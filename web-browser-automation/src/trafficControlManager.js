@@ -54,31 +54,32 @@ function analyzeConversationStageAndStatus(messages) {
   let objectionsDetected = [];
 
   const objectionPatterns = {
-    CHE_DAT: /đắt|cao quá|nhiều tiền|không đủ tiền|giá cao|bớt|giảm giá/i,
-    HOI_BAN_FREE: /bản free|mã nguồn mở|github|tự code|tự host|miễn phí đâu|sao bảo miễn phí/i,
-    THAC_MAC_COC_6_5M: /tại sao cọc|sao phải cọc|6\.5|6,5|cọc làm gì|chưa tin tưởng cọc/i,
-    SO_LUA_DAO_RUI_RO: /lừa đảo|có thật không|uy tín không|cam kết gì|sợ mất tiền|hoàn tiền/i,
+    CHE_DAT: /đắt|cao quá|nhiều tiền|không đủ tiền|giá cao|bớt|giảm giá|chiết khấu/i,
+    HOI_DUNG_THU_FREE: /dùng thử|bản free|mã nguồn mở|github|tự code|tự host|miễn phí đâu|sao bảo miễn phí/i,
+    THAC_MAC_COC_THANH_TOAN: /tại sao cọc|sao phải cọc|đặt cọc|chính sách thanh toán|chuyển khoản|thanh toán thế nào/i,
+    SO_LUA_DAO_RUI_RO: /lừa đảo|có thật không|uy tín không|cam kết gì|sợ mất tiền|hoàn tiền|chính sách hoàn tiền/i,
+    HOI_CHAT_LUONG_DICH_VU: /chất lượng|dùng có tốt không|hiệu quả không|đã ai dùng chưa|có bảo hành không/i,
     HOI_SAU_KY_THUAT: /vps|docker|source code|python|node|api|database|server|máy chủ/i,
-    HOI_THUE_PHAP_LY: /thuế|mắt bão|hkd|hộ kinh doanh|pháp lý|truy thu/i
+    HOI_THUE_PHAP_LY: /thuế|hóa đơn|hợp đồng|pháp lý|chứng từ/i
   };
 
   for (const m of messages) {
     const aiText = m.ai_reply || '';
     const userText = m.user_message || '';
 
-    if (aiText.includes('[dag_sop_03_chatbot_qualifying:stage_4]') || aiText.includes('1903 5848 8190 25') || aiText.includes('6.500.000')) {
+    if (aiText.includes('[dag_sop_03_chatbot_qualifying:stage_4]') || aiText.includes('xác nhận đặt hàng') || aiText.includes('thanh toán') || aiText.includes('đặt cọc')) {
       hasStage4 = true;
       maxStage = Math.max(maxStage, 4);
     }
-    if (aiText.includes('[dag_sop_03_chatbot_qualifying:stage_3]') || aiText.includes('5 Hồi Storytelling') || aiText.includes('33.000 VNĐ') || aiText.includes('Bản FREE ($10,000')) {
+    if (aiText.includes('[dag_sop_03_chatbot_qualifying:stage_3]') || aiText.includes('tư vấn giải pháp') || aiText.includes('bảng giá') || aiText.includes('báo giá')) {
       hasStage3 = true;
       maxStage = Math.max(maxStage, 3);
     }
-    if (aiText.includes('[dag_sop_03_chatbot_qualifying:stage_2]') || aiText.includes('IDEA') || aiText.includes('REVENUE') || aiText.includes('nỗi đau vận hành')) {
+    if (aiText.includes('[dag_sop_03_chatbot_qualifying:stage_2]') || aiText.includes('nhu cầu') || aiText.includes('khảo sát') || aiText.includes('vấn đề gặp phải')) {
       hasStage2 = true;
       maxStage = Math.max(maxStage, 2);
     }
-    if (aiText.includes('[dag_sop_03_chatbot_qualifying:stage_1]') || aiText.includes('Thu thập Tên') || aiText.includes('SĐT, Email')) {
+    if (aiText.includes('[dag_sop_03_chatbot_qualifying:stage_1]') || aiText.includes('Thu thập Tên') || aiText.includes('SĐT') || aiText.includes('chào mừng')) {
       hasStage1 = true;
       maxStage = Math.max(maxStage, 1);
     }
@@ -532,26 +533,26 @@ export async function generateHighTicketReport(options = {}, chatGatewayInstance
     ? droppedConversations.slice(0, 20).map((d, i) => `[Khách hàng ${i + 1} - Rơi rụng tại Stage ${d.stage} - Phản bác: ${d.objections.join(', ') || 'Im lặng'}]:\n${d.transcript}`).join('\n\n')
     : 'Chưa có đủ dữ liệu rơi rụng trong khoảng thời gian này.';
 
-  const rdPrompt = `Bạn là Giám đốc R&D & Chiến Lược Sản Phẩm Cao Cấp (High-Ticket Product Architect) của OPC Freedom.
+  const rdPrompt = `Bạn là Giám đốc R&D & Chiến Lược Sản Phẩm & Dịch Vụ (Product & Sales Strategy Architect) của Doanh nghiệp.
 
-DỮ LIỆU ĐẦU VÀO TỪ TRẠM KIỂM SOÁT KHÔNG LƯU:
+DỮ LIỆU ĐẦU VÀO TỪ TRẠM KIỂM SOÁT ĐIỀU PHỐI (TRAFFIC CONTROL):
 1. TỔNG QUAN TỆP KHÁCH HÀNG RƠI RỤNG (${droppedConversations.length} khách trong khoảng thời gian: ${timeFilter.label}):
 ${transcriptSummary}
 
-2. HỆ SINH THÁI & CHÍNH SÁCH KINH DOANH OPC FREEDOM HIỆN TẠI (Đã loại bỏ code kỹ thuật):
+2. TÀI LIỆU DỰ ÁN & SẢN PHẨM HIỆN TẠI (Đã trích xuất):
 ${cleanedBusinessDocs.substring(0, 3000)}
 
 MỤC TIÊU CHIẾN LƯỢC: "${focusGoal}"
 
-HÃY XUẤT MỘT BẢN BÁO CÁO ĐỀ XUẤT R&D SẢN PHẨM GIÁ CAO MỚI THEO CẤU TRÚC 4 PHẦN CHUẨN:
-# 🎯 BÁO CÁO R&D: ĐỀ XUẤT SẢN PHẨM GIÁ CAO MỚI (HIGH-TICKET STRATEGY REPORT)
+HÃY XUẤT MỘT BẢN BÁO CÁO ĐỀ XUẤT TỐI ƯU SẢN PHẨM & QUY TRÌNH CHỐT SALE (SALES STRATEGY & OFFER REPORT):
+# 🎯 BÁO CÁO CHIẾN LƯỢC: TỐI ƯU SẢN PHẨM & TỶ LỆ CHUYỂN ĐỔI
 
-## I. Phân Tích Điểm Nghẽn & Top Nhu Cầu Bị Bỏ Ngỏ (Unmet Market Needs)
-- Chỉ rõ 3 rào cản tâm lý lớn nhất khiến khách hàng rơi rụng tại Stage 2 và Stage 3.
-- Nhu cầu tiềm ẩn mà bản Membership 13M hiện tại chưa bao phủ hết.
+## I. Phân Tích Điểm Nghẽn & Nhu Cầu Bị Bỏ Ngỏ (Unmet Market Needs)
+- Chỉ rõ các rào cản tâm lý lớn nhất khiến khách hàng rơi rụng tại Stage 2 và Stage 3.
+- Các thắc mắc và lo ngại về giá cả, chất lượng hoặc quy trình thanh toán.
 
-## II. Đề Xuất 2 - 3 Gói Sản Phẩm / Dịch Vụ Giá Cao Mới (High-Ticket Offers: 30M - 200M)
-Đối với mỗi gói sản phẩm, trình bày rõ:
+## II. Đề Xuất Các Gói Sản Phẩm / Dịch Vụ / Ưu Đãi Mới (Offer Optimization)
+Đối với mỗi gói sản phẩm/dịch vụ đề xuất, trình bày rõ:
 1. **Tên Gói Sản Phẩm & Định Vị** (VD: Gói Setup Trực Tiếp Tận Nơi 50M, Gói May Đo Agent Chuyên Ngành 80M, Gói Cố Vấn Tăng Trưởng & Gọi Vốn 150M).
 2. **Mức Giá Đề Xuất & Cơ Cấu Thu Phí**.
 3. **Giá Trị Chuyển Giao & Lợi Ích Vượt Trội (Deliverables)**.

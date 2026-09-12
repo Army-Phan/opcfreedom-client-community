@@ -1,86 +1,80 @@
 {
   "id": "dag_sop_03_chatbot_qualifying",
-  "name": "SOP-03: Quy trình Tư vấn & Sàng lọc Khách hàng (DAG 3 Funnel)",
-  "description": "Phễu 4 giai đoạn tích hợp Tư Vấn Sâu 5 Hồi Storytelling: Lấy thông tin -> Khảo sát nỗi đau vận hành (IDEA/REVENUE) -> Tư vấn sâu & Phân định Free vs Membership (33k/ngày bát phở, hoàn tiền 30 ngày) -> Chốt Sale & Hướng dẫn Cọc 6.5M Đợt 1",
+  "name": "SOP-03: Quy trình Chatbot Tư Vấn & Sàng Lọc Khách Hàng Doanh Nghiệp",
+  "description": "Phễu 4 giai đoạn tư vấn bán hàng & chăm sóc khách hàng tự động: Chào đón & Tiếp nhận -> Khảo sát nhu cầu sản phẩm/dịch vụ -> Tư vấn giải pháp & Báo giá chi tiết -> Hướng dẫn đặt hàng / Chốt lịch tư vấn",
   "required_sops": [
-    "sop_opcfreedom_membership_policy",
-    "sop_opcfreedom_community_rules",
-    "sop_opcfreedom_qa",
-    "sop_membership_deep_consulting",
-    "sop_roi_cost_comparison"
+    "sop_company_product_catalog",
+    "sop_customer_service_policy",
+    "sop_pricing_and_promotion"
   ],
   "trigger_intents": [
-    "đăng ký thành viên",
-    "tham gia cộng đồng",
-    "đăng ký học AI",
-    "nộp phí cọc 6.5M",
-    "muốn làm member",
-    "tư vấn gói OPC",
-    "tư vấn sâu gói membership",
-    "bản free khác gì membership",
-    "sao web nói miễn phí mà thu tiền",
-    "tại sao cọc 6.5M"
+    "tư vấn sản phẩm",
+    "báo giá dịch vụ",
+    "mua hàng",
+    "đặt lịch tư vấn",
+    "chính sách bảo hành",
+    "chương trình khuyến mãi",
+    "thanh toán thế nào",
+    "có dùng thử không"
   ],
   "negative_examples": [
-    "OPC Freedom là gì",
-    "membership có lợi ích gì",
-    "có group miễn phí không",
-    "tư vấn thông tin chung về OPC"
+    "công ty bạn ở đâu",
+    "thời gian làm việc",
+    "hỏi đường đi"
   ],
   "nodes": [
     {
       "id": "node_1_stage_1_collect_info",
       "command": "chat_parse_intent",
       "input": {
-        "message_text": "Thu thập Tên, Tên Tổ Chức/Doanh nghiệp, SĐT, Email"
+        "message_text": "Chào mừng khách hàng, thu thập Tên, Tên Đơn vị/Cá nhân, SĐT hoặc Email liên hệ"
       }
     },
     {
       "id": "node_2_stage_2_evaluate_business",
       "command": "evaluate_condition",
       "input": {
-        "expression": "'{{nodes.node_1_stage_1_collect_info.intent}}' == 'IDEA'"
+        "expression": "'{{nodes.node_1_stage_1_collect_info.intent}}' == 'NEW_CUSTOMER'"
       },
       "branches": {
-        "true": "node_3_stage_2a_idea_exploration",
-        "false": "node_4_stage_2b_revenue_exploration"
+        "true": "node_3_stage_2a_new_lead_exploration",
+        "false": "node_4_stage_2b_existing_lead_exploration"
       }
     },
     {
-      "id": "node_3_stage_2a_idea_exploration",
+      "id": "node_3_stage_2a_new_lead_exploration",
       "command": "chat_send_message",
       "input": {
         "channel": "zalo_web",
         "recipient_id": "cust_dynamic",
-        "text": "Dự án của anh/chị đang ở giai đoạn ý tưởng nào, đã có sản phẩm mẫu chưa và mục tiêu là tìm kiếm khách hàng đầu tiên hay cần đòn bẩy vốn để triển khai?"
+        "text": "Chào Anh/Chị! Rất vui được hỗ trợ Anh/Chị. Anh/Chị đang quan tâm đến dòng sản phẩm/dịch vụ nào của chúng tôi để em hỗ trợ tư vấn chi tiết và gửi bảng giá ưu đãi nhất ạ?"
       }
     },
     {
-      "id": "node_4_stage_2b_revenue_exploration",
+      "id": "node_4_stage_2b_existing_lead_exploration",
       "command": "chat_send_message",
       "input": {
         "channel": "zalo_web",
         "recipient_id": "cust_dynamic",
-        "text": "Doanh nghiệp của anh/chị đang gặp áp lực lớn nhất ở khâu nào: kiệt sức vì trực chat/canh bill đêm, chi phí nhân sự marketing/sale quá cao, hay cần đòn bẩy vốn 1.5 Tỷ và chuẩn hóa thuế HKD?"
+        "text": "Dạ, để tư vấn chính xác nhất cho nhu cầu của Anh/Chị, Anh/Chị có thể chia sẻ thêm về số lượng dự kiến hoặc ngân sách mong muốn để bên em đề xuất giải pháp phù hợp nhất không ạ?"
       }
     },
     {
-      "id": "node_5_stage_3_deep_consulting",
+      "id": "node_5_stage_3_solution_and_pricing",
       "command": "chat_send_message",
       "input": {
         "channel": "zalo_web",
         "recipient_id": "cust_dynamic",
-        "text": "Trình bày giải pháp theo 5 Hồi Storytelling: Phân định minh bạch Bản Free (mã nguồn mở GitHub $10k cho Dev tự code/tự host) vs Bản Membership (12M-13M/năm chìa khóa trao tay cho Doanh chủ, chỉ 33k/ngày = 1 bát phở, cọc 6.5M đợt 1, cam kết hoàn tiền 100% trong 30 ngày, bảo trợ thuế Mắt Bão, cấp tín dụng 1.5 Tỷ). Hỏi khách hàng muốn nhận link bản Free tự làm hay chọn bản Membership có kỹ sư cài đặt trọn gói A-Z?"
+        "text": "Dạ, dựa trên nhu cầu của Anh/Chị, giải pháp phù hợp nhất là: [Tên Sản Phẩm/Gói Dịch Vụ] với mức giá ưu đãi và đầy đủ chính sách bảo hành, hỗ trợ kỹ thuật tận tình. Anh/Chị có muốn em gửi bảng báo giá chi tiết qua Zalo/Email không ạ?"
       }
     },
     {
-      "id": "node_6_stage_4_contract_and_payment",
-      "command": "payment_generate_qr",
+      "id": "node_6_stage_4_closing_and_handover",
+      "command": "chat_send_message",
       "input": {
-        "amount": 6500000,
-        "member_id": "cust_dynamic",
-        "resource_sku": "MEMBERSHIP_DEPOSIT_1",
-        "memo_instruction": "Nội dung chuyển khoản bắt buộc ghi SĐT của khách hàng để kích hoạt tài khoản thành viên ngay lập tức."
+        "channel": "zalo_web",
+        "recipient_id": "cust_dynamic",
+        "text": "Dạ tuyệt vời ạ! Em đã lưu thông tin đặt hàng/yêu cầu của Anh/Chị. Chuyên viên tư vấn bên em sẽ liên hệ lại qua SĐT trong ít phút để hoàn tất đơn hàng và bàn giao cho Anh/Chị ngay ạ. Cảm ơn Anh/Chị!"
       }
     },
     {
@@ -89,7 +83,7 @@
       "input": {
         "lead_id": "cust_dynamic",
         "delay_minutes": 1440,
-        "sequence_template_id": "DAG3_FOLLOWUP_TEMPLATE"
+        "sequence_template_id": "LEAD_FOLLOWUP_TEMPLATE"
       }
     }
   ]
