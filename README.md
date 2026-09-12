@@ -42,7 +42,7 @@ Phiên bản này được thiết kế để **tặng cộng đồng** trải n
 ### Các Bước Khởi Chạy:
 ```bash
 # 1. Clone repository
-git clone https://github.com/opcfreedom/opcfreedom-client-community.git
+git clone https://github.com/Army-Phan/opcfreedom-client-community.git
 cd opcfreedom-client-community
 
 # 2. Tạo file cấu hình từ mẫu
