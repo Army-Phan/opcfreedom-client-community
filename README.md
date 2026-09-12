@@ -1,91 +1,78 @@
-# 🚀 OPC Freedom Community Client Node (Official Client Release)
+# 🚀 OPC Freedom Community Client (Phiên Bản Miễn Phí Tặng Cộng Đồng)
 
-Chào mừng bạn đến với **OPC Freedom Community Client Node** — Hệ điều hành tự động hóa doanh nghiệp mini 1-Click (Autonomous Business OS) được đóng gói và phát hành chính thức bởi **OPC Freedom HQ**.
+**Hệ Điều Hành Tự Động Hóa Vận Hành & Tiếp Thị Đa Kênh 1-Click Dành Cho Mọi Doanh Nghiệp**
 
-Phiên bản này được thiết kế để **tặng cộng đồng** trải nghiệm sức mạnh của mô hình tự động hóa quy trình đa kênh (Social Media, Content CME, CRM, Local DAG Engine, noVNC Cloud Desktop).
-
----
-
-## 🌟 Tính Năng Nổi Bật
-
-1. **🖥️ Xubuntu Cloud Desktop (noVNC Port 6080):**
-   - Môi trường Desktop ảo hóa hoàn chỉnh chạy trong Docker.
-   - Tự động duy trì 11 Tabs mạng xã hội (Facebook, TikTok, YouTube, Threads, X, Instagram, Zalo, Telegram...).
-2. **📊 Client Web Dashboard (Port 3001):**
-   - Quản lý kênh bán hàng, chiến dịch nội dung (CME), sản phẩm và CRM khách hàng cục bộ.
-3. **⚡ Local DAG Engine (Bộ DAG Cốt Lõi Cho Mọi Doanh Nghiệp):**
-   - **DAG 01:** Tự động sáng tạo và đăng bài đa kênh (Facebook, TikTok, YouTube, Threads, Zalo...).
-   - **DAG 02:** Quản lý và tối ưu chiến dịch quảng cáo (Facebook Ads CBO).
-   - **DAG 03:** Chatbot tiếp đón, tư vấn và sàng lọc khách hàng tiềm năng tự động.
-   - **DAG Mẫu:** Mẫu tự động hóa quy trình chuyên ngành (Real Estate Autopilot).
-4. **🤖 Master Telegram Bot Riêng (Port 3003):**
-   - Cho phép bạn chỉ huy và nhận báo cáo từ máy trạm trực tiếp qua Telegram cá nhân.
-5. **🎨 Local Web Studio & Cloudflare Deployer (Port 5173):**
-   - Thiết kế và xuất bản Landing Page / Website tự động hóa chỉ trong vài phút.
+Được phát triển và đóng gói bởi đội ngũ **OPC Freedom**, phiên bản này được phát hành hoàn toàn miễn phí theo **Giấy phép mã nguồn mở MIT** nhằm giúp các chủ doanh nghiệp, nhà bán hàng, chuyên viên tiếp thị và lập trình viên tự động hóa toàn diện quy trình tiếp cận khách hàng trên Internet.
 
 ---
 
-## 💎 Phân Định Gói Sử Dụng & Mở Rộng
+## 🌟 5 Tính Năng Tự Động Hóa Vượt Trội
 
-| Hạng Mục | 🎁 Thành Viên Cộng Đồng (Free Community) | 👑 Thành Viên Trả Phí (Paid Membership / VIP) |
-|---|---|---|
-| **Mã Nguồn Cài Đặt** | Bản phát hành này (Độc lập 100%) | Bản phát hành này + Key VIP kích hoạt |
-| **Bộ DAGs Sẵn Có** | Bộ DAGs cốt lõi doanh nghiệp (DAG 1, 2, 3) | Full bộ DAGs nâng cao + Độc quyền từ Core |
-| **Mở Rộng Tính Năng** | • Tự code thêm DAGs<br>• Hoặc chat với **MTB Client 0** để dùng **Dịch vụ DAG 17 (Custom R&D)** | Được đội ngũ Core HQ / Client 0 hỗ trợ nạp sẵn và nâng cấp liên tục |
-| **Hỗ Trợ Kỹ Thuật** | Hỗ trợ qua Group Cộng đồng | Hỗ trợ 1-1 chuyên sâu từ Mentor |
+1. **🖥️ Màn Hình Máy Tính Ảo (Cloud Desktop - Cổng 6080):**
+   - Tích hợp sẵn giao diện máy tính Linux ảo hóa chạy trực tiếp trên trình duyệt web.
+   - Tự động duy trì và điều khiển đồng thời **11 Kênh Mạng Xã Hội** (Facebook, TikTok, YouTube, Threads, X, Instagram, Zalo, Telegram...).
+2. **📊 Bảng Điều Khiển Quản Trị Trung Tâm (Web Dashboard - Cổng 3001):**
+   - Quản lý kênh tiếp thị, chiến dịch nội dung tự động, danh mục sản phẩm và hồ sơ chăm sóc khách hàng (CRM).
+3. **⚡ Bộ 3 Kịch Bản Tự Động Hóa Cốt Lõi (Pre-built Automation Workflows):**
+   - **Kịch bản 1 - Sáng Tạo & Đăng Bài Tự Động:** AI tự viết bài, gắn hình ảnh và tự động phân phối nội dung lên nhiều nền tảng cùng lúc.
+   - **Kịch bản 2 - Tối Ưu Chiến Dịch Quảng Cáo (Facebook Ads CBO):** Tự động theo dõi ngân sách, tối ưu chi phí và điều chỉnh chiến dịch quảng cáo.
+   - **Kịch bản 3 - Chatbot Tư Vấn & Sàng Lọc Khách Hàng:** Tự động chào đón, giải đáp thắc mắc, tư vấn báo giá sản phẩm và thu thập thông tin khách hàng tiềm năng 24/7.
+4. **🤖 Trợ Lý Telegram Điều Khiển Từ Xa (Cổng 3003):**
+   - Nhận báo cáo hoạt động và ra lệnh điều khiển hệ thống trực tiếp từ điện thoại thông qua ứng dụng Telegram cá nhân.
+5. **🎨 Trình Thiết Kế Website Bán Hàng 1-Click (Web Studio - Cổng 5173):**
+   - Tự động tạo và xuất bản Landing Page / Website bán hàng chuyên nghiệp chỉ trong vài phút.
 
 ---
 
-## 🛠️ Hướng Dẫn Cài Đặt 1-Click (Quick Start)
+## 🛠️ Hướng Dẫn Cài Đặt 1-Click (Cực Kỳ Đơn Giản)
 
-### Yêu Cầu Hệ Thống
-- Đã cài đặt **Docker** và **Docker Compose** (trên Windows, Ubuntu VPS hoặc macOS).
-- RAM tối thiểu 4GB (Khuyến nghị 8GB).
+### Yêu Cầu Trước Khi Cài:
+- Máy tính hoặc máy chủ VPS đã cài đặt **Docker** & **Docker Compose** (Hỗ trợ tốt trên Windows, Linux Ubuntu, macOS).
+- Cấu hình đề xuất: RAM từ 4GB trở lên.
 
-### Các Bước Khởi Chạy:
+### 3 Bước Khởi Chạy Nhanh:
 ```bash
-# 1. Clone repository
+# Bước 1: Tải mã nguồn về máy
 git clone https://github.com/Army-Phan/opcfreedom-client-community.git
 cd opcfreedom-client-community
 
-# 2. Tạo file cấu hình từ mẫu
+# Bước 2: Tạo file cấu hình từ mẫu
 cp .env.example .env
 
-# 3. Khởi chạy 1 lệnh duy nhất
+# Bước 3: Khởi chạy toàn bộ hệ thống bằng 1 lệnh duy nhất
 docker compose up -d
 ```
 
-Sau khi khởi chạy thành công:
-- 🌐 **Web Dashboard:** Truy cập `http://localhost:3001`
-- 🖥️ **Màn hình noVNC Desktop:** Truy cập `http://localhost:6080`
-- 🎨 **Web Studio:** Truy cập `http://localhost:5173`
+Sau khi chạy xong, bạn mở trình duyệt và truy cập các cổng:
+- 🌐 **Bảng điều khiển quản trị:** `http://localhost:3001`
+- 🖥️ **Màn hình máy tính ảo (11 kênh mạng xã hội):** `http://localhost:6080`
+- 🎨 **Trình thiết kế website bán hàng:** `http://localhost:5173`
 
 ---
 
-## 🔒 Bản Quyền & Định Danh Máy Trạm (DRM)
+## 💡 So Sánh Bản Miễn Phí & Gói Thành Viên Nâng Cao
 
-Bản phát hành này tích hợp sẵn mã kích hoạt cộng đồng miễn phí: `OPC-COMMUNITY-FREE-2026`.
-Khi máy trạm của bạn khởi chạy:
-- Hệ thống sẽ gửi nhịp tim (Heartbeat) định kỳ về **Core HQ** để nhận thẻ bài hoạt động (`Lease Token` hiệu lực 72 giờ, hỗ trợ chạy Offline).
-- Core HQ lưu trữ thông tin định danh máy trạm (HWID, IP, Hostname) để phục vụ hỗ trợ kỹ thuật và quản lý nâng cấp gói VIP khi bạn có nhu cầu.
-
----
-
-## 🚀 Đặt Hàng May Đo Tính Năng Riêng (Dịch Vụ DAG 17)
-
-Nếu doanh nghiệp của bạn có quy trình đặc thù cần tự động hóa riêng (ví dụ: cào dữ liệu sàn TMĐT, tích hợp ERP nội bộ, bot chốt sale tự động):
-👉 Bạn hoàn toàn có thể sử dụng **Dịch vụ DAG 17 (Custom R&D & Handover)** từ đội ngũ **Client 0 (Genesis Hub)** của OPC Freedom:
-1. Bạn chỉ cần cung cấp link GitHub repo riêng của bạn.
-2. Đội ngũ AI & Dev chuyên nghiệp của OPC Freedom sẽ phân tích, lập trình, chạy kiểm thử tự động (Sandbox Tests) và chuyển giao module hoàn chỉnh trực tiếp vào máy trạm của bạn.
+| Hạng Mục | 🎁 Bản Cộng Đồng (Free Community) | 👑 Gói Thành Viên Nâng Cao (VIP Membership) |
+|---|---|---|
+| **Mã Nguồn Cài Đặt** | Miễn phí 100% (Mã nguồn mở MIT) | Miễn phí 100% + Mã kích hoạt VIP |
+| **Kịch Bản Sẵn Có** | 3 Kịch bản cốt lõi (Đăng bài, Chạy Ads, Chatbot) | Toàn bộ bộ kịch bản tự động hóa nâng cao chuyên sâu |
+| **Mở Rộng Tính Năng** | • Tự lập trình thêm kịch bản<br>• Hoặc thuê **Dịch vụ May Đo Theo Yêu Cầu** | Được đội ngũ kỹ sư hỗ trợ nạp sẵn và nâng cấp định kỳ |
+| **Hỗ Trợ Kỹ Thuật** | Hỗ trợ qua nhóm cộng đồng | Hỗ trợ kỹ thuật 1-1 chuyên sâu từ chuyên gia |
 
 ---
 
+## 🚀 Dịch Vụ Lập Trình & May Đo Kịch Bản Theo Yêu Cầu
+
+Nếu doanh nghiệp của bạn có quy trình vận hành đặc thù (như: cào dữ liệu thị trường tự động, tích hợp phần mềm kế toán/ERP nội bộ, bot chốt đơn tự động chuyên ngành):
+
+👉 Bạn có thể liên hệ với **Đội ngũ Kỹ sư OPC Freedom** để được tư vấn và may đo giải pháp:
+1. Đội ngũ kỹ sư sẽ phân tích nhu cầu và lên giải pháp tối ưu cho doanh nghiệp của bạn.
+2. Lập trình, kiểm thử an toàn và bàn giao tích hợp trực tiếp vào hệ thống của bạn.
 
 ---
 
 ## 📜 Giấy Phép & Bản Quyền (MIT License)
 
-Mã nguồn **OPC Freedom Community Client Node** được phát hành công khai và miễn phí theo **[Giấy phép MIT (MIT License)](LICENSE)**.
+Mã nguồn **OPC Freedom Community Client** được phát hành công khai và miễn phí theo **[Giấy phép MIT (MIT License)](LICENSE)**.
 
-* **Quyền hạn của bạn:** Bạn được toàn quyền sử dụng miễn phí, sao chép, chỉnh sửa, phân phối và tích hợp vào các dự án cá nhân hoặc thương mại.
-* **Quyền lợi mở rộng:** Bạn có thể tự do phát triển thêm các module DAGs riêng hoặc sử dụng dịch vụ **DAG 17 (Custom R&D)** từ đội ngũ Client 0 để được chuyển giao công nghệ may đo chuyên sâu.
+* **Quyền hạn của bạn:** Bạn được toàn quyền sử dụng miễn phí, sao chép, chỉnh sửa, tích hợp vào các dự án cá nhân hoặc thương mại.
