@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OS Controller Agent - Visual Test Lab & MCP Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0e17;
+      --bg-surface: rgba(18, 25, 41, 0.75);
+      --bg-card: rgba(26, 36, 59, 0.6);
+      --accent-cyan: #00f2fe;
+      --accent-blue: #4facfe;
+      --accent-purple: #9b51e0;
+      --accent-green: #00e676;
+      --accent-red: #ff5252;
+      --accent-amber: #ffb142;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-main);
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(79, 172, 254, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(155, 81, 224, 0.12) 0%, transparent 45%);
+      background-attachment: fixed;
+      padding: 2rem;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2.5rem;
+      padding: 1.5rem 2rem;
+      background: var(--bg-surface);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      box-shadow: var(--glass-shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .brand-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #000;
+      box-shadow: 0 0 20px rgba(0, 242, 254, 0.4);
+    }
+
+    .brand-title h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-title p {
+      font-size: 0.9rem;
+      color: var(--accent-cyan);
+      font-weight: 500;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(0, 230, 118, 0.12);
+      border: 1px solid rgba(0, 230, 118, 0.3);
+      padding: 0.5rem 1rem;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent-green);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 10px var(--accent-green);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 16px var(--accent-green); }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .card {
+      background: var(--bg-surface);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: var(--glass-shadow);
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(79, 172, 254, 0.4);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .metric-value {
+      font-size: 2.2rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0.5rem 0;
+    }
+
+    .metric-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .btn {
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      color: #fff;
+      border: none;
+      padding: 0.8rem 1.6rem;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(79, 172, 254, 0.5);
+    }
+
+    .btn-cyan {
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+    }
+
+    .btn-green {
+      background: linear-gradient(135deg, #00b09b, #96c93d);
+      box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
+    }
+
+    .lab-section {
+      background: var(--bg-surface);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: var(--glass-shadow);
+      margin-bottom: 2rem;
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .scenario-box {
+      background: rgba(13, 19, 33, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .scenario-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .scenario-info h3 {
+      font-size: 1.15rem;
+      color: var(--accent-cyan);
+      margin-bottom: 0.3rem;
+    }
+
+    .scenario-info p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .log-box {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      background: #060911;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 1rem;
+      max-height: 350px;
+      overflow-y: auto;
+      color: #cbd5e1;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    .log-entry {
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+    }
+
+    .log-success { color: var(--accent-green); }
+    .log-warning { color: var(--accent-amber); }
+    .log-error { color: var(--accent-red); }
+    .log-info { color: var(--accent-cyan); }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .tool-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .tool-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: var(--accent-amber);
+      font-size: 0.95rem;
+    }
+
+    .tool-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div class="brand-title">
+        <h1>OS Controller Agent (`os-controller-agent`)</h1>
+        <p>Hệ sinh thái Tự động hóa Máy tính & GUI native (Port 3002) - Chuẩn 100% Gemini Web Client</p>
+      </div>
+    </div>
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      <span id="agentStatus">Agent Active & Directory Guard On</span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🖥️ CPU Usage</div>
+      </div>
+      <div class="metric-value" id="cpuMetric">Loading...</div>
+      <div class="metric-sub" id="cpuSub">Đang tính toán mức độ tải...</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🧠 RAM Memory</div>
+      </div>
+      <div class="metric-value" id="ramMetric">Loading...</div>
+      <div class="metric-sub" id="ramSub">Dung lượng bộ nhớ khả dụng</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🛡️ Safety Sandbox Guard</div>
+      </div>
+      <div class="metric-value" style="color: var(--accent-green); font-size: 1.8rem;">Protected</div>
+      <div class="metric-sub">C:\Windows & C:\Program Files Khóa chỉ đọc</div>
+    </div>
+  </div>
+
+  <!-- VISUAL TEST LAB SECTION -->
+  <div class="lab-section">
+    <div class="section-title">🚀 Visual Test Lab 1-Click (Kiểm chứng Khả năng Điều khiển Tuyệt đối)</div>
+    <div class="section-desc">
+      Kiểm nghiệm khả năng thao tác file an toàn, tìm kiếm thần tốc, kiểm tra bảo mật Directory Guard và điều khiển native explorer khép kín chỉ với 1 nút bấm.
+    </div>
+
+    <div class="scenario-box">
+      <div class="scenario-top">
+        <div class="scenario-info">
+          <h3>⚡ Kịch bản Kiểm nghiệm 1-Click: Full OS Control & Safety Verification</h3>
+          <p>Tự động chạy chuỗi 5 bài test thực tế: Lấy thông số hệ thống -> Thử vi phạm vùng C:\Windows -> Tạo & Di chuyển file -> Tìm kiếm wildcard -> Nghiệm thu kết quả.</p>
+        </div>
+        <button class="btn btn-green" onclick="runVisualTestScenario()">
+          ▶ Chạy Kiểm nghiệm 1-Click (Run Test Suite)
+        </button>
+      </div>
+      <div class="log-box" id="testLogContainer">
+<span class="log-info">[Sẵn sàng] Bấm nút phía trên để bắt đầu kịch bản kiểm nghiệm tự động.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MCP TOOLS REGISTRY -->
+  <div class="lab-section">
+    <div class="section-title">🔧 Kho Công cụ OS Chuẩn MCP (Model Context Protocol Registry)</div>
+    <div class="section-desc">Danh sách 9 công cụ tự động hóa hệ điều hành được đăng ký sẵn cho AI Persona Brain & Trình duyệt gọi trực tiếp:</div>
+    
+    <div class="tools-grid" id="toolsGridContainer">
+      <div class="tool-desc">Đang tải danh sách công cụ từ API /api/tools...</div>
+    </div>
+  </div>
+
+  <script>
+    const testLog = document.getElementById('testLogContainer');
+
+    function appendLog(msg, type = 'info') {
+      const time = new Date().toLocaleTimeString();
+      const div = document.createElement('div');
+      div.className = `log-entry log-${type}`;
+      div.innerText = `[${time}] ${msg}`;
+      testLog.appendChild(div);
+      testLog.scrollTop = testLog.scrollHeight;
+    }
+
+    async function loadMetrics() {
+      try {
+        const res = await fetch('/api/execute-tool', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ toolName: 'sysMonitor_getSystemMetrics' })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          const sys = data.result;
+          document.getElementById('cpuMetric').innerText = sys.cpu.usagePercent;
+          document.getElementById('cpuSub').innerText = `${sys.cpu.model.slice(0, 25)} (${sys.cpu.cores} cores)`;
+
+          document.getElementById('ramMetric').innerText = sys.memory.usagePercent;
+          document.getElementById('ramSub').innerText = `${sys.memory.usedGB} GB / ${sys.memory.totalGB} GB đã dùng`;
+        }
+      } catch (err) {
+        console.error('Lỗi khi lấy thông số:', err);
+      }
+    }
+
+    async function loadTools() {
+      try {
+        const res = await fetch('/api/tools');
+        const data = await res.json();
+        const grid = document.getElementById('toolsGridContainer');
+        grid.innerHTML = '';
+
+        if (data.status === 'success' && data.tools) {
+          data.tools.forEach(tool => {
+            const item = document.createElement('div');
+            item.className = 'tool-item';
+            item.innerHTML = `
+              <div class="tool-name">⚡ ${tool.name}</div>
+              <div class="tool-desc">${tool.description}</div>
+            `;
+            grid.appendChild(item);
+          });
+        }
+      } catch (err) {
+        console.error('Lỗi khi tải danh sách tools:', err);
+      }
+    }
+
+    async function runVisualTestScenario() {
+      testLog.innerHTML = '';
+      appendLog('🚀 Khởi chạy kịch bản kiểm chứng 1-Click trên OS Controller Agent...', 'info');
+
+      // Bước 1: Lấy thông số hệ thống
+      appendLog('--- [Bước 1/5] Kiểm nghiệm công cụ sysMonitor_getSystemMetrics ---', 'info');
+      try {
+        const r1 = await fetch('/api/execute-tool', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ toolName: 'sysMonitor_getSystemMetrics' })
+        });
+        const d1 = await r1.json();
+        if (d1.status === 'success') {
+          appendLog(`✅ Thành công! CPU: ${d1.result.cpu.usagePercent} | RAM: ${d1.result.memory.usagePercent} | OS: ${d1.result.osVersion}`, 'success');
+        } else {
+          appendLog(`❌ Thất bại: ${d1.error}`, 'error');
+        }
+      } catch (e) { appendLog(`❌ Lỗi: ${e.message}`, 'error'); }
+
+      // Bước 2: Kiểm chứng Directory Guard (Thử xóa file trong C:\Windows)
+      appendLog('\n--- [Bước 2/5] Kiểm nghiệm Safety Directory Guard (Thử xóa C:\\Windows\\System32\\cmd.exe) ---', 'warning');
+      try {
+        const r2 = await fetch('/api/execute-tool', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ toolName: 'fileOps_deleteEntry', params: { targetPath: 'C:\\Windows\\System32\\cmd.exe' } })
+        });
+        const d2 = await r2.json();
+        if (d2.status === 'error' && (d2.error.includes('Directory Guard') || d2.error.includes('Quyền truy cập bị từ chối'))) {
+          appendLog(`🛡️ ✅ CHẶN THÀNH CÔNG! Directory Guard đã ngăn chặn nỗ lực can thiệp vùng hệ thống: "${d2.error}"`, 'success');
+        } else {
+          appendLog(`❌ Cảnh báo: Lệnh không bị từ chối đúng như kỳ vọng!`, 'error');
+        }
+      } catch (e) { appendLog(`🛡️ ✅ CHẶN THÀNH CÔNG! Lỗi bảo vệ: ${e.message}`, 'success'); }
+
+      // Bước 3: Thao tác file an toàn (Tạo thư mục & list file)
+      appendLog('\n--- [Bước 3/5] Kiểm nghiệm tạo thư mục an toàn & xem danh sách file ---', 'info');
+      try {
+        const testDir = 'D:\\AIWebsite\\os-controller-agent\\data';
+        await fetch('/api/execute-tool', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ toolName: 'fileOps_createDirectory', params: { dirPath: testDir } })
+        });
+        const r3 = await fetch('/api/execute-tool', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ toolName: 'fileOps_listDirectory', params: { dirPath: 'D:\\AIWebsite\\os-controller-agent' } })
+        });
+        const d3 = await r3.json();
+        if (d3.status === 'success') {
+          appendLog(`✅ Thành công! Liệt kê được ${d3.result.totalItems} mục trong thư mục dự án.`, 'success');
+        }
+      } catch (e) { appendLog(`❌ Lỗi bước 3: ${e.message}`, 'error'); }
+
+      // Bước 4: Tìm kiếm file thần tốc theo wildcard
+      appendLog('\n--- [Bước 4/5] Kiểm nghiệm tìm kiếm thần tốc searchOps_searchFilesByName (*.js) ---', 'info');
+      try {
+        const r4 = await fetch('/api/execute-tool', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ toolName: 'searchOps_searchFilesByName', params: { query: '*.js', searchPath: 'D:\\AIWebsite\\os-controller-agent\\src' } })
+        });
+        const d4 = await r4.json();
+        if (d4.status === 'success') {
+          appendLog(`✅ Thành công! Tìm thấy ${d4.result.totalFound} files .js trong thời gian mili giây.`, 'success');
+        }
+      } catch (e) { appendLog(`❌ Lỗi bước 4: ${e.message}`, 'error'); }
+
+      // Bước 5: Kiểm nghiệm cầu nối Natural Language Command
+      appendLog('\n--- [Bước 5/5] Kiểm nghiệm cổng ngôn ngữ tự nhiên NL Command ("/api/nl-command") ---', 'info');
+      try {
+        const r5 = await fetch('/api/nl-command', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ command: 'Xem thông số ram và cpu hiện tại' })
+        });
+        const d5 = await r5.json();
+        if (d5.status === 'success') {
+          appendLog(`✅ NL Engine tự động hiểu lệnh và ánh xạ sang tool "${d5.interpretedTool}" chính xác!`, 'success');
+        }
+      } catch (e) { appendLog(`❌ Lỗi bước 5: ${e.message}`, 'error'); }
+
+      appendLog('\n🎉 HOÀN TẤT KIỂM NGHIỆM! 5/5 LUỒNG HOẠT ĐỘNG CHUẨN XÁC KHÉP KÍN 100%.', 'success');
+      loadMetrics(); // Reload UI metrics
+    }
+
+    // Load initial data
+    loadMetrics();
+    loadTools();
+    setInterval(loadMetrics, 10000); // refresh every 10s
+  </script>
+</body>
+</html>

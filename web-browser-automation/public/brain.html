@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧠 OPC Client Autonomous Brain - Trạm Vệ Tinh Tự Trị</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #111827;
+      --glass-bg: rgba(17, 24, 39, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --accent-purple: #a855f7;
+      --accent-blue: #38bdf8;
+      --accent-green: #10b981;
+      --accent-gradient: linear-gradient(135deg, #a855f7 0%, #38bdf8 100%);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(circle at 10% 15%, rgba(168, 85, 247, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 90% 85%, rgba(56, 189, 248, 0.12) 0%, transparent 40%);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* TOP BAR */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 28px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-icon {
+      font-size: 1.8rem;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .brand-badge {
+      font-size: 0.75rem;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-green);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .nav-btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+    }
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-1px);
+    }
+    .nav-btn.primary {
+      background: rgba(168, 85, 247, 0.2);
+      border-color: rgba(168, 85, 247, 0.5);
+      color: #e9d5ff;
+    }
+
+    /* MAIN CONTAINER */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 20px;
+      padding: 20px 28px;
+      flex: 1;
+      height: calc(100vh - 65px);
+    }
+
+    /* LEFT COLUMN: SOP ROUTER & QUICK DAG RUNNER */
+    .left-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+    }
+
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 18px;
+    }
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #e2e8f0;
+    }
+
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      min-height: 38px;
+      align-items: center;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .tag {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-blue);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .sop-item {
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border-left: 3px solid var(--accent-purple);
+      border-radius: 6px;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
+    .sop-item-title {
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+    .sop-item-sub {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .dag-btn-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .dag-run-btn {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-primary);
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .dag-run-btn:hover {
+      background: rgba(168, 85, 247, 0.15);
+      border-color: rgba(168, 85, 247, 0.4);
+      transform: translateY(-2px);
+    }
+    .dag-btn-title {
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dag-btn-desc {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      line-height: 1.3;
+    }
+
+    /* RIGHT COLUMN: CHAT INTERFACE */
+    .chat-col {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .chat-header {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .chat-persona-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .persona-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--accent-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+    }
+    .chat-controls select {
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--text-primary);
+      border: 1px solid var(--glass-border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .msg {
+      display: flex;
+      gap: 12px;
+      max-width: 82%;
+    }
+    .msg.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+    .msg.bot {
+      align-self: flex-start;
+    }
+    .msg-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .msg.bot .msg-avatar { background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.4); }
+    .msg.user .msg-avatar { background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.4); }
+    .msg-content {
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+    .msg.bot .msg-content {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid var(--glass-border);
+      color: #f1f5f9;
+    }
+    .msg.user .msg-content {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.3) 0%, rgba(56, 189, 248, 0.3) 100%);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      color: #ffffff;
+    }
+
+    .quick-prompts {
+      padding: 10px 20px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      background: rgba(0, 0, 0, 0.15);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .quick-btn {
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .quick-btn:hover {
+      background: rgba(168, 85, 247, 0.2);
+      color: #e2e8f0;
+      border-color: rgba(168, 85, 247, 0.4);
+    }
+
+    .chat-input-bar {
+      padding: 16px 20px;
+      border-top: 1px solid var(--glass-border);
+      display: flex;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .chat-input {
+      flex: 1;
+      padding: 12px 18px;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--glass-border);
+      color: #ffffff;
+      font-size: 0.92rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .chat-input:focus {
+      border-color: var(--accent-purple);
+    }
+    .send-btn {
+      padding: 0 22px;
+      border-radius: 10px;
+      background: var(--accent-gradient);
+      border: none;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.2s;
+    }
+    .send-btn:hover { opacity: 0.9; }
+    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header class="top-bar">
+    <div class="brand">
+      <span class="brand-icon">🧠</span>
+      <div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="brand-title">OPC Client Autonomous Brain</span>
+          <span class="brand-badge"><i class="fa-solid fa-circle-check"></i> Edge Master Node (3001)</span>
+        </div>
+        <div style="font-size: 0.75rem; color: var(--text-secondary);">Phân hệ Trí Tuệ & Định Tuyến SOP Cục Bộ Độc Lập</div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <!-- Quick Gateway Toggle in Brain -->
+      <div id="brain-gateway-pill" style="display:flex; align-items:center; gap:8px; background: rgba(0,0,0,0.4); padding: 5px 12px; border-radius: 8px; border: 1px solid var(--glass-border); margin-right: 4px;">
+        <span id="brain-gateway-dot" style="display:inline-block; width:9px; height:9px; border-radius:50%; background:#ef4444; box-shadow:0 0 8px #ef4444;"></span>
+        <span id="brain-gateway-text" style="font-size:0.8rem; font-weight:600; color:#94a3b8;">Gateway: TẮT</span>
+        <button id="btn-brain-gateway-toggle" style="padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; border: none; transition: all 0.2s; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff;">
+          🟢 Bật Gateway
+        </button>
+      </div>
+
+      <a href="/" class="nav-btn"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="/marketplace.html" class="nav-btn" style="color:#60a5fa; border-color:rgba(59,130,246,0.4);"><i class="fa-solid fa-store"></i> Chợ DAG & Biến Thể</a>
+      <a href="/website.html" class="nav-btn" style="color:#fb923c; border-color:rgba(249,115,22,0.4);"><i class="fa-solid fa-globe"></i> Website opcfreedom.com</a>
+      <a href="/setup.html" class="nav-btn"><i class="fa-solid fa-gear"></i> Setup Wizard</a>
+      <a href="http://100.102.213.106:6080/vnc.html" target="_blank" class="nav-btn primary"><i class="fa-solid fa-desktop"></i> noVNC (6080)</a>
+      <a href="http://100.102.213.106:3000" target="_blank" class="nav-btn" title="Chuyển sang Core Master Brain (HQ)"><i class="fa-solid fa-network-wired"></i> Core HQ (3000)</a>
+      <a href="/test-studio.html" class="nav-btn" style="color:#f43f5e; border-color:rgba(244,63,94,0.4);"><i class="fa-solid fa-flask"></i> Test Studio</a>
+      <a href="/air-traffic.html" class="nav-btn" style="color:#a855f7; border-color:rgba(168,85,247,0.4);"><i class="fa-solid fa-plane-departure"></i> Kiểm Soát DAG-3</a>
+      <a href="/gemini-logs.html" class="nav-btn" style="color:#38bdf8; border-color:rgba(56,189,248,0.4);"><i class="fa-solid fa-bolt"></i> Gemini Logs</a>
+    </div>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <main class="main-layout">
+    
+    <!-- LEFT: SOP & DAG ROUTER -->
+    <section class="left-col">
+      
+      <!-- 1. BÓC TÁCH TỪ KHÓA THỜI GIAN THỰC -->
+      <div class="glass-card">
+        <div class="card-title">
+          <i class="fa-solid fa-magnifying-glass-chart" style="color: var(--accent-blue);"></i>
+          <span>Từ Khóa Bóc Tách Được (Keywords)</span>
+        </div>
+        <div id="keywordsBox" class="tags-container">
+          <span style="color: var(--text-secondary); font-size: 0.8rem;">Chưa có hội thoại mới...</span>
+        </div>
+      </div>
+
+      <!-- 2. SOP ĐƯỢC ĐỊNH TUYẾN -->
+      <div class="glass-card">
+        <div class="card-title" style="justify-content: space-between;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-diagram-project" style="color: var(--accent-purple);"></i>
+            <span>SOP Được Định Tuyến (SOP Router)</span>
+          </div>
+          <span id="sopsCountBadge" style="font-size:0.75rem; color:var(--accent-purple); background:rgba(168,85,247,0.15); padding:2px 8px; border-radius:12px;">48 SOPs Sẵn sàng</span>
+        </div>
+        <div id="sopsListBox" style="max-height: 180px; overflow-y: auto;">
+          <div style="color: var(--text-secondary); font-size: 0.8rem; padding: 6px 0;">Hãy gửi câu hỏi để xem quy trình SOP nào được kích hoạt...</div>
+        </div>
+      </div>
+
+      <!-- 3. BẢNG KHỞI CHẠY NHANH 4 QUY TRÌNH HOT -->
+      <div class="glass-card" style="flex: 1;">
+        <div class="card-title">
+          <i class="fa-solid fa-bolt" style="color: #f59e0b;"></i>
+          <span>Kích Hoạt Nhanh Quy Trình SOP / DAG</span>
+        </div>
+        <div class="dag-btn-grid">
+          <button class="dag-run-btn" onclick="triggerQuickDag('dag_sop_01_multichannel_content', 'SOP-01 Đăng bài 11 kênh')">
+            <div class="dag-btn-title">🚀 SOP-01 Đa Kênh</div>
+            <div class="dag-btn-desc">Tự tạo nội dung AI & xuất bản lên 11 kênh MXH</div>
+          </button>
+          <button class="dag-run-btn" onclick="triggerQuickDag('dag_sop_02_fb_ads_cbo', 'SOP-02 FB Ads CBO')">
+            <div class="dag-btn-title">🎯 SOP-02 Ads CBO</div>
+            <div class="dag-btn-desc">Tối ưu ngân sách quảng cáo & scale chiến dịch</div>
+          </button>
+          <button class="dag-run-btn" onclick="triggerQuickDag('dag_sop_03_chatbot_qualifying', 'SOP-03 Chatbot Sàng Lọc')">
+            <div class="dag-btn-title">🤖 SOP-03 Sàng Lọc</div>
+            <div class="dag-btn-desc">Chấm điểm & phân loại khách hàng tiềm năng</div>
+          </button>
+          <button class="dag-run-btn" onclick="triggerQuickDag('dag_sop_18_push_communication', 'SOP-18 Push Truyền Thông')">
+            <div class="dag-btn-title">📢 SOP-18 Push Tin</div>
+            <div class="dag-btn-desc">Bắn thông báo hàng loạt qua Zalo / Telegram</div>
+          </button>
+        </div>
+
+        <div style="margin-top: 14px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); font-size: 0.75rem; color: var(--text-secondary);">
+          <i class="fa-solid fa-shield-halved" style="color: var(--accent-green);"></i>
+          <strong>Chế độ Vận Hành Cục Bộ:</strong> Toàn bộ 18 DAG chạy trực tiếp trên máy trạm Client 01, dữ liệu độc lập 100% với Core.
+        </div>
+      </div>
+
+    </section>
+
+    <!-- RIGHT: CHAT INTERFACE -->
+    <section class="chat-col">
+      <div class="chat-header">
+        <div class="chat-persona-info">
+          <div class="persona-avatar">🤖</div>
+          <div>
+            <div style="font-weight: 700; font-size: 0.95rem;">Chuyên Gia Vận Hành & Marketing AI</div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary);">Động cơ: Gemini Web + Kho 48 SOPs Doanh Nghiệp 1 Người</div>
+          </div>
+        </div>
+
+        <div class="chat-controls">
+          <select id="personaSelect">
+            <option value="Chuyên Gia Marketing & Bán Hàng">🎯 Chuyên Gia Marketing Đa Kênh</option>
+            <option value="Cố Vấn Vận Hành Tự Động Hóa">⚡ Cố Vấn Tự Động Hóa Vận Hành</option>
+            <option value="Chuyên Gia Quản Trị Tài Chính & Hoàn Phí">💰 Chuyên Gia Tài Chính & Dòng Tiền</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- MESSAGES -->
+      <div id="chatMessages" class="chat-messages">
+        <div class="msg bot">
+          <div class="msg-avatar">🤖</div>
+          <div class="msg-content">Chào anh! Em là Persona Brain của Client Node 01. 
+
+Hệ thống của anh đã được đồng bộ đủ **18 DAG và 48 quy trình SOP** thực chiến. Em có thể giúp anh lên chiến lược bài đăng đa kênh, tư vấn ngân sách quảng cáo, hoặc kích hoạt tự động hóa trực tiếp ngay tại đây! Anh cần em hỗ trợ việc gì trước ạ?</div>
+        </div>
+      </div>
+
+      <!-- QUICK PROMPTS -->
+      <div class="quick-prompts">
+        <button class="quick-btn" onclick="sendPrompt('Lên kịch bản nội dung và chạy SOP 1 đăng bài đa kênh cho anh')">🚀 Chạy SOP-01 đăng bài đa kênh</button>
+        <button class="quick-btn" onclick="sendPrompt('Chiến dịch Facebook Ads hôm nay cắn tiền nhanh mà CTR thấp dưới 1% thì xử lý thế nào?')">🎯 Ads FB cắn tiền CTR thấp</button>
+        <button class="quick-btn" onclick="sendPrompt('Quy trình sàng lọc hội viên và chấm điểm khách hàng tiềm năng hoạt động ra sao?')">🤖 Sàng lọc khách hàng SOP-03</button>
+      </div>
+
+      <!-- INPUT BAR -->
+      <form id="chatForm" class="chat-input-bar" onsubmit="handleSend(event)">
+        <input type="text" id="userInput" class="chat-input" placeholder="Nhập câu hỏi hoặc yêu cầu chạy quy trình SOP tại đây..." autocomplete="off">
+        <button type="submit" id="sendBtn" class="send-btn">
+          <span>Gửi</span>
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </form>
+    </section>
+
+  </main>
+
+  <script>
+    async function handleSend(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('userInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      appendMessage('user', text);
+      input.value = '';
+      input.focus();
+
+      const sendBtn = document.getElementById('sendBtn');
+      sendBtn.disabled = true;
+
+      // Loading bot message
+      const loadingId = appendMessage('bot', '⏳ Đang phân tích từ khóa và định tuyến quy trình SOP...');
+
+      try {
+        const persona = document.getElementById('personaSelect').value;
+        const res = await fetch('/api/brain/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, persona })
+        });
+        const data = await res.json();
+
+        // Cập nhật keywords
+        const keywordsBox = document.getElementById('keywordsBox');
+        if (data.matchedKeywords && data.matchedKeywords.length > 0) {
+          keywordsBox.innerHTML = data.matchedKeywords.map(k => `<span class="tag">#${k}</span>`).join('');
+        }
+
+        // Cập nhật SOPs Router
+        const sopsBox = document.getElementById('sopsListBox');
+        if (data.matchedSops && data.matchedSops.length > 0) {
+          sopsBox.innerHTML = data.matchedSops.map(s => `
+            <div class="sop-item">
+              <div class="sop-item-title">📘 ${s.title}</div>
+              <div class="sop-item-sub">Từ khóa: ${(s.keywords || []).slice(0, 4).join(', ')}</div>
+            </div>
+          `).join('');
+        }
+
+        // Cập nhật tin nhắn bot
+        const botMsgEl = document.getElementById(loadingId);
+        if (botMsgEl) {
+          botMsgEl.querySelector('.msg-content').innerText = data.reply || 'Đã ghi nhận yêu cầu của anh.';
+        }
+      } catch (err) {
+        const botMsgEl = document.getElementById(loadingId);
+        if (botMsgEl) {
+          botMsgEl.querySelector('.msg-content').innerText = '❌ Lỗi kết nối Brain API: ' + err.message;
+        }
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    function sendPrompt(text) {
+      document.getElementById('userInput').value = text;
+      handleSend();
+    }
+
+    async function triggerQuickDag(dagId, name) {
+      appendMessage('user', `Kích hoạt chạy quy trình: ${name}`);
+      const loadingId = appendMessage('bot', `🚀 Đang khởi chạy ${name} trên Client Node...`);
+
+      try {
+        const res = await fetch('/api/dag/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: dagId })
+        });
+        const data = await res.json();
+        const botMsgEl = document.getElementById(loadingId);
+        if (botMsgEl) {
+          if (data.success) {
+            const nodeCount = data.data && data.data.nodes ? Object.keys(data.data.nodes).length : 'N/A';
+            botMsgEl.querySelector('.msg-content').innerText = `✅ ĐÃ CHẠY HOÀN TẤT ${name}!\n\n- Trạng thái: ${data.data.status}\n- Số nodes đã xử lý: ${nodeCount}\n- Thời gian: ${new Date().toLocaleTimeString('vi-VN')}\n- Kênh xuất bản: Facebook, TikTok, Instagram, Threads, Website...`;
+          } else {
+            botMsgEl.querySelector('.msg-content').innerText = `❌ Không thể chạy ${name}: ${data.error}`;
+          }
+        }
+      } catch (err) {
+        const botMsgEl = document.getElementById(loadingId);
+        if (botMsgEl) {
+          botMsgEl.querySelector('.msg-content').innerText = `❌ Lỗi thực thi DAG: ${err.message}`;
+        }
+      }
+    }
+
+    function appendMessage(sender, text) {
+      const chatMessages = document.getElementById('chatMessages');
+      const msgDiv = document.createElement('div');
+      const id = 'msg_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+      msgDiv.id = id;
+      msgDiv.className = `msg ${sender}`;
+
+      const avatar = sender === 'user' ? '👤' : '🤖';
+      msgDiv.innerHTML = `
+        <div class="msg-avatar">${avatar}</div>
+        <div class="msg-content">${text}</div>
+      `;
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      return id;
+    }
+
+    // ============================================================================
+    // ĐỒNG BỘ TRẠNG THÁI VÀ NÚT BẬT/DỪNG GATEWAY THỜI GIAN THỰC TRÊN BRAIN UI
+    // ============================================================================
+    async function updateBrainGatewayStatus() {
+      try {
+        const res = await fetch('/api/chat-gateway/status');
+        if (!res.ok) return;
+        const data = await res.json();
+        const dot = document.getElementById('brain-gateway-dot');
+        const text = document.getElementById('brain-gateway-text');
+        const btn = document.getElementById('btn-brain-gateway-toggle');
+
+        if (data.isRunning) {
+          if (dot) { dot.style.background = '#10b981'; dot.style.boxShadow = '0 0 10px #10b981'; }
+          if (text) { text.textContent = 'Gateway: ĐANG BẬT'; text.style.color = '#34d399'; }
+          if (btn) {
+            btn.dataset.running = 'true';
+            btn.textContent = '⏹️ Dừng Gateway';
+            btn.style.background = 'rgba(239, 68, 68, 0.2)';
+            btn.style.color = '#f87171';
+            btn.style.border = '1px solid rgba(239, 68, 68, 0.5)';
+          }
+        } else {
+          if (dot) { dot.style.background = '#ef4444'; dot.style.boxShadow = '0 0 8px #ef4444'; }
+          if (text) { text.textContent = 'Gateway: ĐANG TẮT'; text.style.color = '#94a3b8'; }
+          if (btn) {
+            btn.dataset.running = 'false';
+            btn.textContent = '🟢 Bật Gateway';
+            btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+            btn.style.color = '#ffffff';
+            btn.style.border = 'none';
+          }
+        }
+      } catch (e) {}
+    }
+
+    async function toggleBrainGateway() {
+      const btn = document.getElementById('btn-brain-gateway-toggle');
+      if (!btn) return;
+
+      if (btn.dataset.running === 'true') {
+        if (confirm('Bạn có chắc muốn dừng Gateway trực chiến 24/7 và đóng trình duyệt không?')) {
+          btn.disabled = true;
+          btn.textContent = 'Đang dừng...';
+          try {
+            await fetch('/api/chat-gateway/stop', { method: 'POST' });
+          } catch (e) {
+            alert('Lỗi dừng Gateway: ' + e.message);
+          } finally {
+            btn.disabled = false;
+            await updateBrainGatewayStatus();
+          }
+        }
+      } else {
+        btn.disabled = true;
+        btn.textContent = 'Đang bật 13 tab...';
+        try {
+          const res = await fetch('/api/chat-gateway/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ headless: false })
+          });
+          const d = await res.json();
+          if (!d.success) alert('Lỗi khởi chạy Gateway: ' + (d.error || 'N/A'));
+        } catch (e) {
+          alert('Lỗi kết nối Gateway: ' + e.message);
+        } finally {
+          btn.disabled = false;
+          await updateBrainGatewayStatus();
+        }
+      }
+    }
+
+    document.getElementById('btn-brain-gateway-toggle')?.addEventListener('click', toggleBrainGateway);
+    updateBrainGatewayStatus();
+    setInterval(updateBrainGatewayStatus, 4000);
+  </script>
+</body>
+</html>

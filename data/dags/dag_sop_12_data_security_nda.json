@@ -1,0 +1,74 @@
+{
+  "id": "dag_sop_12_data_security_nda",
+  "name": "SOP-12: Quy trình Kiểm soát An toàn Thông tin & Bảo mật Dữ liệu Nội bộ",
+  "description": "Ký hợp đồng NDA điện tử, phân quyền truy cập Data Folder tối đa 2 nhân sự cố định, mã hóa tài nguyên, quét log bảo mật và gọi thẳng DAG-16 STOP khi vi phạm",
+  "nodes": [
+    {
+      "id": "node_1_send_nda",
+      "command": "nda_send_esignature",
+      "input": {
+        "member_id": "mem_opc_2026_01",
+        "contact_emails": ["ceo@doanhnghiepa.com", "cto@doanhnghiepa.com"]
+      }
+    },
+    {
+      "id": "node_2_set_folder_permissions",
+      "command": "folder_set_permissions",
+      "input": {
+        "folder_id": "FLD_CREDIT_MEM01",
+        "allowed_user_ids": ["admin_bqt", "mentor_007", "mem_opc_2026_01"]
+      }
+    },
+    {
+      "id": "node_3_encrypt_sensitive_data",
+      "command": "crypto_encrypt_data",
+      "input": {
+        "data_path": "data/uploads/finance_model_mem01.xlsx"
+      }
+    },
+    {
+      "id": "node_4_scan_audit_log",
+      "command": "audit_log_scan",
+      "input": {
+        "folder_id": "FLD_CREDIT_MEM01"
+      }
+    },
+    {
+      "id": "node_5_check_violation",
+      "command": "evaluate_condition",
+      "input": {
+        "expression": "0 == 1"
+      },
+      "branches": {
+        "true": "node_6_expel_unauthorized_user",
+        "false": "node_7_log_security_clean"
+      }
+    },
+    {
+      "id": "node_6_expel_unauthorized_user",
+      "command": "escalate_to_human",
+      "input": {
+        "reason": "Phát hiện vi phạm bảo mật nghiêm trọng / nhân sự lạ truy cập trái phép Data Folder"
+      },
+      "next": "node_6b_trigger_dag16_stop"
+    },
+    {
+      "id": "node_6b_trigger_dag16_stop",
+      "command": "trigger_sub_dag",
+      "input": {
+        "member_id": "mem_opc_2026_01",
+        "sub_dag_id": "dag_sop_16_exit_mna_renewal",
+        "variables": {
+          "exit_method": "STOP"
+        }
+      }
+    },
+    {
+      "id": "node_7_log_security_clean",
+      "command": "evaluate_condition",
+      "input": {
+        "expression": "1 == 1"
+      }
+    }
+  ]
+}

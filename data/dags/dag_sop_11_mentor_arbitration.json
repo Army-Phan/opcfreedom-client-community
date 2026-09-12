@@ -1,0 +1,119 @@
+{
+  "id": "dag_sop_11_mentor_arbitration",
+  "name": "SOP-11: Quy trình Xử lý Khiếu nại Mentor & Vận hành Hội đồng Trọng tài",
+  "description": "Tiếp nhận đơn trong 24h, thành lập Hội đồng Trọng tài (BQT), AI đối soát transcript và thi hành phán quyết",
+  "status": "ACTIVE",
+  "trigger": {
+    "type": "EVENT",
+    "event": "arbitration_ticket_created"
+  },
+  "nodes": [
+    {
+      "id": "node_1_submit_ticket",
+      "command": "arbitration_submit_ticket",
+      "input": {
+        "member_id": "{{member_id}}",
+        "mentor_id": "{{mentor_id}}",
+        "disputed_step": "{{disputed_step}}",
+        "reason": "{{variables.reason}}",
+        "recording_url": "{{variables.recording_url}}"
+      },
+      "next": "node_2_collect_mentor_evidence"
+    },
+    {
+      "id": "node_2_collect_mentor_evidence",
+      "command": "arbitration_collect_evidence",
+      "input": {
+        "ticket_id": "{{nodes.node_1_submit_ticket.output.ticket_id}}",
+        "mentor_id": "{{mentor_id}}",
+        "timeout_hours": 24
+      },
+      "next": "node_3_ai_debate_review"
+    },
+    {
+      "id": "node_3_ai_debate_review",
+      "command": "debate_council_review_transcript",
+      "input": {
+        "ticket_id": "{{nodes.node_1_submit_ticket.output.ticket_id}}",
+        "recording_url": "{{variables.recording_url}}"
+      },
+      "next": "node_4_select_judges"
+    },
+    {
+      "id": "node_4_select_judges",
+      "command": "arbitration_select_judges",
+      "input": {
+        "ticket_id": "{{nodes.node_1_submit_ticket.output.ticket_id}}"
+      },
+      "next": "node_5_council_voting"
+    },
+    {
+      "id": "node_5_council_voting",
+      "command": "arbitration_council_vote",
+      "input": {
+        "ticket_id": "{{nodes.node_1_submit_ticket.output.ticket_id}}",
+        "judges": "{{nodes.node_4_select_judges.output.judges}}",
+        "ai_suggestion": "{{nodes.node_3_ai_debate_review.output.verdict}}"
+      },
+      "next": "node_6_evaluate_vote_result"
+    },
+    {
+      "id": "node_6_evaluate_vote_result",
+      "command": "evaluate_condition",
+      "input": {
+        "expression": "'{{nodes.node_5_council_voting.output.final_verdict}}' == 'MENTOR_FAULT'"
+      },
+      "branches": {
+        "true": "node_7a_penalize_mentor_rollback",
+        "false": "node_6b_check_false_claim"
+      }
+    },
+    {
+      "id": "node_6b_check_false_claim",
+      "command": "evaluate_condition",
+      "input": {
+        "expression": "'{{nodes.node_5_council_voting.output.final_verdict}}' == 'FALSE_CLAIM'"
+      },
+      "branches": {
+        "true": "node_7b_expel_and_trigger_exit",
+        "false": "node_7c_dismiss_dispute_resume"
+      }
+    },
+    {
+      "id": "node_7a_penalize_mentor_rollback",
+      "command": "arbitration_execute_penalty",
+      "input": {
+        "ticket_id": "{{nodes.node_1_submit_ticket.output.ticket_id}}",
+        "member_id": "{{member_id}}",
+        "mentor_id": "{{mentor_id}}",
+        "disputed_step": "{{disputed_step}}",
+        "verdict": "MENTOR_FAULT_ROLLBACK_STEP"
+      },
+      "next": "END"
+    },
+    {
+      "id": "node_7b_expel_and_trigger_exit",
+      "command": "arbitration_execute_penalty",
+      "input": {
+        "ticket_id": "{{nodes.node_1_submit_ticket.output.ticket_id}}",
+        "member_id": "{{member_id}}",
+        "mentor_id": "{{mentor_id}}",
+        "disputed_step": "{{disputed_step}}",
+        "verdict": "FALSE_CLAIM_EXPEL_MEMBER"
+      },
+      "next": "END"
+    },
+    {
+      "id": "node_7c_dismiss_dispute_resume",
+      "command": "arbitration_execute_penalty",
+      "input": {
+        "ticket_id": "{{nodes.node_1_submit_ticket.output.ticket_id}}",
+        "member_id": "{{member_id}}",
+        "mentor_id": "{{mentor_id}}",
+        "disputed_step": "{{disputed_step}}",
+        "verdict": "DISMISS_RESUME_ROADMAP"
+      },
+      "next": "END"
+    }
+  ]
+}

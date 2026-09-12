@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OPC Autonomous Business OS - Master Server Config Vault v4.0</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --accent: #8b5cf6;
+      --accent-hover: #7c3aed;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    .header-branding {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .header-branding h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 800;
+      background: linear-gradient(to right, #c084fc, #6366f1, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    .header-branding p { color: var(--text-muted); font-size: 1rem; }
+
+    .wizard-container {
+      width: 100%;
+      max-width: 950px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tabs-nav {
+      display: flex;
+      background: rgba(0, 0, 0, 0.3);
+      border-bottom: 1px solid var(--glass-border);
+      overflow-x: auto;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 18px 15px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.3s;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+    }
+    .tab-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.03); }
+    .tab-btn.active {
+      color: #fff;
+      border-bottom-color: var(--accent);
+      background: rgba(139, 92, 246, 0.1);
+    }
+
+    .tab-content { padding: 35px 40px; display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    .section-title { font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 8px; color: #fff; }
+    .section-desc { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 25px; line-height: 1.5; }
+
+    .form-group { margin-bottom: 22px; }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+      color: #e2e8f0;
+    }
+    .form-group label span { font-weight: normal; color: var(--text-muted); font-size: 0.8rem; }
+    .form-control {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 0.95rem;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media(max-width: 768px) { .form-row { grid-template-columns: 1fr; } }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6); }
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+    .btn-outline:hover { background: rgba(255, 255, 255, 0.1); border-color: #fff; }
+    .btn-success { background: var(--success); color: #fff; }
+
+    .hwid-box {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px dashed var(--accent);
+      padding: 15px 20px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+    .hwid-code { font-family: monospace; font-size: 1.1rem; color: #38bdf8; letter-spacing: 1px; font-weight: 700; }
+
+    .browser-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .browser-card-info h4 { font-size: 1.1rem; color: #fff; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .browser-card-info p { font-size: 0.88rem; color: var(--text-muted); }
+
+    .footer-actions {
+      padding: 20px 40px;
+      background: rgba(0, 0, 0, 0.35);
+      border-top: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      color: #fff;
+      background: #1e293b;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      border: 1px solid var(--glass-border);
+      display: none;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+
+  <div style="width: 100%; max-width: 950px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+      <a href="/" style="color: #94a3b8; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; background: rgba(255,255,255,0.06); padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); transition: all 0.2s;">
+        <i class="fa-solid fa-arrow-left"></i> ⬅️ Về Automation
+      </a>
+      <a href="/brain.html" style="color: #c084fc; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; background: rgba(168, 85, 247, 0.18); padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(168, 85, 247, 0.45); transition: all 0.2s;">
+        <i class="fa-solid fa-brain"></i> 🧠 Mở Brain SOP Client (3001)
+      </a>
+      <a href="/website.html" style="color: #fb923c; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; background: rgba(249, 115, 22, 0.15); padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(249, 115, 22, 0.4); transition: all 0.2s;">
+        <i class="fa-solid fa-globe"></i> 🌐 Website opcfreedom.com
+      </a>
+      <a href="http://100.102.213.106:6080/vnc.html" target="_blank" style="color: #34d399; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; background: rgba(16, 185, 129, 0.12); padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.35); transition: all 0.2s;">
+        <i class="fa-solid fa-desktop"></i> 🖥️ Màn Hình noVNC (6080)
+      </a>
+    </div>
+    <span style="color: #64748b; font-size: 0.85rem; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);"><i class="fa-solid fa-server"></i> Client Node 01 (Port 3001)</span>
+  </div>
+
+  <div class="header-branding">
+    <h1>🚀 OPC Business OS Setup Wizard</h1>
+    <p>Trung Tâm Khởi Tạo & Cấu Hình Tự Động Hóa Doanh Nghiệp Một Người (v2.0)</p>
+  </div>
+
+  <div class="wizard-container">
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab(0)"><i class="fa-solid fa-key"></i> 1. Bản Quyền & HWID</button>
+      <button class="tab-btn" onclick="switchTab(1)"><i class="fa-brands fa-telegram"></i> 2. Telegram Bots</button>
+      <button class="tab-btn" onclick="switchTab(2)"><i class="fa-solid fa-chart-line"></i> 3. Facebook & Google Ads</button>
+      <button class="tab-btn" onclick="switchTab(3)"><i class="fa-solid fa-globe"></i> 4. Phiên Trình Duyệt</button>
+      <button class="tab-btn" onclick="switchTab(4)"><i class="fa-solid fa-share-nodes"></i> 5. Kênh Phân Phối</button>
+      <button class="tab-btn" onclick="switchTab(5)"><i class="fa-solid fa-photo-film"></i> 6. Nội Dung (CME)</button>
+      <button class="tab-btn" onclick="switchTab(6)"><i class="fa-solid fa-rocket"></i> 7. SOP & Khởi Chạy</button>
+      <button class="tab-btn" onclick="switchTab(7)"><i class="fa-solid fa-diagram-project"></i> 8. SOP DAG Studio</button>
+    </div>
+
+    <form id="setupForm" onsubmit="return false;">
+      <!-- TAB 1: BẢN QUYỀN & HWID -->
+      <div class="tab-content active" id="tab0">
+        <h2 class="section-title">Kích Hoạt Bản Quyền OPC Business OS</h2>
+        <p class="section-desc">Mỗi giấy phép (License Key) được gắn chặt với mã định danh phần cứng máy tính (HWID) duy nhất của bạn để bảo đảm tính toàn vẹn và bảo mật dữ liệu.</p>
+
+        <label style="font-weight:600; font-size:0.9rem; color:#e2e8f0; margin-bottom:8px; display:block;">Mã định danh phần cứng máy tính của bạn (`HWID Fingerprint`):</label>
+        <div class="hwid-box">
+          <span class="hwid-code" id="hwidDisplay">Đang lấy thông số máy tính...</span>
+          <button class="btn btn-outline" type="button" onclick="copyHWID()"><i class="fa-regular fa-copy"></i> Copy HWID</button>
+        </div>
+
+        <div class="form-group">
+          <label>Nhập Mã Kích Hoạt Bản Quyền (`OPC_LICENSE_KEY`) <span>(Mã do System Admin cấp, ví dụ: OPC-PRO-2026-VIP)</span></label>
+          <input type="text" class="form-control" name="OPC_LICENSE_KEY" id="OPC_LICENSE_KEY" placeholder="OPC-PRO-YYYY-XXXX-XXXX" required>
+        </div>
+      </div>
+
+      <!-- TAB 2: TELEGRAM BOTS -->
+      <div class="tab-content" id="tab1">
+        <h2 class="section-title">Cấu Hình Cụm Trợ Lý Telegram Bot</h2>
+        <p class="section-desc">Kết nối các bot Telegram của riêng bạn để ra lệnh Bàn tròn Trí tuệ (`@Roundtable`), điều khiển quảng cáo và nhận báo cáo 24/7 từ điện thoại di động.</p>
+
+        <div class="form-group">
+          <label>1. Token Bot Tổng Chỉ Huy (`MASTER_TELEGRAM_BOT_TOKEN`) <span>(Tạo qua @BotFather trên Telegram)</span></label>
+          <input type="password" class="form-control" name="MASTER_TELEGRAM_BOT_TOKEN" id="MASTER_TELEGRAM_BOT_TOKEN" placeholder="7123456789:AAExxxxxx...">
+        </div>
+        <div class="form-group">
+          <label>ID Telegram Quản Trị Viên (`MASTER_TELEGRAM_ADMIN_ID`) <span>(Chỉ nhận lệnh từ đúng ID này)</span></label>
+          <input type="text" class="form-control" name="MASTER_TELEGRAM_ADMIN_ID" id="MASTER_TELEGRAM_ADMIN_ID" placeholder="Ví dụ: 123456789">
+        </div>
+        <hr style="border:none; border-top:1px solid var(--glass-border); margin:25px 0;">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Token Bot Facebook Ads (`FB_TELEGRAM_BOT_TOKEN`)</label>
+            <input type="password" class="form-control" name="FB_TELEGRAM_BOT_TOKEN" id="FB_TELEGRAM_BOT_TOKEN" placeholder="Token bot điều khiển FB Ads...">
+          </div>
+          <div class="form-group">
+            <label>Token Bot Google Ads (`GG_TELEGRAM_BOT_TOKEN`)</label>
+            <input type="password" class="form-control" name="GG_TELEGRAM_BOT_TOKEN" id="GG_TELEGRAM_BOT_TOKEN" placeholder="Token bot điều khiển Google Ads...">
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: FACEBOOK & GOOGLE ADS -->
+      <div class="tab-content" id="tab2">
+        <h2 class="section-title">Kết Nối Hệ Thống Quảng Cáo Đa Kênh</h2>
+        <p class="section-desc">Cung cấp Token và API Credentials để AI tự động theo dõi số liệu, điều chỉnh ngân sách và đăng tải chiến dịch quảng cáo khi được phê duyệt.</p>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Facebook System User Token (`FB_ACCESS_TOKEN`)</label>
+            <input type="password" class="form-control" name="FB_ACCESS_TOKEN" id="FB_ACCESS_TOKEN" placeholder="EAABxxxx...">
+          </div>
+          <div class="form-group">
+            <label>Facebook Ad Account ID (`FB_AD_ACCOUNT_ID`)</label>
+            <input type="text" class="form-control" name="FB_AD_ACCOUNT_ID" id="FB_AD_ACCOUNT_ID" placeholder="act_1234567890">
+          </div>
+        </div>
+        <hr style="border:none; border-top:1px solid var(--glass-border); margin:25px 0;">
+        <h3 style="font-size:1.1rem; color:#c084fc; margin-bottom:15px;"><i class="fa-brands fa-facebook-messenger"></i> Facebook Fanpage Messenger API (Kênh 5)</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Facebook Page ID (`FB_PAGE_ID`)</label>
+            <input type="text" class="form-control" name="FB_PAGE_ID" id="FB_PAGE_ID" placeholder="105473438013074">
+          </div>
+          <div class="form-group">
+            <label>Webhook Verify Token (`FB_WEBHOOK_VERIFY_TOKEN`)</label>
+            <input type="text" class="form-control" name="FB_WEBHOOK_VERIFY_TOKEN" id="FB_WEBHOOK_VERIFY_TOKEN" placeholder="opcfreedom_biztada_webhook_2026">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Facebook Page Access Token (`FB_PAGE_ACCESS_TOKEN`)</label>
+          <input type="password" class="form-control" name="FB_PAGE_ACCESS_TOKEN" id="FB_PAGE_ACCESS_TOKEN" placeholder="EAAOxxxx...">
+        </div>
+        <hr style="border:none; border-top:1px solid var(--glass-border); margin:25px 0;">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Google Ads Developer Token (`GOOGLE_ADS_DEVELOPER_TOKEN`)</label>
+            <input type="password" class="form-control" name="GOOGLE_ADS_DEVELOPER_TOKEN" id="GOOGLE_ADS_DEVELOPER_TOKEN" placeholder="Developer Token...">
+          </div>
+          <div class="form-group">
+            <label>Google Ads Refresh Token (`GOOGLE_ADS_REFRESH_TOKEN`)</label>
+            <input type="password" class="form-control" name="GOOGLE_ADS_REFRESH_TOKEN" id="GOOGLE_ADS_REFRESH_TOKEN" placeholder="1//0xxxx...">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Google Ads Client ID (`GOOGLE_ADS_CLIENT_ID`)</label>
+            <input type="text" class="form-control" name="GOOGLE_ADS_CLIENT_ID" id="GOOGLE_ADS_CLIENT_ID" placeholder="xxxx.apps.googleusercontent.com">
+          </div>
+          <div class="form-group">
+            <label>Google Ads Client Secret (`GOOGLE_ADS_CLIENT_SECRET`)</label>
+            <input type="password" class="form-control" name="GOOGLE_ADS_CLIENT_SECRET" id="GOOGLE_ADS_CLIENT_SECRET" placeholder="Client Secret...">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>ID Tài Khoản Con (`GOOGLE_ADS_CUSTOMER_ID`)</label>
+            <input type="text" class="form-control" name="GOOGLE_ADS_CUSTOMER_ID" id="GOOGLE_ADS_CUSTOMER_ID" placeholder="1234567890">
+          </div>
+          <div class="form-group">
+            <label>ID Tài Khoản MCC Cha (`GOOGLE_ADS_LOGIN_CUSTOMER_ID`)</label>
+            <input type="text" class="form-control" name="GOOGLE_ADS_LOGIN_CUSTOMER_ID" id="GOOGLE_ADS_LOGIN_CUSTOMER_ID" placeholder="0987654321">
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: PHIÊN TRÌNH DUYỆT -->
+      <div class="tab-content" id="tab3">
+        <h2 class="section-title">Đăng Nhập Phiên Trình Duyệt Ngầm (`Omnichannel 11 Channels`)</h2>
+        <p class="section-desc">Nhấn nút bên dưới để mở trình duyệt có giao diện. Bạn đăng nhập một lần duy nhất vào 11 kênh mạng xã hội & chat. Hệ thống lưu trọn vẹn phiên (`shared_omnichannel_profile`) phục vụ AI Agent tự động hóa <strong>SOP-01</strong> & <strong>Chat Gateway 24/7</strong>.</p>
+
+        <!-- Nút bấm khởi chạy tổng hợp -->
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 25px;">
+          <button type="button" class="btn btn-primary" style="padding: 14px 22px; font-size: 1rem; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);" onclick="launchBrowserLogin('all')">
+            <i class="fa-solid fa-rocket"></i> 🚀 Mở Tất Cả 11 Kênh Đăng Nhập (SOP-01 & Gateway)
+          </button>
+          <button type="button" class="btn btn-outline" onclick="launchBrowserLogin('chat')">
+            <i class="fa-solid fa-comments"></i> 💬 Chỉ Mở 4 Kênh Chat & AI
+          </button>
+          <button type="button" class="btn btn-outline" onclick="launchBrowserLogin('sop01')">
+            <i class="fa-solid fa-share-nodes"></i> 📢 Chỉ Mở 7 Kênh SOP-01
+          </button>
+        </div>
+
+        <!-- Danh sách 11 Kênh phân nhóm -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <!-- CARD 1: CHAT & AI -->
+          <div class="browser-card" style="flex-direction: column; align-items: flex-start;">
+            <h4 style="font-size: 1.05rem; color: #fff; margin-bottom: 10px;">
+              <i class="fa-solid fa-comments" style="color:var(--accent);"></i> Cụm Chat Gateway & AI Brain (4 Kênh)
+            </h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px;">
+              <span style="background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; color: #60a5fa; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;"><i class="fa-solid fa-comment"></i> Zalo Web</span>
+              <span style="background: rgba(24, 119, 242, 0.2); border: 1px solid #1877f2; color: #93c5fd; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;"><i class="fa-brands fa-facebook"></i> Facebook</span>
+              <span style="background: rgba(14, 165, 233, 0.2); border: 1px solid #0ea5e9; color: #38bdf8; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;"><i class="fa-brands fa-telegram"></i> Telegram Web</span>
+              <span style="background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #c084fc; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;"><i class="fa-solid fa-wand-magic-sparkles"></i> Gemini Web</span>
+            </div>
+          </div>
+
+          <!-- CARD 2: SOP-01 PHÂN PHỐI NỘI DUNG -->
+          <div class="browser-card" style="flex-direction: column; align-items: flex-start;">
+            <h4 style="font-size: 1.05rem; color: #fff; margin-bottom: 10px;">
+              <i class="fa-solid fa-share-nodes" style="color:var(--success);"></i> Cụm Phân Phối Bài Đăng SOP-01 (7 Kênh)
+            </h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px;">
+              <span style="background: rgba(10, 102, 194, 0.2); border: 1px solid #0a66c2; color: #60a5fa; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;"><i class="fa-brands fa-linkedin"></i> LinkedIn</span>
+              <span style="background: rgba(225, 48, 108, 0.2); border: 1px solid #e1306c; color: #f472b6; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;"><i class="fa-brands fa-instagram"></i> Instagram</span>
+              <span style="background: rgba(255, 255, 255, 0.1); border: 1px solid #94a3b8; color: #f8fafc; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;"><i class="fa-brands fa-threads"></i> Threads</span>
+              <span style="background: rgba(0, 0, 0, 0.4); border: 1px solid #f43f5e; color: #fda4af; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;"><i class="fa-brands fa-tiktok"></i> TikTok</span>
+              <span style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;"><i class="fa-brands fa-youtube"></i> YouTube Shorts</span>
+              <span style="background: rgba(255, 255, 255, 0.1); border: 1px solid #38bdf8; color: #7dd3fc; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;"><i class="fa-brands fa-x-twitter"></i> X (Twitter)</span>
+              <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;"><i class="fa-solid fa-globe"></i> Website CMS</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: rgba(139, 92, 246, 0.1); border-left: 4px solid var(--accent); padding: 15px; border-radius: 8px; margin-top: 20px;">
+          <p style="font-size: 0.9rem; color: #e2e8f0; line-height: 1.5;">
+            <i class="fa-solid fa-lightbulb" style="color:#f59e0b;"></i> <strong>Mẹo vận hành tự động:</strong> Bạn chỉ cần đăng nhập thành công 1 lần duy nhất trên các tab cửa sổ Chrome vừa mở. Toàn bộ Cookie/Token sẽ được bảo lưu trong profile `shared_omnichannel_profile` để AI Agent tự động xuất bản bài viết SOP-01 và tư vấn khách hàng 24/7 mà không cần mở lại trình duyệt!
+          </p>
+        </div>
+      </div>
+
+      <!-- TAB 5: KÊNH PHÂN PHỐI -->
+      <div class="tab-content" id="tab4">
+        <h2 class="section-title">Quản Lý Kênh Phân Phối</h2>
+        <p class="section-desc">Khai báo danh sách các kênh truyền thông của bạn (Group Facebook, Fanpage, Zalo, Telegram...) để AI có thể tự động điều hướng bài đăng.</p>
+        
+        <div style="background: var(--glass-bg); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <h4 style="margin-bottom: 10px; color: #fff;">Thêm kênh mới</h4>
+          <div class="form-row">
+            <input type="text" class="form-control" id="newChannelName" placeholder="Tên kênh (VD: Nhóm Khởi Nghiệp)">
+            <select class="form-control" id="newChannelType">
+              <!-- Load động từ API -->
+            </select>
+          </div>
+          <div class="form-row" style="margin-top:10px;">
+            <input type="text" class="form-control" id="newChannelUrl" placeholder="URL hoặc ID kênh đích" style="flex: 2;">
+            <button class="btn btn-primary" type="button" onclick="addChannel()" style="flex: 1;"><i class="fa-solid fa-plus"></i> Thêm Kênh</button>
+          </div>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left; background: rgba(0,0,0,0.2); border-radius: 8px; overflow: hidden;">
+          <thead style="background: rgba(255,255,255,0.1); color: #fff;">
+            <tr>
+              <th style="padding: 12px 15px;">Tên Kênh</th>
+              <th style="padding: 12px 15px;">Loại</th>
+              <th style="padding: 12px 15px;">URL</th>
+              <th style="padding: 12px 15px; text-align: center;">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="channelsTableBody">
+            <tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--text-muted);">Đang tải danh sách...</td></tr>
+          </tbody>
+        </table>
+
+        <!-- Quản lý danh mục loại kênh -->
+        <details style="background: var(--glass-bg); padding: 15px; border-radius: 8px; margin-top: 20px;">
+          <summary style="color: #fff; font-weight: 600; cursor: pointer; user-select: none;">📁 Quản Lý Danh Mục Loại Kênh</summary>
+          <div style="margin-top: 15px;">
+            <div class="form-row" style="margin-bottom: 15px;">
+              <input type="text" class="form-control" id="newChannelTypeName" placeholder="Tên loại kênh mới (VD: Threads, Zalo Cá Nhân)">
+              <button class="btn btn-primary" type="button" onclick="addChannelType()"><i class="fa-solid fa-plus"></i> Thêm Loại Kênh</button>
+            </div>
+            <div id="channelTypesList" style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <!-- Load động các badge loại kênh kèm nút xóa -->
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <!-- TAB 6: NỘI DUNG CME -->
+      <div class="tab-content" id="tab5">
+        <h2 class="section-title">Quản Lý Nội Dung Đa Kênh (CME)</h2>
+        <p class="section-desc">Nơi lưu trữ và phê duyệt (Duyệt/Approve) tài nguyên marketing trước khi AI Playwright tiến hành đăng bài tự động.</p>
+        
+        <div style="background: var(--glass-bg); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <h4 style="margin-bottom: 10px; color: #fff;">Tạo Bài Đăng Nháp</h4>
+          <div class="form-row" style="margin-bottom: 10px; gap: 10px;">
+            <input type="text" class="form-control" id="newContentTitle" placeholder="Tiêu đề nội dung (VD: Mở bán Web Builder 2026)" style="flex: 2;">
+            <select class="form-control" id="newContentType" style="flex: 1; min-width: 150px;">
+              <!-- Sẽ load động từ database -->
+            </select>
+          </div>
+          <div class="form-group">
+            <textarea class="form-control" id="newContentRawData" placeholder="Nội dung Caption thô hoặc tài nguyên đính kèm..." rows="3"></textarea>
+          </div>
+          <div class="form-row">
+            <select class="form-control" id="newContentChannelId">
+              <option value="">-- Chọn kênh đích --</option>
+            </select>
+            <button class="btn btn-primary" type="button" onclick="addContent()"><i class="fa-solid fa-file-signature"></i> Tạo Nháp</button>
+          </div>
+        </div>
+
+        <div style="display: grid; gap: 15px;" id="contentsListContainer">
+          <div style="text-align: center; padding: 20px; color: var(--text-muted);">Đang tải nội dung...</div>
+        </div>
+
+        <!-- Quản lý danh mục loại nội dung -->
+        <details style="background: var(--glass-bg); padding: 15px; border-radius: 8px; margin-top: 20px;">
+          <summary style="color: #fff; font-weight: 600; cursor: pointer; user-select: none;">📁 Quản Lý Danh Mục Loại Nội Dung</summary>
+          <div style="margin-top: 15px;">
+            <div class="form-row" style="margin-bottom: 15px;">
+              <input type="text" class="form-control" id="newContentTypeName" placeholder="Phân loại mới (VD: Tuyển đại lý, Meme vui nhộn)">
+              <button class="btn btn-primary" type="button" onclick="addContentType()"><i class="fa-solid fa-plus"></i> Thêm Loại Nội Dung</button>
+            </div>
+            <div id="contentTypesList" style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <!-- Load động các badge phân loại kèm nút xóa -->
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <!-- TAB 7: SOP & KHỞI CHẠY -->
+      <div class="tab-content" id="tab6">
+        <h2 class="section-title">Hoàn Tất Cấu Hình & Khởi Chạy Hệ Sinh Thái</h2>
+        <p class="section-desc">Kiểm tra lại toàn bộ thông tin. Bấm nút bên dưới để mã hóa cấu hình vào `data/opc_vault.json` và khởi chạy toàn bộ 7 ứng dụng trong hệ sinh thái tự trị của bạn.</p>
+
+        <div class="form-group">
+          <label>Chế độ suy luận chính (`AI Reasoning Engine`):</label>
+          <select class="form-control" name="USE_GEMINI_WEB" id="USE_GEMINI_WEB">
+            <option value="true">🌟 Gemini Web Client - Trò chuyện tạm thời (Ưu tiên Zero API Cost - Khuyên dùng)</option>
+            <option value="false">🔑 Gemini REST API Key (Tính phí theo token khi gọi API ngoại quốc)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Gemini API Key dự phòng (`GEMINI_API_KEY`) <span>(Tùy chọn fallback khi Web Client bảo trì)</span></label>
+          <input type="password" class="form-control" name="GEMINI_API_KEY" id="GEMINI_API_KEY" placeholder="AIzaSyxxxx...">
+        </div>
+
+        <div style="text-align: center; margin-top: 35px;">
+          <button type="button" class="btn btn-success" style="padding: 16px 40px; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);" onclick="saveAndLaunch()">
+            <i class="fa-solid fa-rocket"></i> LƯU VÀ KHỞI CHẠY HỆ SINH THÁI OPC OS
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 8: VISUAL SOP DAG STUDIO -->
+      <div class="tab-content" id="tab7">
+        <h2 class="section-title">⚙️ Visual SOP DAG & Dynamic Tool Studio</h2>
+        <p class="section-desc">Giao diện trực quan chọn sơ đồ SOP, gán Web Tool từ Dropdown và mapping dữ liệu Input/Output 100% bằng chuột.</p>
+
+        <div style="display: grid; grid-template-columns: 260px 1fr; gap: 20px; min-height: 480px;">
+          <!-- Cột Trái: Danh sách 16 SOPs -->
+          <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 12px; padding: 15px; overflow-y: auto; max-height: 520px;">
+            <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+              <span>📋 16 Quy Trình SOP</span>
+              <span id="dagCountBadge" style="background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem;">16</span>
+            </h4>
+            <div id="sopListContainer" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- Load động danh sách 16 SOPs -->
+              <div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 20px;">Đang tải danh sách SOP...</div>
+            </div>
+          </div>
+
+          <!-- Cột Phải: Trình thiết kế Sơ đồ & Mapper -->
+          <div style="display: flex; flex-direction: column; gap: 15px;">
+            <!-- Thanh Công Cụ Tiêu Đề DAG -->
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); padding: 12px 18px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h3 id="currentDagTitle" style="color: #fff; font-size: 1.1rem; margin-bottom: 2px;">Chọn một SOP ở cột trái để bắt đầu thiết kế</h3>
+                <p id="currentDagDesc" style="color: var(--text-muted); font-size: 0.85rem;">Mã ID: <code id="currentDagId" style="color: #38bdf8;">none</code></p>
+              </div>
+              <button class="btn btn-success" type="button" onclick="saveCurrentDagSchema()" id="btnSaveDag" style="display: none;">
+                <i class="fa-solid fa-floppy-disk"></i> Lưu Sơ Đồ DAG
+              </button>
+            </div>
+
+            <!-- Khu Vực Nút & Dynamic Tool Mapper -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; flex: 1;">
+              <!-- Sơ đồ Luồng Nút (Nodes Flow Visualizer) -->
+              <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); border-radius: 12px; padding: 15px; overflow-y: auto; max-height: 400px;">
+                <h4 style="color: #fff; font-size: 0.9rem; margin-bottom: 12px;"><i class="fa-solid fa-network-wired"></i> Luồng Nút Thực Thi (Nodes Sequence)</h4>
+                <div id="nodesFlowVisualizer" style="display: flex; flex-direction: column; gap: 10px;">
+                  <div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 30px;">Vui lòng chọn SOP để xem các Nút</div>
+                </div>
+              </div>
+
+              <!-- Panel Cấu Hình Tool & Mapping Tham Số (Tool Mapper Panel) -->
+              <div style="background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); border-radius: 12px; padding: 15px; overflow-y: auto; max-height: 400px;" id="nodeEditorPanel">
+                <h4 style="color: #fff; font-size: 0.9rem; margin-bottom: 12px;"><i class="fa-solid fa-sliders"></i> Cấu Hình Nút & Dynamic Tool Mapper</h4>
+                
+                <div id="nodeEditorContent">
+                  <div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 30px;">Nhấp chọn 1 Nút ở bảng bên trái để gán Tool và mapping dữ liệu</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <div class="footer-actions">
+      <button class="btn btn-outline" id="prevBtn" onclick="changeStep(-1)" style="visibility: hidden;"><i class="fa-solid fa-chevron-left"></i> Quay lại</button>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <button class="btn btn-success" id="quickSaveBtn" onclick="saveAndLaunch(false)" style="padding: 10px 20px; font-size: 0.9rem;"><i class="fa-solid fa-floppy-disk"></i> Lưu Cấu Hình</button>
+        <button class="btn btn-primary" id="nextBtn" onclick="changeStep(1)">Tiếp tục <i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="setup.js"></script>
+</body>
+</html>

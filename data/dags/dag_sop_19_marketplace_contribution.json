@@ -1,0 +1,71 @@
+{
+  "id": "dag_sop_19_marketplace_contribution",
+  "name": "SOP-19: Quy trình Tiếp nhận, Thẩm định & Xuất bản DAG/SOP Lên Chợ Chung",
+  "description": "Tiếp nhận DAG/SOP từ Thành viên nộp lên, AI Pre-audit kiểm tra biến số, thông báo Commander Client 0 sơ duyệt, và chuyển lên Core Sandbox để ký số xuất bản vào Chợ Chung",
+  "status": "ACTIVE",
+  "trigger": {
+    "type": "EVENT",
+    "event": "marketplace_candidate_received"
+  },
+  "createdAt": "2026-09-09T01:30:00.000Z",
+  "variables": {
+    "candidate_id": "CAND_2026_001",
+    "member_id": "member_opc_vip_01",
+    "dag_json": {},
+    "description": "Quy trình tư vấn và chốt sale tự động ngành Bất Động Sản",
+    "niche_category": "Real Estate"
+  },
+  "nodes": [
+    {
+      "id": "node_1_receive_candidate",
+      "command": "marketplace_receive_candidate",
+      "input": {
+        "candidate_id": "{{candidate_id}}",
+        "member_id": "{{member_id}}",
+        "dag_json": "{{dag_json}}",
+        "description": "{{description}}",
+        "niche_category": "{{niche_category}}"
+      },
+      "next": "node_2_ai_preaudit_structure"
+    },
+    {
+      "id": "node_2_ai_preaudit_structure",
+      "command": "marketplace_ai_preaudit",
+      "input": {
+        "candidate_id": "{{nodes.node_1_receive_candidate.output.candidate_id}}",
+        "dag_json": "{{nodes.node_1_receive_candidate.output.dag_json}}"
+      },
+      "next": "node_3_generate_spec_doc"
+    },
+    {
+      "id": "node_3_generate_spec_doc",
+      "command": "marketplace_generate_spec",
+      "input": {
+        "candidate_id": "{{nodes.node_1_receive_candidate.output.candidate_id}}",
+        "sanitized_dag": "{{nodes.node_2_ai_preaudit_structure.output.sanitized_dag}}",
+        "audit_summary": "{{nodes.node_2_ai_preaudit_structure.output.audit_summary}}"
+      },
+      "next": "node_4_notify_commander"
+    },
+    {
+      "id": "node_4_notify_commander",
+      "command": "chat_send_message",
+      "input": {
+        "channel": "telegram",
+        "recipient_id": "MASTER_ADMIN",
+        "text": "📢 **HỒ SƠ ĐỀ XUẤT DAG MỚI TỪ THÀNH VIÊN**\n- Ticket Candidate: {{nodes.node_1_receive_candidate.output.candidate_id}}\n- Tác giả: {{member_id}}\n- Tên DAG: {{nodes.node_2_ai_preaudit_structure.output.dag_name}}\n- Đánh giá AI: {{nodes.node_2_ai_preaudit_structure.output.audit_summary}}\n- Biến số Template: {{nodes.node_2_ai_preaudit_structure.output.variables_detected}}\n👉 Bấm /marketplace approve {{nodes.node_1_receive_candidate.output.candidate_id}} để gửi lên Core Sandbox."
+      },
+      "next": "node_5_forward_to_core_sandbox"
+    },
+    {
+      "id": "node_5_forward_to_core_sandbox",
+      "command": "marketplace_forward_core",
+      "input": {
+        "candidate_id": "{{nodes.node_1_receive_candidate.output.candidate_id}}",
+        "sanitized_dag": "{{nodes.node_2_ai_preaudit_structure.output.sanitized_dag}}",
+        "spec_markdown": "{{nodes.node_3_generate_spec_doc.output.spec_markdown}}"
+      },
+      "next": "END"
+    }
+  ]
+}

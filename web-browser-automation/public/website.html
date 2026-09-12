@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌐 Quản Trị & Phát Triển Website opcfreedom.com (Client Node)</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #111827;
+      --glass-bg: rgba(17, 24, 39, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --accent-orange: #f97316;
+      --accent-blue: #38bdf8;
+      --accent-green: #10b981;
+      --accent-purple: #a855f7;
+      --gradient-orange: linear-gradient(135deg, #f97316 0%, #e11d48 100%);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(249, 115, 22, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(56, 189, 248, 0.12) 0%, transparent 40%);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* TOP BAR */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 28px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-icon {
+      font-size: 1.8rem;
+    }
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .brand-badge {
+      font-size: 0.75rem;
+      background: rgba(249, 115, 22, 0.15);
+      color: var(--accent-orange);
+      border: 1px solid rgba(249, 115, 22, 0.35);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .nav-btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+    }
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-1px);
+    }
+
+    /* STATUS CARDS GRID */
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      padding: 20px 28px 10px 28px;
+    }
+    .card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status-pill {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: 700;
+    }
+    .status-pill.online {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-green);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .status-pill.offline {
+      background: rgba(148, 163, 184, 0.15);
+      color: var(--text-secondary);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .card-body {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    .card-footer {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--gradient-orange);
+      color: #fff;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-green {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--accent-green);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+    .btn-green:hover { background: rgba(16, 185, 129, 0.3); }
+    .btn-red {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+    .btn-red:hover { background: rgba(239, 68, 68, 0.3); }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+      border: 1px solid var(--glass-border);
+    }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.15); }
+
+    /* MAIN PREVIEW & LOGS */
+    .workspace-layout {
+      display: grid;
+      grid-template-columns: 1fr 480px;
+      gap: 20px;
+      padding: 10px 28px 20px 28px;
+      flex: 1;
+      height: calc(100vh - 240px);
+    }
+
+    .preview-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .preview-header {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .preview-tabs {
+      display: flex;
+      gap: 8px;
+    }
+    .preview-tab {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .preview-tab.active {
+      background: rgba(249, 115, 22, 0.18);
+      border-color: rgba(249, 115, 22, 0.45);
+      color: #fed7aa;
+    }
+
+    .preview-frame-container {
+      flex: 1;
+      background: #000;
+      position: relative;
+    }
+    .preview-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* CONSOLE LOGS */
+    .logs-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .logs-header {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .logs-body {
+      flex: 1;
+      background: rgba(10, 15, 26, 0.95);
+      padding: 16px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.78rem;
+      color: #93c5fd;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header class="top-bar">
+    <div class="brand">
+      <span class="brand-icon">🌐</span>
+      <div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="brand-title">Quản Trị & Phát Triển Website opcfreedom.com</span>
+          <span class="brand-badge"><i class="fa-solid fa-cloud"></i> Cloudflare Pages + Vite</span>
+        </div>
+        <div style="font-size: 0.75rem; color: var(--text-secondary);">Môi Trường Phát Triển Phân Tán Tại Client Node (Port 3001)</div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <a href="/" class="nav-btn"><i class="fa-solid fa-gauge-high"></i> Dashboard Automation</a>
+      <a href="/brain.html" class="nav-btn" style="color:#c084fc; border-color:rgba(168,85,247,0.4);"><i class="fa-solid fa-brain"></i> Brain SOP Client</a>
+      <a href="/setup.html" class="nav-btn"><i class="fa-solid fa-gear"></i> Setup Wizard</a>
+      <a href="http://100.102.213.106:6080/vnc.html" target="_blank" class="nav-btn"><i class="fa-solid fa-desktop"></i> noVNC (6080)</a>
+    </div>
+  </header>
+
+  <!-- 3 CARDS STATUS -->
+  <section class="status-grid">
+    
+    <!-- CARD 1: LIVE CLOUDFLARE -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><i class="fa-solid fa-globe" style="color: var(--accent-orange);"></i> Website Live (Cloudflare)</div>
+        <span class="status-pill online"><i class="fa-solid fa-circle"></i> Trực Tuyến</span>
+      </div>
+      <div class="card-body">
+        Trang web chính thức đang phân phối toàn cầu qua mạng lưới CDN của Cloudflare Pages.
+        <div style="margin-top: 6px; font-weight: 600; color: #f8fafc;">https://opcfreedom.com</div>
+      </div>
+      <div class="card-footer">
+        <a href="https://opcfreedom.com" target="_blank" class="btn btn-secondary"><i class="fa-solid fa-arrow-up-right-from-square"></i> Mở Trang Live</a>
+      </div>
+    </div>
+
+    <!-- CARD 2: LOCAL DEV SERVER -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><i class="fa-solid fa-laptop-code" style="color: var(--accent-blue);"></i> Môi Trường Dev Cục Bộ</div>
+        <span id="devStatusPill" class="status-pill offline"><i class="fa-solid fa-circle"></i> Đang tắt</span>
+      </div>
+      <div class="card-body">
+        Máy chủ phát triển Vite chạy trên máy trạm Client Node. Hỗ trợ cập nhật giao diện thời gian thực (HMR).
+        <div style="margin-top: 6px; font-weight: 600; color: #f8fafc;">http://100.102.213.106:5173</div>
+      </div>
+      <div class="card-footer">
+        <button id="btnToggleDev" class="btn btn-green" onclick="toggleDevServer()"><i class="fa-solid fa-play"></i> Bật Dev Server</button>
+        <button class="btn btn-secondary" onclick="openDevTab()"><i class="fa-solid fa-arrow-up-right-from-square"></i> Mở Tab Dev</button>
+      </div>
+    </div>
+
+    <!-- CARD 3: CLOUDFLARE DEPLOY -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><i class="fa-solid fa-cloud-arrow-up" style="color: var(--accent-purple);"></i> Triển Khai Cloudflare</div>
+        <span class="status-pill online"><i class="fa-solid fa-check"></i> Sẵn Sàng</span>
+      </div>
+      <div class="card-body">
+        Tự động đóng gói bản dựng tối ưu (Vite Production Build) và đẩy trực tiếp lên Cloudflare Pages bằng Wrangler.
+        <div id="lastBuildInfo" style="margin-top: 6px; font-size: 0.75rem; color: #94a3b8;">Thư mục: tenant_data/client_0/data/website</div>
+      </div>
+      <div class="card-footer">
+        <button id="btnDeploy" class="btn btn-primary" onclick="triggerDeploy()"><i class="fa-solid fa-rocket"></i> 🚀 1-Click Deploy Cloudflare</button>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- WORKSPACE: PREVIEW & LOGS -->
+  <main class="workspace-layout">
+    
+    <!-- LEFT: PREVIEW IFRAME -->
+    <section class="preview-card">
+      <div class="preview-header">
+        <div class="preview-tabs">
+          <button id="tabLive" class="preview-tab active" onclick="switchPreview('live')">
+            <i class="fa-solid fa-globe"></i> Live (opcfreedom.com)
+          </button>
+          <button id="tabDist" class="preview-tab" onclick="switchPreview('dist')">
+            <i class="fa-solid fa-box-archive"></i> Bản Build (Port 3001)
+          </button>
+          <button id="tabDev" class="preview-tab" onclick="switchPreview('dev')">
+            <i class="fa-solid fa-laptop-code"></i> Dev HMR (Port 5173)
+          </button>
+        </div>
+        <button class="btn btn-secondary" style="padding:4px 10px; font-size:0.75rem;" onclick="reloadPreview()">
+          <i class="fa-solid fa-rotate-right"></i> Làm Mới Frame
+        </button>
+      </div>
+      <div class="preview-frame-container">
+        <iframe id="previewIframe" class="preview-frame" src="https://opcfreedom.com"></iframe>
+      </div>
+    </section>
+
+    <!-- RIGHT: TERMINAL BUILD LOGS -->
+    <section class="logs-card">
+      <div class="logs-header">
+        <div style="font-weight: 700; font-size: 0.88rem; display:flex; align-items:center; gap:8px;">
+          <i class="fa-solid fa-terminal" style="color: var(--accent-orange);"></i> Nhật Ký Build & Deploy
+        </div>
+        <button class="btn btn-secondary" style="padding:4px 10px; font-size:0.75rem;" onclick="fetchLogs()">
+          <i class="fa-solid fa-arrows-rotate"></i> Cập Nhật Log
+        </button>
+      </div>
+      <div id="logsBox" class="logs-body">Đang kết nối tới máy trạm Client Node...</div>
+    </section>
+
+  </main>
+
+  <script>
+    let currentPreviewMode = 'live';
+    let isDevRunning = false;
+
+    async function checkStatus() {
+      try {
+        const res = await fetch('/api/website/status');
+        const json = await res.json();
+        if (json.success) {
+          const data = json.data;
+          isDevRunning = data.isDevRunning;
+
+          const pill = document.getElementById('devStatusPill');
+          const toggleBtn = document.getElementById('btnToggleDev');
+
+          if (isDevRunning) {
+            pill.className = 'status-pill online';
+            pill.innerHTML = '<i class="fa-solid fa-circle"></i> Đang chạy';
+            toggleBtn.className = 'btn btn-red';
+            toggleBtn.innerHTML = '<i class="fa-solid fa-stop"></i> Tắt Dev Server';
+          } else {
+            pill.className = 'status-pill offline';
+            pill.innerHTML = '<i class="fa-solid fa-circle"></i> Đang tắt';
+            toggleBtn.className = 'btn btn-green';
+            toggleBtn.innerHTML = '<i class="fa-solid fa-play"></i> Bật Dev Server';
+          }
+
+          if (data.lastBuildTime) {
+            document.getElementById('lastBuildInfo').innerText = `Bản build gần nhất: ${new Date(data.lastBuildTime).toLocaleString('vi-VN')}`;
+          }
+        }
+      } catch (e) {}
+    }
+
+    async function toggleDevServer() {
+      const toggleBtn = document.getElementById('btnToggleDev');
+      toggleBtn.disabled = true;
+
+      try {
+        const endpoint = isDevRunning ? '/api/website/dev/stop' : '/api/website/dev/start';
+        const res = await fetch(endpoint, { method: 'POST' });
+        const data = await res.json();
+        await checkStatus();
+        await fetchLogs();
+
+        if (!isDevRunning && currentPreviewMode === 'dev') {
+          switchPreview('dev');
+        }
+      } catch (e) {
+        alert('Lỗi: ' + e.message);
+      } finally {
+        toggleBtn.disabled = false;
+      }
+    }
+
+    function openDevTab() {
+      window.open('http://100.102.213.106:5173', '_blank');
+    }
+
+    function switchPreview(mode) {
+      currentPreviewMode = mode;
+      const iframe = document.getElementById('previewIframe');
+      const tabLive = document.getElementById('tabLive');
+      const tabDist = document.getElementById('tabDist');
+      const tabDev = document.getElementById('tabDev');
+
+      tabLive.className = 'preview-tab';
+      tabDist.className = 'preview-tab';
+      tabDev.className = 'preview-tab';
+
+      if (mode === 'live') {
+        tabLive.className = 'preview-tab active';
+        iframe.src = 'https://opcfreedom.com';
+      } else if (mode === 'dist') {
+        tabDist.className = 'preview-tab active';
+        iframe.src = '/website-preview/';
+      } else {
+        tabDev.className = 'preview-tab active';
+        iframe.src = 'http://100.102.213.106:5173';
+      }
+    }
+
+    function reloadPreview() {
+      const iframe = document.getElementById('previewIframe');
+      iframe.src = iframe.src;
+    }
+
+    async function triggerDeploy() {
+      const btn = document.getElementById('btnDeploy');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Build & Upload...';
+
+      try {
+        const res = await fetch('/api/website/deploy', { method: 'POST' });
+        const data = await res.json();
+        await fetchLogs();
+        await checkStatus();
+
+        if (data.success) {
+          alert('🎉 Triển khai thành công lên Cloudflare Pages! Hãy kiểm tra opcfreedom.com');
+          reloadPreview();
+        } else {
+          alert('⚠️ Deploy thất bại: ' + (data.error || 'Kiểm tra log bên phải'));
+        }
+      } catch (e) {
+        alert('❌ Lỗi kết nối server: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-rocket"></i> 🚀 1-Click Deploy Cloudflare';
+      }
+    }
+
+    async function fetchLogs() {
+      try {
+        const res = await fetch('/api/website/logs');
+        const data = await res.json();
+        if (data.success && data.logs) {
+          const box = document.getElementById('logsBox');
+          box.innerText = data.logs.join('\n') || 'Chưa có nhật ký hoạt động.';
+          box.scrollTop = box.scrollHeight;
+        }
+      } catch (e) {}
+    }
+
+    // Khởi tạo
+    checkStatus();
+    fetchLogs();
+    setInterval(fetchLogs, 5000);
+    setInterval(checkStatus, 10000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoBrowse & AutoHeal System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-mode">
+  <div class="app-container">
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo-area">
+        <div class="logo-icon">🤖</div>
+        <div class="logo-text">
+          <span class="brand-title">AutoBrowse</span>
+          <span class="brand-subtitle">Self-Healing Agent</span>
+        </div>
+      </div>
+      
+      <nav class="nav-menu">
+        <a href="#" class="nav-item active" data-target="dashboard-section">
+          <span class="nav-icon">📊</span> Dashboard
+        </a>
+        <a href="#" class="nav-item" data-target="create-section">
+          <span class="nav-icon">➕</span> Tạo Tool Mới
+        </a>
+        <a href="#" class="nav-item" data-target="recorder-section">
+          <span class="nav-icon">🎥</span> Ghi Nhận Trực Tiếp
+        </a>
+        <a href="#" class="nav-item" data-target="tools-section">
+          <span class="nav-icon">🛠️</span> Kho Công Cụ
+        </a>
+        <a href="#" class="nav-item" data-target="history-section">
+          <span class="nav-icon">📜</span> Lịch Sử Chạy
+        </a>
+        <a href="#" class="nav-item" data-target="profiles-section">
+          <span class="nav-icon">👥</span> Quản lý Profile
+        </a>
+        <a href="#" class="nav-item" data-target="gateway-section">
+          <span class="nav-icon">💬</span> Quản lý Kênh Chat
+        </a>
+        <a href="/marketplace.html" style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: #60a5fa; background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.4); margin-top: 14px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">
+          <span style="font-size: 1.15rem;">🛒</span> Chợ DAG & Biến Thể
+        </a>
+        <a href="/setup.html" onclick="window.location.href='/setup.html'" style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: #38bdf8; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.35); margin-top: 8px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">
+          <span style="font-size: 1.15rem;">⚙️</span> Cài Đặt (Setup Wizard)
+        </a>
+        <a href="/brain.html" style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: #c084fc; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.45); margin-top: 8px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">
+          <span style="font-size: 1.15rem;">🧠</span> Brain SOP Client (3001)
+        </a>
+        <a href="/website.html" style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: #fb923c; background: rgba(249, 115, 22, 0.12); border: 1px solid rgba(249, 115, 22, 0.4); margin-top: 8px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">
+          <span style="font-size: 1.15rem;">🌐</span> Website opcfreedom.com
+        </a>
+        <a href="http://100.102.213.106:6080/vnc.html" target="_blank" style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: #34d399; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.4); margin-top: 8px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">
+          <span style="font-size: 1.15rem;">🖥️</span> Màn Hình Ảo VNC (6080)
+        </a>
+        <a href="/test-studio.html" style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: #f43f5e; background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.4); margin-top: 8px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">
+          <span style="font-size: 1.15rem;">🧪</span> Visual Test Studio (20 DAGs)
+        </a>
+        <a href="/air-traffic.html" style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: #a855f7; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.45); margin-top: 8px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">
+          <span style="font-size: 1.15rem;">🛫</span> Kiểm Soát DAG-3 & R&D
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="status-indicator online"></div>
+        <span>Hệ thống Sẵn sàng</span>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      
+      <!-- HEADER -->
+      <header class="app-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <h1 id="page-title">Bảng điều khiển</h1>
+        <div style="display:flex; align-items:center; gap:14px;">
+          <!-- Quick Gateway Toggle Pill -->
+          <div id="header-gateway-pill" style="display:flex; align-items:center; gap:10px; background: rgba(0,0,0,0.35); padding: 6px 14px; border-radius: 10px; border: 1px solid var(--border-color);">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span id="header-gateway-dot" style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#ef4444; box-shadow:0 0 8px #ef4444;"></span>
+              <span id="header-gateway-text" style="font-size:0.85rem; font-weight:600; color:#94a3b8;">Gateway: TẮT</span>
+            </div>
+            <button id="btn-header-gateway-toggle" style="padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; border: none; transition: all 0.2s; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff;">
+              🟢 Bật Gateway
+            </button>
+          </div>
+          <div class="user-profile">
+            <span class="model-badge">Gemini 3.5 Flash</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- SECTION: DASHBOARD -->
+      <section id="dashboard-section" class="content-section active">
+        <div class="stats-grid">
+          <div class="stat-card glass-panel">
+            <div class="stat-icon purple">🛠️</div>
+            <div class="stat-info">
+              <h3>Tổng số Tool</h3>
+              <p id="stat-tools-count">0</p>
+            </div>
+          </div>
+          <div class="stat-card glass-panel">
+            <div class="stat-icon green">✅</div>
+            <div class="stat-info">
+              <h3>Chạy thành công</h3>
+              <p id="stat-runs-success">0</p>
+            </div>
+          </div>
+          <div class="stat-card glass-panel">
+            <div class="stat-icon orange">🩹</div>
+            <div class="stat-info">
+              <h3>Đã tự vá (Healed)</h3>
+              <p id="stat-runs-healed">0</p>
+            </div>
+          </div>
+          <div class="stat-card glass-panel">
+            <div class="stat-icon red">❌</div>
+            <div class="stat-info">
+              <h3>Lỗi (Failed)</h3>
+              <p id="stat-runs-failed">0</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-panel healer-config-panel" style="margin-bottom: 24px; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <h3 style="margin: 0 0 6px 0; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+              <span>⚙️ Cấu Hình Chế Độ AI Healer (Tự Động Vá Lỗi)</span>
+            </h3>
+            <p style="margin: 0; font-size: 13px; color: var(--text-muted);">
+              Tùy chọn cách AI Healer kết nối khi phát hiện sự cố trên trang web (dùng API hoặc khung chat nháp Gemini Web).
+            </p>
+          </div>
+          <div class="healer-options" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <label class="config-radio-btn" style="cursor: pointer; display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+              <input type="radio" name="healerMode" value="both" checked>
+              <span>🚀 Cả hai (Ưu tiên API ➔ Fallback Web)</span>
+            </label>
+            <label class="config-radio-btn" style="cursor: pointer; display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+              <input type="radio" name="healerMode" value="web">
+              <span>🌐 Chỉ dùng Gemini Web Chat</span>
+            </label>
+            <label class="config-radio-btn" style="cursor: pointer; display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+              <input type="radio" name="healerMode" value="api">
+              <span>🔑 Chỉ dùng Gemini API</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="dashboard-layout">
+          <div class="left-col">
+            <div class="glass-panel main-prompt-card">
+              <h2>Tạo Tool nhanh bằng AI</h2>
+              <p>Mô tả ngắn gọn bằng tiếng Việt để Gemini tự động lập trình và tạo tool automation.</p>
+              <div class="quick-generate-form">
+                <input type="text" id="quick-tool-name" placeholder="Tên tool (Ví dụ: HNScraping, ScrapeGoogle)">
+                <input type="url" id="quick-tool-url" placeholder="Đường dẫn Website bắt đầu (Ví dụ: https://...)">
+                <textarea id="quick-tool-prompt" placeholder="Bạn muốn tool làm gì? (Ví dụ: Nhập chữ 'AI agent' vào ô tìm kiếm, bấm Enter, tìm danh sách bài viết đầu tiên và lấy Tiêu đề và Link...)"></textarea>
+                <button id="btn-quick-generate" class="primary-btn">Tạo và Kiểm thử Ngay</button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="right-col">
+            <div class="glass-panel recent-runs-card">
+              <div class="panel-header">
+                <h2>Lượt chạy gần đây</h2>
+                <a href="#" class="view-all-link" data-target="history-section">Tất cả</a>
+              </div>
+              <div class="recent-runs-list" id="dashboard-runs-list">
+                <div class="empty-state">Chưa có dữ liệu chạy.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION: CREATE TOOL -->
+      <section id="create-section" class="content-section">
+        <div class="glass-panel">
+          <h2>Tạo Tool Automation Mới</h2>
+          <div class="creation-form">
+            <div class="form-group">
+              <label for="tool-name">Tên Công Cụ *</label>
+              <input type="text" id="tool-name" placeholder="Ví dụ: get_hn_stories">
+            </div>
+            
+            <div class="form-group">
+              <label for="tool-url">Địa chỉ URL Bắt đầu *</label>
+              <input type="url" id="tool-url" placeholder="https://news.ycombinator.com">
+            </div>
+            
+            <div class="form-group">
+              <label for="tool-prompt">Mô tả hành động chi tiết (Prompt) *</label>
+              <textarea id="tool-prompt" rows="5" placeholder="Bấm vào nút 'New', đợi danh sách tải xong, copy 5 liên kết đầu tiên kèm số điểm."></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 1.5rem; padding: 1rem; background: rgba(0,0,0,0.15); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+              <div style="flex: 1; min-width: 200px;">
+                <label for="create-tool-type" style="display: block; margin-bottom: 6px; font-weight: 600; color: #a855f7;">Nhóm Công Cụ:</label>
+                <select id="create-tool-type" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff;">
+                  <option value="task">⚙️ Task Tool (Làm việc chính)</option>
+                  <option value="auth">🔑 Auth Tool (Đăng nhập / Nuôi tài khoản)</option>
+                </select>
+              </div>
+                <div style="flex: 1; min-width: 200px;">
+                <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #10b981;">Profile Dùng Chung (Chia sẻ Cookie):</label>
+                <div style="display: flex; gap: 8px;">
+                  <select id="create-tool-profile-select" style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff;">
+                    <option value="default">default (Mặc định)</option>
+                  </select>
+                  <input type="text" id="create-tool-profile-custom" placeholder="Tạo mới..." style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; display: none;">
+                </div>
+                </div>
+            </div>
+
+            <button id="btn-generate-tool" class="primary-btn">Bắt đầu Phân tích & Tạo Quy trình</button>
+          </div>
+        </div>
+
+        <div id="generation-result" class="glass-panel hidden">
+          <div class="generation-success-header">
+            <h3>🎉 Đã tạo thành công quy trình duyệt web!</h3>
+          </div>
+          <div class="steps-flow-container">
+            <h4>Danh sách các bước duyệt web tự động:</h4>
+            <div class="steps-list" id="generated-steps-preview">
+              <!-- Steps generated dynamically -->
+            </div>
+          </div>
+          <div class="action-bar">
+            <button id="btn-test-run-new" class="secondary-btn">Chạy Thử Nghiệm (Test Run)</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION: LIVE RECORDER -->
+      <section id="recorder-section" class="content-section">
+        <div class="glass-panel">
+          <h2>🎥 Ghi Nhận Trực Tiếp Trên Trình Duyệt (Interactive Live Recorder)</h2>
+          <p style="margin-bottom: 1rem; color: var(--text-secondary);">
+            Mở một cửa sổ Chrome thực có giao diện (thuộc profile cá nhân lưu giữ Cookie/Session). Bạn thao tác nhấp chuột, điền dữ liệu hay bôi đen chọn vùng lấy dữ liệu trực tiếp trên trình duyệt, hệ thống sẽ tự động ghi lại từng bước để tạo thành Tool!
+          </p>
+          <div class="creation-form" style="margin-bottom: 1.5rem;">
+            <div class="form-group">
+              <label for="recorder-url">Địa chỉ URL Bắt đầu *</label>
+              <input type="url" id="recorder-url" placeholder="https://news.ycombinator.com hoặc https://google.com">
+            </div>
+            <div style="display:flex; gap:12px;">
+              <button id="btn-start-recorder" class="primary-btn">🚀 Mở Chrome & Bắt Đầu Ghi Nhận</button>
+              <button id="btn-stop-recorder" class="secondary-btn hidden" style="border-color:var(--color-danger);color:var(--color-danger);">⏹️ Dừng & Đóng Trình Duyệt</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side-by-side Recording Dashboard (Hidden until recording starts) -->
+        <div id="recorder-dashboard-panel" class="glass-panel hidden" style="margin-top: 1.5rem;">
+          <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+            <div>
+              <h3 style="margin:0; color: #a855f7;">🔴 Đang Ghi Nhận Tương Tác Trực Tiếp</h3>
+              <span id="recorder-start-url-display" style="font-size:0.85rem; color: var(--text-secondary);"></span>
+            </div>
+            <div style="display:flex; gap:12px; align-items:center;">
+              <span class="status-badge running" id="recorder-status-badge">Đang ghi nhận</span>
+              <button id="btn-finish-recorder" class="primary-btn" style="background: var(--color-success); padding: 0.5rem 1.25rem;">📦 Đóng Gói Tool Ngay</button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+            <!-- Recorded steps list -->
+            <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+              <h4 style="margin-bottom: 0.75rem;">📋 Danh Sách Các Bước Đã Ghi:</h4>
+              <div id="recorder-steps-list" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                <div class="empty-state">Chưa có bước nào được ghi. Hãy thao tác trên Chrome hoặc bấm nút trên thanh công cụ Overlay...</div>
+              </div>
+            </div>
+
+            <!-- Recorded dynamic inputs & extractions summary -->
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+              <div style="background: rgba(245, 158, 11, 0.1); padding: 1rem; border-radius: var(--radius-md); border: 1px solid rgba(245, 158, 11, 0.3);">
+                <h4 style="color: #f59e0b; margin-bottom: 0.5rem;">📝 Biến Nhập Liệu (Inputs):</h4>
+                <ul id="recorder-inputs-list" style="padding-left: 1.25rem; margin: 0; font-size: 0.85rem; color: var(--text-secondary);">
+                  <li>Chưa có ô nhập liệu nào được cấu hình.</li>
+                </ul>
+              </div>
+              
+              <div style="background: rgba(16, 185, 129, 0.1); padding: 1rem; border-radius: var(--radius-md); border: 1px solid rgba(16, 185, 129, 0.3);">
+                <h4 style="color: #10b981; margin-bottom: 0.5rem;">🎯 Vùng Cào Dữ Liệu (Scrapes):</h4>
+                <ul id="recorder-scrapes-list" style="padding-left: 1.25rem; margin: 0; font-size: 0.85rem; color: var(--text-secondary);">
+                  <li>Chưa có bước lấy dữ liệu nào.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION: TOOLS LIST -->
+      <section id="tools-section" class="content-section">
+        <div class="tools-grid" id="tools-library-grid">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- SECTION: RUN VIEWER / ACTIVE RUN -->
+      <section id="run-viewer-section" class="content-section">
+        <div class="run-viewer-layout">
+          <div class="run-control-panel glass-panel">
+            <div class="run-header-details">
+              <h2 id="viewer-run-title">Tên Tool Chạy</h2>
+              <div class="run-badges">
+                <span id="viewer-run-status" class="status-badge running">Running</span>
+                <span id="viewer-run-time" class="time-badge">--:--</span>
+                <button id="viewer-btn-resume" class="primary-btn hidden" style="background:var(--color-warning);color:#000;padding:0.25rem 0.60rem;font-size:0.75rem;box-shadow:none;border-radius:var(--radius-full);line-height:1.2;font-weight:700;margin-left:0.5rem;">Tiếp tục (Resume)</button>
+              </div>
+            </div>
+
+            <!-- Re-record Alert Banner (when self-healing fails) -->
+            <div id="viewer-rerecord-panel" class="healing-console hidden" style="background: rgba(239, 68, 68, 0.15); border-color: var(--color-danger); margin-top: 1rem;">
+              <div class="console-title" style="color: var(--color-danger);">🚨 VÁ LỖI SELECTOR THẤT BẠI - CẦN GHI NHẬN LẠI LUỒNG</div>
+              <p style="font-size: 0.85rem; margin-bottom: 0.75rem; color: var(--text-primary); line-height: 1.4;">
+                Trang web đã thay đổi giao diện quá lớn khiến hệ thống tự vá không thể khôi phục tự động. Vui lòng bấm nút dưới đây để mở trình duyệt và tự động hóa/ghi nhận lại luồng cho Tool này.
+              </p>
+              <div style="display:flex; justify-content:flex-end;">
+                <button id="viewer-btn-rerecord" class="primary-btn" style="background: var(--color-danger); color: #fff; padding: 0.5rem 1rem; font-size: 0.85rem;">🎥 Mở Chrome & Ghi Nhận Lại Luồng</button>
+              </div>
+            </div>
+
+            <!-- Steps Progress flow -->
+            <div class="run-steps-flow">
+              <h3>Tiến độ duyệt web</h3>
+              <div class="flow-steps-list" id="viewer-steps-list">
+                <!-- Step nodes with status icons -->
+              </div>
+            </div>
+
+             <!-- Healing Console (if any healing triggers) -->
+            <div class="healing-console hidden" id="viewer-healing-panel">
+              <div class="console-title">🩹 TIẾN TRÌNH TỰ VÁ SELECTOR</div>
+              <div class="healing-steps-log" id="viewer-healing-log">
+                <!-- Healing steps -->
+              </div>
+            </div>
+
+            <!-- Interactive Debugging / Input Panel -->
+            <div id="viewer-interactive-panel" class="healing-console hidden" style="background: rgba(245, 158, 11, 0.1); border-color: var(--color-warning);">
+              <div class="console-title" style="color: var(--color-warning);">⚠️ YÊU CẦU CAN THIỆP HỆ THỐNG</div>
+              <p id="viewer-interactive-msg" style="font-size: 0.85rem; margin-bottom: 0.75rem; color: var(--text-primary); line-height: 1.4;"></p>
+              
+              <!-- Input field container -->
+              <div id="viewer-interactive-input-container" class="dynamic-input-field hidden" style="margin-bottom: 0.75rem;">
+                <label id="viewer-interactive-input-label" for="viewer-interactive-input-field">Giá trị:</label>
+                <input type="text" id="viewer-interactive-input-field" placeholder="Nhập giá trị...">
+              </div>
+
+              <div style="display:flex; justify-content:flex-end;">
+                <button id="viewer-btn-interactive-submit" class="primary-btn" style="background: var(--color-warning); color: #000; padding: 0.5rem 1rem; font-size: 0.85rem; box-shadow: none;">Xác nhận & Tiếp tục</button>
+              </div>
+            </div>
+            
+            <!-- Console Logs -->
+            <div class="terminal-logs">
+              <div class="console-title">🖥️ LOG HỆ THỐNG</div>
+              <pre class="logs-console" id="viewer-console-logs"></pre>
+            </div>
+          </div>
+
+          <div class="run-viewport-panel">
+            <!-- Live Viewport Image -->
+            <div class="glass-panel live-browser-card">
+              <h2>Màn hình Trực quan (Live Browser)</h2>
+              <div class="viewport-wrapper">
+                <img id="viewer-live-screen" src="placeholder.png" alt="Live browser viewport screen">
+                <div class="live-overlay">LIVE VIEWPORT</div>
+              </div>
+            </div>
+
+            <!-- Extracted Data -->
+            <div class="glass-panel extracted-data-card">
+              <h2>Dữ liệu thu được (Extracted Data)</h2>
+              <div class="scraped-data-container" id="viewer-scraped-data">
+                <div class="empty-state">Đang đợi bước cào dữ liệu...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION: RUN HISTORY -->
+      <section id="history-section" class="content-section">
+        <div class="glass-panel">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:12px;">
+            <h2 style="margin:0;">Lịch sử các lần duyệt web</h2>
+            <button class="secondary-btn" style="border-color:#ef4444;color:#ef4444;padding:0.5rem 1rem;" onclick="clearAllHistory()">🗑️ Xóa Tất Cả Lịch Sử</button>
+          </div>
+          <div class="table-container">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Thời Gian</th>
+                  <th>Tên Quy Trình (Tool)</th>
+                  <th>Trạng Thái</th>
+                  <th>Số Lần Tự Vá</th>
+                  <th>Hành Động</th>
+                </tr>
+              </thead>
+              <tbody id="history-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      
+      <!-- Profiles Section -->
+      <section id="profiles-section" class="content-section">
+        <header class="section-header">
+          <h2>Quản Lý Profile 👥</h2>
+          <p>Quản lý các hồ sơ trình duyệt, tránh xung đột Cookies và bảo vệ tài khoản đăng nhập.</p>
+        </header>
+        
+        <div class="controls-bar" style="justify-content: flex-end;">
+          <button id="btn-refresh-profiles" class="secondary-btn">Làm mới danh sách</button>
+        </div>
+
+        <div class="table-container" style="background: var(--bg-surface); border-radius: var(--radius-md); border: 1px solid var(--border-color); overflow: hidden; margin-top: 20px;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+              <tr style="background: rgba(255,255,255,0.05); border-bottom: 1px solid var(--border-color);">
+                <th style="padding: 12px; font-weight: 600; color: #94a3b8;">Tên Profile</th>
+                <th style="padding: 12px; font-weight: 600; color: #94a3b8;">Loại</th>
+                <th style="padding: 12px; font-weight: 600; color: #94a3b8;">Trạng Thái Dữ Liệu</th>
+                <th style="padding: 12px; font-weight: 600; color: #94a3b8;">Liên Kết Tool</th>
+                <th style="padding: 12px; font-weight: 600; color: #94a3b8; text-align: right;">Hành Động</th>
+              </tr>
+            </thead>
+            <tbody id="profiles-list-body">
+              <!-- Rendered by app.js -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <!-- SECTION: OMNICHANNEL CHAT GATEWAY CONTROLLER -->
+      <section id="gateway-section" class="content-section">
+        <div class="glass-panel" style="margin-bottom: 1.5rem;">
+          <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom: 1.5rem;">
+            <div>
+              <h2 style="margin:0 0 4px 0; color: #a855f7;">💬 Quản Lý Cổng Kênh Chat Omnichannel (Zalo / FB / Telegram)</h2>
+              <p style="margin:0; font-size:0.85rem; color: var(--text-secondary);">
+                Tự động gõ trả lời khách hàng trên trình duyệt thật với bảo lưu Cookie/Session vĩnh viễn và bộ lọc tường lửa giá vốn (`Strict Internal Blocker`).
+              </p>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span id="gateway-status-badge" class="status-badge failed" style="font-size:0.8rem; padding: 0.4rem 0.8rem;">OFFLINE (ĐANG TẮT)</span>
+            </div>
+          </div>
+
+          <!-- Status Grid for Channels -->
+          <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 1.75rem;">
+            <div class="stat-card glass-panel" style="background: rgba(0, 132, 255, 0.08); border-color: rgba(0, 132, 255, 0.25);">
+              <div class="stat-icon" style="background: rgba(0, 132, 255, 0.2); color: #38bdf8;">Z</div>
+              <div class="stat-info">
+                <h3>Zalo Web (chat.zalo.me)</h3>
+                <p id="channel-status-zalo" style="font-size: 1rem; color: var(--text-muted);">Chưa kết nối</p>
+              </div>
+            </div>
+            <div class="stat-card glass-panel" style="background: rgba(59, 89, 152, 0.08); border-color: rgba(59, 89, 152, 0.25);">
+              <div class="stat-icon" style="background: rgba(59, 89, 152, 0.2); color: #60a5fa;">FB</div>
+              <div class="stat-info">
+                <h3>Facebook Messenger</h3>
+                <p id="channel-status-facebook" style="font-size: 1rem; color: var(--text-muted);">Chưa kết nối</p>
+              </div>
+            </div>
+            <div class="stat-card glass-panel" style="background: rgba(0, 136, 204, 0.08); border-color: rgba(0, 136, 204, 0.25);">
+              <div class="stat-icon" style="background: rgba(0, 136, 204, 0.2); color: #38bdf8;">T</div>
+              <div class="stat-info">
+                <h3>Telegram Web</h3>
+                <p id="channel-status-telegram" style="font-size: 1rem; color: var(--text-muted);">Chưa kết nối</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Control Actions -->
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; padding: 1.25rem; background: rgba(0,0,0,0.25); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <div style="display:flex; gap:12px; flex-wrap:wrap;">
+              <button id="btn-gateway-login" class="secondary-btn" style="border-color: #a855f7; color: #c084fc; font-weight: 700;">
+                🔑 Đăng Nhập & Quét QR Code (Login Channels)
+              </button>
+              <button id="btn-gateway-start" class="primary-btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                🟢 Khởi Chạy Live 24/7 Mode (Start)
+              </button>
+              <button id="btn-gateway-stop" class="secondary-btn hidden" style="border-color: var(--color-danger); color: var(--color-danger); font-weight: 700;">
+                ⏹️ Dừng Gateway Trực Chiến (Stop)
+              </button>
+            </div>
+            <div style="font-size:0.85rem; color: var(--text-secondary);">
+              <span>Tổng tin nhắn xử lý: <strong id="gateway-messages-count" style="color: #34d399; font-size:1rem;">0</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Message Stream Console -->
+        <div class="glass-panel">
+          <h3 style="margin-bottom: 1rem; color: #38bdf8; display:flex; align-items:center; gap:8px;">
+            <span>⚡ Luồng Tin Nhắn Khách Hàng Trực Chiến (`Live Message Stream`)</span>
+          </h3>
+          <div id="gateway-messages-log" style="display:flex; flex-direction:column; gap:10px; max-height: 450px; overflow-y:auto; padding: 10px; background: rgba(0,0,0,0.3); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <div class="empty-state">Chưa có tin nhắn nào. Hãy khởi chạy Live Mode hoặc mô phỏng tin nhắn để quan sát AI trả lời tự động!</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODAL FOR TOOL DETAILS -->
+      <div id="tool-modal" class="modal hidden">
+        <div class="modal-content glass-panel">
+          <div class="modal-header">
+            <h2 id="modal-tool-name">Chi tiết Tool</h2>
+            <button class="close-btn" id="btn-close-modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p id="modal-tool-description" class="tool-desc-text"></p>
+            <div class="modal-info-grid">
+              <div><strong>URL Gốc:</strong> <span id="modal-tool-url"></span></div>
+              <div><strong>Số Bước:</strong> <span id="modal-tool-steps-count">0</span></div>
+            </div>
+
+            <!-- Shared Profile & Tool Type Selector in Modal -->
+            <div class="modal-config-box" style="margin: 1.25rem 0; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.08); display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between;">
+              <div style="flex: 1; min-width: 220px;">
+                <label style="font-size: 13px; font-weight: 600; color: #a855f7; display: block; margin-bottom: 6px;">Phân Loại Tool (Nhóm):</label>
+                <select id="modal-tool-type-select" style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 14px;">
+                  <option value="task">⚙️ Task Tool (Làm việc nghiệp vụ chính)</option>
+                  <option value="auth">🔑 Auth Tool (Chuyên đăng nhập / Nuôi tài khoản)</option>
+                </select>
+              </div>
+              <div style="flex: 1; min-width: 220px;">
+                <label style="font-size: 13px; font-weight: 600; color: #10b981; display: block; margin-bottom: 6px;">Profile Dùng Chung (Chia sẻ Cookie):</label>
+                <div style="display: flex; gap: 8px;">
+                  <select id="modal-tool-profile-select" style="flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 14px;">
+                    <option value="default">default (Mặc định)</option>
+                  </select>
+                  <input type="text" id="modal-tool-profile-custom" placeholder="Hoặc nhập profile mới..." style="flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; font-size: 14px;">
+                </div>
+              </div>
+              <div style="width: 100%; display: flex; justify-content: flex-end;">
+                <button id="modal-btn-save-config" class="secondary-btn" style="padding: 6px 14px; font-size: 13px; border-color: #a855f7; color: #a855f7;">💾 Lưu Cấu Hình Profile/Loại Tool</button>
+              </div>
+            </div>
+
+            <!-- Dynamic Inputs Container -->
+            <div id="modal-tool-inputs-container" class="modal-steps-container hidden" style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(0,0,0,0.15); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+              <h3 style="margin-bottom: 0.75rem;">Nhập thông tin yêu cầu</h3>
+              <div id="modal-tool-inputs" style="display:flex; flex-direction:column; gap:0.75rem;"></div>
+            </div>
+            
+            <div class="modal-steps-container">
+              <h3>Các bước tự động hóa</h3>
+              <div class="modal-steps-list" id="modal-tool-steps"></div>
+            </div>
+
+            <div class="modal-actions" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+              <div class="run-options-row" style="display:flex; flex-direction:column; gap:8px; align-items:flex-start;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="modal-run-headless">
+                    <span class="slider"></span>
+                  </label>
+                  <span>Chạy ngầm không hiển thị cửa sổ (Headless)</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;" title="Sử dụng trực tiếp Profile Google Chrome thật đã ghi nhận (lách CAPTCHA tối đa)">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="modal-run-persistent-profile" checked>
+                    <span class="slider"></span>
+                  </label>
+                  <span style="color: #10b981; font-weight: 500;">🛡️ Dùng Profile Chrome (Lách CAPTCHA)</span>
+                </div>
+              </div>
+              <div style="display:flex; gap:12px; align-items:center;">
+                <button id="modal-btn-delete-tool" class="secondary-btn" style="border-color:#ef4444;color:#ef4444;padding:0.65rem 1rem;font-size:0.85rem;" title="Xóa vĩnh viễn Tool này">🗑️ Xóa Tool</button>
+                <button id="modal-btn-clear-state" class="secondary-btn" style="border-color:var(--color-danger);color:var(--color-danger);padding:0.65rem 1rem;font-size:0.85rem;" title="Xóa Cookies/Session đã lưu của Tool này">Xóa Cookie</button>
+                <button id="modal-btn-run" class="primary-btn">Kích Hoạt Chạy Ngay</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  
+  <script src="app.js"></script>
+</body>
+</html>

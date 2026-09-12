@@ -1,0 +1,288 @@
+{
+  "id": "dag_sop_04_member_roadmap",
+  "name": "SOP-04: Quy trình Vận hành Thành viên Theo Lộ trình 1 Năm",
+  "description": "Quản lý 9 bước lộ trình phát triển thành viên, kiểm tra nghiệm thu 24h và tự động chuyển giao giai đoạn",
+  "nodes": [
+    {
+      "id": "node_1_onboard",
+      "command": "member_onboard",
+      "input": {
+        "member_id": "{{member_id}}",
+        "fee_amount": 6500000,
+        "mentor_id": "{{mentor_id}}"
+      },
+      "next": "node_1a_trigger_dag7"
+    },
+    {
+      "id": "node_1a_trigger_dag7",
+      "command": "trigger_sub_dag",
+      "input": {
+        "member_id": "{{member_id}}",
+        "mentor_id": "{{mentor_id}}",
+        "bqt_id": "{{bqt_id}}",
+        "sub_dag_id": "dag_sop_07_fee_and_refund",
+        "variables": {
+          "amount": 6500000,
+          "fee_type": "DOT_1_ONBOARDING"
+        }
+      },
+      "next": "node_1b_trigger_dag8_deposit"
+    },
+    {
+      "id": "node_1b_trigger_dag8_deposit",
+      "command": "trigger_sub_dag",
+      "input": {
+        "member_id": "{{member_id}}",
+        "mentor_id": "{{mentor_id}}",
+        "bqt_id": "{{bqt_id}}",
+        "sub_dag_id": "dag_sop_08_fund_allocation",
+        "variables": {
+          "fee_type": "DOT_1_ONBOARDING",
+          "amount": 6500000
+        }
+      },
+      "next": "node_2_mentor_review_s1"
+    },
+    {
+      "id": "node_2_mentor_review_s1",
+      "command": "mentor_review_step",
+      "input": {
+        "member_id": "{{member_id}}",
+        "step_number": 1,
+        "mentor_id": "{{mentor_id}}"
+      },
+      "next": "node_3_mentor_review_s2"
+    },
+    {
+      "id": "node_3_mentor_review_s2",
+      "command": "mentor_review_step",
+      "input": {
+        "member_id": "{{member_id}}",
+        "step_number": 2,
+        "mentor_id": "{{mentor_id}}"
+      },
+      "next": "node_4_mentor_review_s3"
+    },
+    {
+      "id": "node_4_mentor_review_s3",
+      "command": "mentor_review_step",
+      "input": {
+        "member_id": "{{member_id}}",
+        "step_number": 3,
+        "mentor_id": "{{mentor_id}}"
+      },
+      "next": "node_4a_trigger_dag9_step3"
+    },
+    {
+      "id": "node_4a_trigger_dag9_step3",
+      "command": "trigger_sub_dag",
+      "input": {
+        "member_id": "{{member_id}}",
+        "mentor_id": "{{mentor_id}}",
+        "bqt_id": "{{bqt_id}}",
+        "sub_dag_id": "dag_sop_09_financial_cic_audit",
+        "variables": {
+          "milestone": "STEP_1_3"
+        }
+      },
+      "next": "node_5_mentor_review_s4"
+    },
+    {
+      "id": "node_5_mentor_review_s4",
+      "command": "mentor_review_step",
+      "input": {
+        "member_id": "{{member_id}}",
+        "step_number": 4,
+        "mentor_id": "{{mentor_id}}"
+      },
+      "next": "node_6_mentor_review_s5"
+    },
+    {
+      "id": "node_6_mentor_review_s5",
+      "command": "mentor_review_step",
+      "input": {
+        "member_id": "{{member_id}}",
+        "step_number": 5,
+        "mentor_id": "{{mentor_id}}"
+      },
+      "next": "node_7_mentor_review_s6"
+    },
+    {
+      "id": "node_7_mentor_review_s6",
+      "command": "mentor_review_step",
+      "input": {
+        "member_id": "{{member_id}}",
+        "step_number": 6,
+        "mentor_id": "{{mentor_id}}"
+      },
+      "next": "node_7a_trigger_dag9_step6"
+    },
+    {
+      "id": "node_7a_trigger_dag9_step6",
+      "command": "trigger_sub_dag",
+      "input": {
+        "member_id": "{{member_id}}",
+        "mentor_id": "{{mentor_id}}",
+        "bqt_id": "{{bqt_id}}",
+        "sub_dag_id": "dag_sop_09_financial_cic_audit",
+        "variables": {
+          "milestone": "STEP_6"
+        }
+      },
+      "next": "node_7b_trigger_dag15"
+    },
+    {
+      "id": "node_7b_trigger_dag15",
+      "command": "trigger_sub_dag",
+      "input": {
+        "member_id": "{{member_id}}",
+        "mentor_id": "{{mentor_id}}",
+        "bqt_id": "{{bqt_id}}",
+        "sub_dag_id": "dag_sop_15_capital_matching",
+        "variables": {
+          "member_id": "{{member_id}}",
+          "project_name": "Dự án OPC của {{member_id}}"
+        }
+      },
+      "next": "node_8_check_month6_fee"
+    },
+    {
+      "id": "node_8_check_month6_fee",
+      "command": "member_check_payment_due",
+      "input": {
+        "member_id": "{{member_id}}"
+      },
+      "next": "node_9_branch_phase_2"
+    },
+    {
+      "id": "node_9_branch_phase_2",
+      "command": "evaluate_condition",
+      "input": {
+        "expression": "{{nodes.node_8_check_month6_fee.output.is_paid}} == true"
+      },
+      "branches": {
+        "true": "node_9a_trigger_dag8_final",
+        "false": "node_11_trigger_autolock"
+      }
+    },
+    {
+      "id": "node_9a_trigger_dag8_final",
+      "command": "trigger_sub_dag",
+      "input": {
+        "member_id": "{{member_id}}",
+        "mentor_id": "{{mentor_id}}",
+        "bqt_id": "{{bqt_id}}",
+        "sub_dag_id": "dag_sop_08_fund_allocation",
+        "variables": {
+          "fee_type": "DOT_2_FINAL",
+          "amount": 13000000
+        }
+      },
+      "next": "node_10_mentor_review_s7"
+    },
+    {
+      "id": "node_10_mentor_review_s7",
+      "command": "mentor_review_step",
+      "input": {
+        "member_id": "{{member_id}}",
+        "step_number": 7,
+        "mentor_id": "{{mentor_id}}"
+      },
+      "next": "node_12_weekly_attendance_audit"
+    },
+    {
+      "id": "node_11_trigger_autolock",
+      "command": "trigger_sub_dag",
+      "input": {
+        "member_id": "{{member_id}}",
+        "mentor_id": "{{mentor_id}}",
+        "bqt_id": "{{bqt_id}}",
+        "sub_dag_id": "dag_sop_14_autolock_unlock"
+      }
+    },
+    {
+      "id": "node_12_weekly_attendance_audit",
+      "command": "weekly_attendance_audit",
+      "input": {
+        "member_id": "{{member_id}}",
+        "member_group": "{{member_group}}"
+      },
+      "next": "node_13_branch_attendance"
+    },
+    {
+      "id": "node_13_branch_attendance",
+      "command": "evaluate_condition",
+      "input": {
+        "expression": "{{nodes.node_12_weekly_attendance_audit.output.is_warning}} == true"
+      },
+      "branches": {
+        "true": "node_14_attendance_warning",
+        "false": "node_15a_trigger_dag13"
+      }
+    },
+    {
+      "id": "node_14_attendance_warning",
+      "command": "escalate_to_human",
+      "input": {
+        "reason": "Thành viên {{member_id}} thuộc nhóm {{member_group}} vắng họp weekly 2 tuần liên tiếp."
+      }
+    },
+    {
+      "id": "node_15a_trigger_dag13",
+      "command": "trigger_sub_dag",
+      "input": {
+        "member_id": "{{member_id}}",
+        "mentor_id": "{{mentor_id}}",
+        "bqt_id": "{{bqt_id}}",
+        "sub_dag_id": "dag_sop_13_contribution_poll",
+        "variables": {
+          "meeting_group": "{{member_group}}"
+        }
+      },
+      "next": "node_15_mentor_review_s8"
+    },
+    {
+      "id": "node_15_mentor_review_s8",
+      "command": "mentor_review_step",
+      "input": {
+        "member_id": "{{member_id}}",
+        "step_number": 8,
+        "mentor_id": "{{mentor_id}}"
+      },
+      "next": "node_15b_trigger_dag9_step8"
+    },
+    {
+      "id": "node_15b_trigger_dag9_step8",
+      "command": "trigger_sub_dag",
+      "input": {
+        "member_id": "{{member_id}}",
+        "mentor_id": "{{mentor_id}}",
+        "bqt_id": "{{bqt_id}}",
+        "sub_dag_id": "dag_sop_09_financial_cic_audit",
+        "variables": {
+          "milestone": "STEP_8"
+        }
+      },
+      "next": "node_16_bqt_review_exit_s9"
+    },
+    {
+      "id": "node_16_bqt_review_exit_s9",
+      "command": "bqt_review_exit",
+      "input": {
+        "member_id": "{{member_id}}",
+        "bqt_id": "{{bqt_id}}"
+      },
+      "next": "node_17_trigger_dag16"
+    },
+    {
+      "id": "node_17_trigger_dag16",
+      "command": "trigger_sub_dag",
+      "input": {
+        "member_id": "{{member_id}}",
+        "mentor_id": "{{mentor_id}}",
+        "bqt_id": "{{bqt_id}}",
+        "sub_dag_id": "dag_sop_16_exit_mna_renewal"
+      }
+    }
+  ]
+}

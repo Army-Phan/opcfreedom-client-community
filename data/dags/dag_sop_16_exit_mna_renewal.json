@@ -1,0 +1,77 @@
+{
+  "id": "dag_sop_16_exit_mna_renewal",
+  "name": "SOP-16: Quy trình Dừng tham gia / Tốt nghiệp / Thoái vốn (Exit & M&A)",
+  "description": "Họp Review 4h phân tích chỉ số tài chính sau 6-12 tháng và phân loại 3 kịch bản: STOP, DUY TRÌ hoặc Đưa lên Sàn M&A nội bộ",
+  "nodes": [
+    {
+      "id": "node_1_review_meeting_4h",
+      "command": "meeting_review_4hours",
+      "input": {
+        "member_id": "mem_opc_2026_01",
+        "financial_report": "data/uploads/final_annual_report_mem01.pdf"
+      },
+      "next": "node_2_is_renew"
+    },
+    {
+      "id": "node_2_is_renew",
+      "command": "evaluate_condition",
+      "input": {
+        "expression": "'{{nodes.node_1_review_meeting_4h.output.exit_decision}}' == 'RENEW'"
+      },
+      "branches": {
+        "true": "node_5_scenario_renew_annual",
+        "false": "node_2b_is_mna"
+      }
+    },
+    {
+      "id": "node_2b_is_mna",
+      "command": "evaluate_condition",
+      "input": {
+        "expression": "'{{nodes.node_1_review_meeting_4h.output.exit_decision}}' == 'MNA'"
+      },
+      "branches": {
+        "true": "node_3_scenario_mna_exchange",
+        "false": "node_4_scenario_stop_close"
+      }
+    },
+    {
+      "id": "node_3_scenario_mna_exchange",
+      "command": "mna_list_on_exchange",
+      "input": {
+        "member_id": "mem_opc_2026_01",
+        "valuation_amount": 500000000
+      },
+      "next": "END"
+    },
+    {
+      "id": "node_4_scenario_stop_close",
+      "command": "member_deactivate",
+      "input": {
+        "member_id": "mem_opc_2026_01"
+      },
+      "next": "END"
+    },
+    {
+      "id": "node_5_scenario_renew_annual",
+      "command": "member_renew_13m",
+      "input": {
+        "member_id": "{{member_id}}"
+      },
+      "next": "node_6_handover_to_dag20"
+    },
+    {
+      "id": "node_6_handover_to_dag20",
+      "command": "trigger_sub_dag",
+      "input": {
+        "sub_dag_id": "dag_sop_20_weekly_meeting",
+        "variables": {
+          "member_id": "{{member_id}}",
+          "member_group": "{{member_group}}",
+          "entry_source": "DAG_16_RENEWAL",
+          "valid_weeks": 52
+        }
+      },
+      "next": "END"
+    }
+  ]
+}

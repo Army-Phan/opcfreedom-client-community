@@ -1,0 +1,68 @@
+{
+  "id": "dag_sop_01_multichannel_content",
+  "name": "SOP-01: Quy trình Tổng hợp & Đăng bài Đa kênh bằng AI Agent",
+  "description": "Tự động tạo 5-7 định dạng nội dung từ nguồn gốc, đăng tải lên Biztada/Mạng xã hội và theo dõi Reach & Conversion Rate",
+  "nodes": [
+    {
+      "id": "node_1_ingest_source",
+      "command": "cme_generate_content",
+      "input": {
+        "topic": "Hướng dẫn ứng dụng AI tự động hóa doanh nghiệp 1 người",
+        "target_audience": "Chủ HKD, Doanh nghiệp vừa và nhỏ, Người học AI",
+        "tone": "Chuyên gia, B2B, Thuyết phục",
+        "format": "multi_channel_suite"
+      }
+    },
+    {
+      "id": "node_2_human_approval",
+      "command": "evaluate_condition",
+      "input": {
+        "expression": "1 == 1"
+      }
+    },
+    {
+      "id": "node_3_publish_to_channels",
+      "command": "channel_publish_post",
+      "input": {
+        "content_object": "{{nodes.node_1_ingest_source.output.draft_text}}",
+        "channels": ["website", "linkedin", "facebook", "instagram", "threads", "tiktok", "youtube_shorts", "x"]
+      }
+    },
+    {
+      "id": "node_4_check_engagement",
+      "command": "channel_get_engagement_report",
+      "input": {
+        "time_window": "7d"
+      }
+    },
+    {
+      "id": "node_5_branch_performance",
+      "command": "evaluate_condition",
+      "input": {
+        "expression": "25 >= 20"
+      },
+      "branches": {
+        "true": "node_6_scale_content",
+        "false": "node_7_optimize_hook"
+      }
+    },
+    {
+      "id": "node_6_scale_content",
+      "command": "cme_generate_content",
+      "input": {
+        "topic": "Nhân bản kịch bản hiệu quả sang các kênh vệ tinh",
+        "target_audience": "Khách hàng vệ tinh",
+        "format": "expanded_suite"
+      }
+    },
+    {
+      "id": "node_7_optimize_hook",
+      "command": "cme_generate_content",
+      "input": {
+        "topic": "Viết lại Tiêu đề/Hook & thiết kế Thumbnail mới trong 24h",
+        "target_audience": "Khách hàng cũ",
+        "format": "hook_retry"
+      }
+    }
+  ]
+}

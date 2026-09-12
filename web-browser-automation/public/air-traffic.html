@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🛫 Trạm Kiểm Soát Không Lưu DAG-3 & High-Ticket R&D | OPC Autonomous OS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #070913;
+      --bg-secondary: #0f172a;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-border-highlight: rgba(56, 189, 248, 0.3);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-blue: #38bdf8;
+      --accent-purple: #a855f7;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-cyan: #06b6d4;
+      --accent-indigo: #6366f1;
+      --gradient-brand: linear-gradient(135deg, #a855f7 0%, #38bdf8 100%);
+      --gradient-card: linear-gradient(180deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.85) 100%);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(circle at 15% 10%, rgba(168, 85, 247, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 90%, rgba(56, 189, 248, 0.1) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.4) 0%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* TOP BAR */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--glass-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-icon {
+      font-size: 1.8rem;
+      background: var(--gradient-brand);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.3));
+    }
+    .brand-title-wrap h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-title-wrap p {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .status-badge .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--accent-emerald);
+      box-shadow: 0 0 8px var(--accent-emerald);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    .top-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-link {
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-1px);
+    }
+    .nav-link.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: rgba(56, 189, 248, 0.4);
+      color: var(--accent-blue);
+    }
+    .btn-rd-action {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.25) 0%, rgba(56, 189, 248, 0.25) 100%);
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      color: #f1f5f9;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-rd-action:hover {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.4) 0%, rgba(56, 189, 248, 0.4) 100%);
+      box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+      color: #fff;
+    }
+
+    /* MAIN CONTAINER */
+    .app-main {
+      padding: 16px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+    }
+
+    /* FILTER & STATS CONTROL BAR */
+    .control-header {
+      background: var(--gradient-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .filter-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .btn-pill {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-pill:hover, .btn-pill.active {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: rgba(56, 189, 248, 0.5);
+      color: var(--accent-blue);
+    }
+    .select-input, .date-input {
+      background: #090d16;
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-family: inherit;
+      outline: none;
+    }
+    .select-input:focus, .date-input:focus {
+      border-color: var(--accent-blue);
+    }
+
+    /* METRIC CARDS ROW */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+    }
+    .metric-card {
+      background: var(--gradient-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .metric-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .metric-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    .metric-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .metric-value {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .metric-title {
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* FUNNEL & OBJECTION SECTION */
+    .funnel-radar-section {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 1024px) {
+      .funnel-radar-section { grid-template-columns: 1fr; }
+    }
+    .card-panel {
+      background: var(--gradient-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .panel-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel-title i {
+      color: var(--accent-blue);
+    }
+
+    /* FUNNEL STEPS */
+    .funnel-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .funnel-step {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+    }
+    .step-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+    }
+    .step-name {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .step-badge {
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .progress-bar-bg {
+      height: 7px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    /* OBJECTION RADAR LIST */
+    .objection-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .objection-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--glass-border);
+      font-size: 0.8rem;
+    }
+    .objection-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .objection-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--accent-rose);
+      background: rgba(244, 63, 94, 0.1);
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    /* WORKSPACE: CONVERSATIONS & INSPECTOR */
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 390px 1fr;
+      gap: 16px;
+      min-height: 640px;
+    }
+    @media (max-width: 980px) {
+      .workspace-grid { grid-template-columns: 1fr; }
+    }
+
+    /* CONVERSATION LIST (LEFT) */
+    .conv-list-container {
+      background: var(--gradient-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      height: 720px;
+    }
+    .conv-list-header {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #090d16;
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 6px 10px;
+    }
+    .search-box input {
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      outline: none;
+      font-size: 0.82rem;
+      width: 100%;
+      font-family: inherit;
+    }
+    .conv-filter-tabs {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    .tab-btn {
+      padding: 5px 8px;
+      border: none;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-secondary);
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: rgba(56, 189, 248, 0.2);
+      color: var(--accent-blue);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    .conv-list-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .conv-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .conv-card:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .conv-card.active {
+      background: rgba(56, 189, 248, 0.1);
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+    }
+    .conv-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .conv-card-name {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .conv-card-time {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .conv-card-snippet {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .conv-card-badges {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .badge-identified {
+      font-size: 0.66rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.15);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge-unidentified {
+      font-size: 0.66rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      background: rgba(148, 163, 184, 0.1);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    .badge-stage {
+      font-size: 0.66rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      background: rgba(168, 85, 247, 0.15);
+      color: #d8b4fe;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+    .badge-channel {
+      font-size: 0.66rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent-blue);
+    }
+    .badge-status-drop {
+      font-size: 0.66rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      background: rgba(244, 63, 94, 0.15);
+      color: #fda4af;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+    .badge-status-ok {
+      font-size: 0.66rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.15);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    /* CONVERSATION INSPECTOR (RIGHT) */
+    .inspector-container {
+      background: var(--gradient-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      height: 720px;
+    }
+    .inspector-header {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .customer-info-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .customer-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--gradient-brand);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .customer-details h2 {
+      font-size: 0.98rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .customer-details p {
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    .inspector-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    /* CRM ATTRIBUTES PROFILE PANEL */
+    .crm-profile-panel {
+      background: rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 12px 18px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      font-size: 0.78rem;
+    }
+    @media (max-width: 1200px) {
+      .crm-profile-panel { grid-template-columns: 1fr; }
+    }
+    .crm-attr-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .crm-attr-title {
+      font-weight: 700;
+      color: var(--accent-blue);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .crm-attr-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      line-height: 1.35;
+    }
+    .crm-attr-label {
+      color: var(--text-muted);
+      font-weight: 500;
+      min-width: 90px;
+      flex-shrink: 0;
+    }
+    .crm-attr-val {
+      color: var(--text-primary);
+      word-break: break-word;
+    }
+
+    /* TIMELINE CHAT STREAM */
+    .chat-timeline {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: rgba(7, 9, 19, 0.4);
+    }
+    .chat-bubble-wrap {
+      display: flex;
+      flex-direction: column;
+      max-width: 80%;
+    }
+    .chat-bubble-wrap.customer {
+      align-self: flex-start;
+    }
+    .chat-bubble-wrap.bot {
+      align-self: flex-end;
+    }
+    .chat-bubble-meta {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .chat-bubble {
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.86rem;
+      line-height: 1.6;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+    .chat-bubble strong {
+      color: #ffffff;
+      font-weight: 700;
+    }
+    .chat-section-header {
+      font-weight: 700;
+      color: #38bdf8;
+      margin: 10px 0 4px 0;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .chat-divider-line {
+      border: none;
+      border-top: 1px dashed rgba(255, 255, 255, 0.2);
+      margin: 10px 0;
+    }
+    .chat-dag-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.68rem;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 2px 7px;
+      background: rgba(168, 85, 247, 0.25);
+      border: 1px solid rgba(168, 85, 247, 0.45);
+      color: #e9d5ff;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+    .chat-bubble-wrap.customer .chat-bubble {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--glass-border);
+      color: #f1f5f9;
+      border-bottom-left-radius: 2px;
+    }
+    .chat-bubble-wrap.bot .chat-bubble {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.25) 0%, rgba(56, 189, 248, 0.25) 100%);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      color: #ffffff;
+      border-bottom-right-radius: 2px;
+    }
+
+    /* DROP ALERT BANNER IN TIMELINE */
+    .drop-alert-banner {
+      background: rgba(244, 63, 94, 0.12);
+      border: 1px solid rgba(244, 63, 94, 0.35);
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin: 8px 0;
+    }
+    .drop-alert-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fda4af;
+      font-size: 0.82rem;
+    }
+
+    /* MODAL STYLES */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-box {
+      background: #0d1322;
+      border: 1px solid var(--glass-border-highlight);
+      border-radius: 14px;
+      width: 90%;
+      max-width: 680px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+      animation: modalSlide 0.25s ease-out;
+    }
+    @keyframes modalSlide {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .modal-header h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .form-input, .form-textarea, .form-select {
+      background: #070a12;
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      font-family: inherit;
+      outline: none;
+    }
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
+    }
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .btn-submit {
+      background: var(--gradient-brand);
+      border: none;
+      color: #fff;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-cancel {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      color: var(--text-secondary);
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* R&D RESULT DISPLAY BOX */
+    .rd-result-card {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .rd-result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--glass-border);
+      padding-bottom: 8px;
+    }
+    .rd-text-content {
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+      white-space: pre-wrap;
+      font-family: 'Outfit', sans-serif;
+      max-height: 380px;
+      overflow-y: auto;
+    }
+
+    /* TOAST NOTIFICATION */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .toast {
+      padding: 12px 18px;
+      border-radius: 8px;
+      background: #0f172a;
+      border: 1px solid var(--glass-border);
+      color: #fff;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      animation: toastIn 0.3s ease;
+    }
+    @keyframes toastIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header class="top-bar">
+    <div class="brand-area">
+      <span class="brand-icon">🛫</span>
+      <div class="brand-title-wrap">
+        <h1>
+          Trạm Kiểm Soát Không Lưu DAG-3
+          <span class="status-badge"><span class="dot"></span> 5 Kênh Live</span>
+        </h1>
+        <p>Giám sát hội thoại, phát hiện điểm rơi rụng, nạp nhanh SOP & R&D High-Ticket Offers</p>
+      </div>
+    </div>
+    
+    <nav class="top-nav">
+      <a href="/index.html" class="nav-link"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="/brain.html" class="nav-link"><i class="fa-solid fa-brain"></i> Brain SOP</a>
+      <a href="/test-studio.html" class="nav-link"><i class="fa-solid fa-vial"></i> Test Studio</a>
+      <a href="/gemini-logs.html" class="nav-link"><i class="fa-solid fa-scroll"></i> Gemini Logs</a>
+      <button class="nav-link btn-rd-action" onclick="openRdModal()">
+        <i class="fa-solid fa-lightbulb"></i> R&D Sản Phẩm Giá Cao
+      </button>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="app-main">
+    
+    <!-- FILTER & CONTROL HEADER -->
+    <div class="control-header">
+      <div class="filter-group">
+        <span class="filter-label"><i class="fa-solid fa-calendar"></i> Thời Gian:</span>
+        <button class="btn-pill" onclick="setTimeRange('24h', this)">24 Giờ</button>
+        <button class="btn-pill" onclick="setTimeRange('3d', this)">3 Ngày</button>
+        <button class="btn-pill active" onclick="setTimeRange('7d', this)">7 Ngày</button>
+        <button class="btn-pill" onclick="setTimeRange('30d', this)">30 Ngày</button>
+        <button class="btn-pill" onclick="setTimeRange('all', this)">Toàn Bộ</button>
+        <button class="btn-pill" onclick="setTimeRange('custom', this)">Tuỳ Chọn</button>
+        
+        <div id="custom-date-inputs" style="display: none; align-items: center; gap: 6px;">
+          <input type="date" id="start-date" class="date-input">
+          <span style="font-size: 0.8rem; color: var(--text-muted);">-</span>
+          <input type="date" id="end-date" class="date-input">
+          <button class="btn-pill" onclick="applyCustomDate()"><i class="fa-solid fa-check"></i></button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label"><i class="fa-solid fa-satellite-dish"></i> Kênh:</span>
+        <select id="channel-filter" class="select-input" onchange="applyFilters()">
+          <option value="ALL">Tất Cả 5 Kênh</option>
+          <option value="zalo">Zalo OA & Cá nhân</option>
+          <option value="facebook">Facebook Cá nhân</option>
+          <option value="telegram">Telegram Bot</option>
+          <option value="web">Website Widget</option>
+          <option value="fb_fanpage">Facebook Fanpage</option>
+        </select>
+
+        <span class="filter-label" style="margin-left: 6px;"><i class="fa-solid fa-id-card"></i> Định Danh:</span>
+        <select id="identity-filter" class="select-input" onchange="applyFilters()">
+          <option value="ALL">Tất Cả Khách</option>
+          <option value="IDENTIFIED">🟢 Đã Định Danh</option>
+          <option value="UNIDENTIFIED">⚪ Chưa Định Danh</option>
+        </select>
+
+        <button class="btn-pill" onclick="loadAllData()" title="Làm mới dữ liệu">
+          <i class="fa-solid fa-rotate"></i> Làm mới
+        </button>
+      </div>
+    </div>
+
+    <!-- METRIC CARDS -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon-box" style="background: rgba(56, 189, 248, 0.15); color: var(--accent-blue);">
+          <i class="fa-solid fa-users"></i>
+        </div>
+        <div class="metric-info">
+          <span class="metric-value" id="stat-total-chats">0</span>
+          <span class="metric-title">Tổng Khách Tương Tác</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-box" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald);">
+          <i class="fa-solid fa-user-check"></i>
+        </div>
+        <div class="metric-info">
+          <span class="metric-value" id="stat-identified-chats">0</span>
+          <span class="metric-title">Khách Đã Định Danh</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-box" style="background: rgba(148, 163, 184, 0.15); color: var(--text-secondary);">
+          <i class="fa-solid fa-user-secret"></i>
+        </div>
+        <div class="metric-info">
+          <span class="metric-value" id="stat-unidentified-chats">0</span>
+          <span class="metric-title">Khách Vãng Lai / Ẩn Danh</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-box" style="background: rgba(168, 85, 247, 0.15); color: var(--accent-purple);">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div class="metric-info">
+          <span class="metric-value" id="stat-converted-chats">0</span>
+          <span class="metric-title">Chốt Đơn (Stage 4)</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-box" style="background: rgba(244, 63, 94, 0.15); color: var(--accent-rose);">
+          <i class="fa-solid fa-user-xmark"></i>
+        </div>
+        <div class="metric-info">
+          <span class="metric-value" id="stat-dropped-chats">0</span>
+          <span class="metric-title">Khách Hàng Rơi Rụng</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FUNNEL & RADAR OBJECTIONS -->
+    <div class="funnel-radar-section">
+      <!-- PHỄU CHUYỂN ĐỔI -->
+      <div class="card-panel">
+        <div class="panel-header">
+          <div class="panel-title"><i class="fa-solid fa-filter"></i> Phễu Chuyển Đổi DAG-3 (Stage 1 -> Stage 4)</div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Hiệu suất qua từng bước tư vấn</span>
+        </div>
+        
+        <div class="funnel-steps" id="funnel-steps-container">
+          <!-- Step 1 -->
+          <div class="funnel-step">
+            <div class="step-top">
+              <span class="step-name"><i class="fa-solid fa-1" style="color: var(--accent-blue);"></i> Giai đoạn 1: Tiếp nhận & Phân loại</span>
+              <span class="step-badge" id="step1-count">0 khách (100%)</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="step1-bar" style="width: 100%; background: var(--accent-blue);"></div>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="funnel-step">
+            <div class="step-top">
+              <span class="step-name"><i class="fa-solid fa-2" style="color: var(--accent-purple);"></i> Giai đoạn 2: Trình bày Giải pháp & Giá trị</span>
+              <span class="step-badge" id="step2-count">0 khách (0%)</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="step2-bar" style="width: 0%; background: var(--accent-purple);"></div>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="funnel-step">
+            <div class="step-top">
+              <span class="step-name"><i class="fa-solid fa-3" style="color: var(--accent-amber);"></i> Giai đoạn 3: Xử lý Từ chối & Băn khoăn</span>
+              <span class="step-badge" id="step3-count">0 khách (0%)</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="step3-bar" style="width: 0%; background: var(--accent-amber);"></div>
+            </div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="funnel-step">
+            <div class="step-top">
+              <span class="step-name"><i class="fa-solid fa-4" style="color: var(--accent-emerald);"></i> Giai đoạn 4: Chốt Đơn & Hướng dẫn Thanh toán</span>
+              <span class="step-badge" id="step4-count">0 khách (0%)</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="step4-bar" style="width: 0%; background: var(--accent-emerald);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RADAR LÝ DO TỪ CHỐI -->
+      <div class="card-panel">
+        <div class="panel-header">
+          <div class="panel-title"><i class="fa-solid fa-triangle-exclamation"></i> Radar Điểm Rơi Rụng & Băn Khoăn Phổ Biến</div>
+          <span style="font-size: 0.75rem; color: var(--accent-rose); font-weight: 600;">Cần bổ sung SOP</span>
+        </div>
+        
+        <div class="objection-list" id="objection-list-container">
+          <div style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 0.8rem;">
+            Đang tải dữ liệu lý do từ chối...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WORKSPACE: CONVERSATIONS & INSPECTOR -->
+    <div class="workspace-grid">
+      <!-- CONVERSATION LIST (LEFT) -->
+      <div class="conv-list-container">
+        <div class="conv-list-header">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted); font-size: 0.8rem;"></i>
+            <input type="text" id="conv-search" placeholder="Tìm tên khách, số điện thoại, nghề nghiệp..." oninput="filterConvList()">
+          </div>
+          <div class="conv-filter-tabs">
+            <button class="tab-btn active" onclick="setConvTab('all', this)">Tất Cả</button>
+            <button class="tab-btn" onclick="setConvTab('identified', this)">🟢 Đã Định Danh</button>
+            <button class="tab-btn" onclick="setConvTab('unidentified', this)">⚪ Chưa Định Danh</button>
+            <button class="tab-btn" onclick="setConvTab('dropped', this)">⚠️ Rơi Rụng</button>
+            <button class="tab-btn" onclick="setConvTab('converted', this)">✅ Đã Chốt</button>
+          </div>
+        </div>
+
+        <div class="conv-list-scroll" id="conv-list-items">
+          <div style="text-align: center; color: var(--text-muted); padding: 30px; font-size: 0.8rem;">
+            Đang tải danh sách hội thoại...
+          </div>
+        </div>
+      </div>
+
+      <!-- INSPECTOR (RIGHT) -->
+      <div class="inspector-container">
+        <div class="inspector-header">
+          <div class="customer-info-box" id="inspector-customer-info">
+            <div class="customer-avatar" id="inspector-avatar">OPC</div>
+            <div class="customer-details">
+              <h2 id="inspector-name">Chọn một khách hàng để kiểm tra</h2>
+              <p id="inspector-sub">Xem toàn bộ lịch sử tư vấn, thuộc tính CRM bóc tách và nạp SOP khắc phục</p>
+            </div>
+          </div>
+
+          <div class="inspector-actions" id="inspector-actions" style="display: none;">
+            <button class="btn-pill" style="background: rgba(168, 85, 247, 0.2); color: #d8b4fe; border-color: rgba(168, 85, 247, 0.4);" onclick="openInjectModalForCurrent()">
+              <i class="fa-solid fa-bolt"></i> Nạp SOP Xử Lý
+            </button>
+          </div>
+        </div>
+
+        <!-- CRM ATTRIBUTES & CUSTOMER PROFILE PANEL -->
+        <div class="crm-profile-panel" id="crm-profile-panel" style="display: none;">
+          <div class="crm-attr-card">
+            <div class="crm-attr-title"><i class="fa-solid fa-briefcase"></i> Chân Dung & Bối Cảnh Kinh Doanh</div>
+            <div class="crm-attr-row">
+              <span class="crm-attr-label">Nghề nghiệp:</span>
+              <span class="crm-attr-val" id="crm-job">Chưa xác định</span>
+            </div>
+            <div class="crm-attr-row">
+              <span class="crm-attr-label">Bối cảnh / Mục tiêu:</span>
+              <span class="crm-attr-val" id="crm-context">Chưa có thông tin bối cảnh</span>
+            </div>
+            <div class="crm-attr-row">
+              <span class="crm-attr-label">Điện thoại / Email:</span>
+              <span class="crm-attr-val" id="crm-contact">Chưa có</span>
+            </div>
+          </div>
+
+          <div class="crm-attr-card">
+            <div class="crm-attr-title"><i class="fa-solid fa-brain"></i> Tâm Lý & Lời Khuyên Chiến Lược AI</div>
+            <div class="crm-attr-row">
+              <span class="crm-attr-label">Cảm xúc (Trend):</span>
+              <span class="crm-attr-val" id="crm-sentiment"><span class="status-badge" style="background: rgba(56, 189, 248, 0.15); color: var(--accent-blue);">NEUTRAL</span></span>
+            </div>
+            <div class="crm-attr-row">
+              <span class="crm-attr-label">Sở thích / Băn khoăn:</span>
+              <span class="crm-attr-val" id="crm-preference">Chưa phát hiện băn khoăn đặc thù</span>
+            </div>
+            <div class="crm-attr-row">
+              <span class="crm-attr-label">Ghi chú AI (Notes):</span>
+              <span class="crm-attr-val" id="crm-notes" style="color: #cbd5e1; font-style: italic;">Chưa có ghi chú chiến lược.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TIMELINE CHAT -->
+        <div class="chat-timeline" id="chat-timeline-container">
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); gap: 10px;">
+            <i class="fa-solid fa-tower-broadcast" style="font-size: 2.5rem; color: rgba(255, 255, 255, 0.1);"></i>
+            <span>Vui lòng chọn một cuộc hội thoại từ danh sách bên trái</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL: HOT-RELOAD SOP INJECTION -->
+  <div class="modal-overlay" id="sop-inject-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-bolt" style="color: var(--accent-purple);"></i> Nạp Nhanh SOP Xử Lý Từ Chối Vào DAG-3 (Hot-Reload)</h3>
+        <button class="modal-close" onclick="closeInjectModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); padding: 10px 14px; border-radius: 8px; font-size: 0.78rem; color: #e9d5ff;">
+          <i class="fa-solid fa-circle-info"></i> Quy tắc SOP mới sẽ được nạp tức thì vào bộ não phân loại DAG-3 mà không cần khởi động lại Gateway hay tắt 13 tab Gemini.
+        </div>
+
+        <div class="form-group">
+          <label>Từ Khóa Kích Hoạt (Trigger Keywords - Phân cách bằng dấu phẩy)</label>
+          <input type="text" id="sop-keywords" class="form-input" placeholder="Ví dụ: đắt quá, chưa có vốn, không có thời gian, sợ bị lừa">
+        </div>
+
+        <div class="form-group">
+          <label>Tình Huống / Bối Cảnh Từ Chối (Objection Context)</label>
+          <input type="text" id="sop-context" class="form-input" placeholder="Ví dụ: Khách hàng lo ngại về giá gói Membership hoặc thiếu vốn đầu tư">
+        </div>
+
+        <div class="form-group">
+          <label>Kịch Bản / Hướng Dẫn Tư Vấn Của SOP (Guidance Script)</label>
+          <textarea id="sop-script" class="form-textarea" rows="4" placeholder="Nhập lời thoại hoặc hướng dẫn dẫn dắt: Đồng cảm -> Phân tích ROI -> Đưa ra giải pháp chia nhỏ / thanh toán thử 1 tháng..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Quy Trình Áp Dụng (Target SOP/DAG)</label>
+          <select id="sop-target" class="form-select">
+            <option value="DAG_3_SALES_ADVISOR">DAG 3 - Tư Vấn & Chốt Đơn Đa Kênh (Mặc định)</option>
+            <option value="DAG_1_TRAFFIC_OUTREACH">DAG 1 - Tìm Kiếm & Kéo Traffic</option>
+            <option value="DAG_2_WARM_NURTURE">DAG 2 - Chăm Sóc & Nuôi Dưỡng Tương Tác</option>
+            <option value="DAG_4_ONBOARDING">DAG 4 - Onboarding & Chăm Sóc Sau Bán</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Ghi Chú Kiểm Soát (Notes)</label>
+          <input type="text" id="sop-notes" class="form-input" placeholder="Ví dụ: Khắc phục điểm rơi rụng ngày 11/09 của khách hàng Telegram">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeInjectModal()">Hủy</button>
+        <button class="btn-submit" onclick="submitInjectSop()"><i class="fa-solid fa-rocket"></i> Nạp Ngay Vào Luồng DAG-3</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: HIGH-TICKET R&D ENGINE -->
+  <div class="modal-overlay" id="rd-engine-modal">
+    <div class="modal-box" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-lightbulb" style="color: var(--accent-amber);"></i> Phân Hệ 4: R&D Sản Phẩm Giá Cao Mới (High-Ticket Offers)</h3>
+        <button class="modal-close" onclick="closeRdModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); padding: 12px 14px; border-radius: 8px; font-size: 0.8rem; color: #bae6fd;">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> <strong>Cơ chế tự động:</strong> Tổng hợp toàn bộ hồ sơ khách hàng rơi rụng + lịch sử hội thoại + tài liệu kinh doanh / Membership Policy (đã loại bỏ code & kỹ thuật) -> Đẩy sang Gemini Web phân tích để đề xuất 2-3 gói High-Ticket (30M - 200M) và kịch bản DAG-3 mới.
+        </div>
+
+        <div class="form-group">
+          <label>Khoảng Thời Gian Dữ Liệu R&D</label>
+          <div style="display: flex; gap: 8px;">
+            <select id="rd-time-range" class="form-select" style="flex: 1;" onchange="updateRdPreviewStats()">
+              <option value="24h">24 Giờ Qua</option>
+              <option value="3d">3 Ngày Qua</option>
+              <option value="7d" selected>7 Ngày Qua (Khuyên dùng)</option>
+              <option value="30d">30 Ngày Qua</option>
+              <option value="all">Toàn Bộ Dữ Liệu</option>
+            </select>
+            <div id="rd-stats-preview" style="display: flex; align-items: center; padding: 0 14px; background: rgba(0,0,0,0.3); border-radius: 8px; font-size: 0.82rem; color: var(--accent-blue); font-family: 'JetBrains Mono', monospace;">
+              Đang tính toán...
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Mục Tiêu R&D / Yêu Cầu Bổ Sung</label>
+          <input type="text" id="rd-custom-goals" class="form-input" value="Đề xuất 2-3 gói High-Ticket VIP/Doanh nghiệp (30M - 200M VNĐ), giải pháp chia giai đoạn thanh toán và kịch bản xử lý băn khoăn">
+        </div>
+
+        <!-- RESULT SECTION -->
+        <div id="rd-result-section" style="display: none;" class="rd-result-card">
+          <div class="rd-result-header">
+            <span style="font-weight: 700; color: var(--accent-emerald); font-size: 0.85rem;"><i class="fa-solid fa-check-circle"></i> Báo Cáo Đề Xuất R&D Từ Gemini Web</span>
+            <span id="rd-result-time" style="font-size: 0.72rem; color: var(--text-muted);"></span>
+          </div>
+          <div id="rd-result-text" class="rd-text-content"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeRdModal()">Đóng</button>
+        <button class="btn-submit" id="btn-run-rd" onclick="triggerRdAnalysis()">
+          <i class="fa-solid fa-brain"></i> Bắt Đầu Tổng Hợp & Phân Tích R&D
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toast-box"></div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    let currentFilter = {
+      timeRange: '7d',
+      startDate: null,
+      endDate: null,
+      channel: 'ALL',
+      identity: 'ALL',
+      tab: 'all',
+      search: ''
+    };
+
+    let cachedConversations = [];
+    let selectedCustomerId = null;
+
+    // INITIALIZATION
+    window.addEventListener('DOMContentLoaded', () => {
+      loadAllData();
+      setInterval(loadAllData, 30000); // Auto-refresh every 30s
+    });
+
+    async function loadAllData() {
+      await Promise.all([
+        fetchStats(),
+        fetchConversations()
+      ]);
+    }
+
+    // STATS & FUNNEL
+    async function fetchStats() {
+      try {
+        let url = '/api/traffic/stats?timeRange=' + currentFilter.timeRange;
+        if (currentFilter.timeRange === 'custom' && currentFilter.startDate && currentFilter.endDate) {
+          url += '&startDate=' + currentFilter.startDate + '&endDate=' + currentFilter.endDate;
+        }
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Failed to fetch traffic stats');
+        const rootData = await res.json();
+        const s = rootData.stats || rootData;
+        const ov = s.overview || {};
+        const fn = s.funnel || {};
+
+        // Update metric cards
+        document.getElementById('stat-total-chats').innerText = ov.totalConversations || 0;
+        document.getElementById('stat-converted-chats').innerText = ov.totalConverted || 0;
+        document.getElementById('stat-dropped-chats').innerText = ov.totalDropped || 0;
+
+        // Count identified vs unidentified in cached or calculate
+        updateIdentityCounts();
+
+        // Update Funnel
+        const s1 = fn.stage1 ? fn.stage1.count : 0;
+        const s2 = fn.stage2 ? fn.stage2.count : 0;
+        const s3 = fn.stage3 ? fn.stage3.count : 0;
+        const s4 = fn.stage4 ? (fn.stage4.count || fn.stage4.converted) : 0;
+        const total = ov.totalConversations || 1;
+
+        const p1 = total > 0 ? 100 : 0;
+        const p2 = total > 0 ? Math.round((s2 / total) * 100) : 0;
+        const p3 = total > 0 ? Math.round((s3 / total) * 100) : 0;
+        const p4 = total > 0 ? Math.round((s4 / total) * 100) : 0;
+
+        document.getElementById('step1-count').innerText = s1 + ' khách (' + p1 + '%)';
+        document.getElementById('step2-count').innerText = s2 + ' khách (' + p2 + '%)';
+        document.getElementById('step3-count').innerText = s3 + ' khách (' + p3 + '%)';
+        document.getElementById('step4-count').innerText = s4 + ' khách (' + p4 + '%)';
+
+        document.getElementById('step1-bar').style.width = p1 + '%';
+        document.getElementById('step2-bar').style.width = p2 + '%';
+        document.getElementById('step3-bar').style.width = p3 + '%';
+        document.getElementById('step4-bar').style.width = p4 + '%';
+
+        // Update Radar Objections
+        const radar = s.objectionRadar || {};
+        const radarList = Object.entries(radar).map(([reason, count]) => ({ reason, count })).filter(item => item.count > 0);
+        renderObjections(radarList);
+      } catch (err) {
+        console.error('Error fetching stats:', err);
+      }
+    }
+
+    function updateIdentityCounts() {
+      let identified = 0;
+      let unidentified = 0;
+      for (const c of cachedConversations) {
+        if (c.isIdentified) identified++;
+        else unidentified++;
+      }
+      document.getElementById('stat-identified-chats').innerText = identified;
+      document.getElementById('stat-unidentified-chats').innerText = unidentified;
+    }
+
+    function renderObjections(objections) {
+      const container = document.getElementById('objection-list-container');
+      if (!objections || objections.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 0.8rem;">Chưa phát hiện điểm rơi rụng trong khoảng thời gian này</div>';
+        return;
+      }
+
+      const labelMap = {
+        'CHE_DAT': 'Chê đắt / Chưa có vốn',
+        'HOI_BAN_FREE': 'Hỏi bản miễn phí / GitHub',
+        'THAC_MAC_COC_6_5M': 'Băn khoăn cọc 6.5M đợt 1',
+        'SO_LUA_DAO_RUI_RO': 'Lo sợ rủi ro / Lừa đảo',
+        'HOI_SAU_KY_THUAT': 'Hỏi sâu kỹ thuật / Server',
+        'HOI_THUE_PHAP_LY': 'Thắc mắc thuế & Pháp lý HKD'
+      };
+
+      container.innerHTML = objections.map(obj => `
+        <div class="objection-item">
+          <div class="objection-left">
+            <i class="fa-solid fa-circle-exclamation" style="color: var(--accent-rose);"></i>
+            <span>${escapeHtml(labelMap[obj.reason] || obj.reason || 'Băn khoăn chưa rõ')}</span>
+          </div>
+          <span class="objection-count">${obj.count} vụ</span>
+        </div>
+      `).join('');
+    }
+
+    // CONVERSATIONS LIST
+    async function fetchConversations() {
+      try {
+        let url = '/api/traffic/conversations?timeRange=' + currentFilter.timeRange + '&channel=' + currentFilter.channel + '&identity=' + currentFilter.identity;
+        if (currentFilter.timeRange === 'custom' && currentFilter.startDate && currentFilter.endDate) {
+          url += '&startDate=' + currentFilter.startDate + '&endDate=' + currentFilter.endDate;
+        }
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Failed to fetch conversations');
+        const data = await res.json();
+        cachedConversations = data.conversations || [];
+        updateIdentityCounts();
+        renderConversationList();
+
+        // Auto select first conversation if none selected
+        if (!selectedCustomerId && cachedConversations.length > 0) {
+          selectConversation(cachedConversations[0].customerId);
+        }
+      } catch (err) {
+        console.error('Error fetching conversations:', err);
+      }
+    }
+
+    function renderConversationList() {
+      const container = document.getElementById('conv-list-items');
+      const search = currentFilter.search.toLowerCase().trim();
+      const tab = currentFilter.tab;
+
+      let filtered = cachedConversations.filter(c => {
+        const isDropped = c.status === 'DROPPED' || c.status === 'CHOKED';
+        const isConverted = c.status === 'CONVERTED';
+
+        if (tab === 'identified' && !c.isIdentified) return false;
+        if (tab === 'unidentified' && c.isIdentified) return false;
+        if (tab === 'dropped' && !isDropped) return false;
+        if (tab === 'converted' && !isConverted) return false;
+
+        if (search) {
+          const matchName = (c.customerName || '').toLowerCase().includes(search);
+          const matchId = (c.customerId || '').toLowerCase().includes(search);
+          const matchPhone = (c.phone || '').toLowerCase().includes(search);
+          const matchJob = (c.job || '').toLowerCase().includes(search);
+          const matchReason = (c.objections || []).join(' ').toLowerCase().includes(search);
+          const matchSnippet = ((c.lastUserMessage || '') + ' ' + (c.lastAiReply || '')).toLowerCase().includes(search);
+          if (!matchName && !matchId && !matchPhone && !matchJob && !matchReason && !matchSnippet) return false;
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 30px; font-size: 0.8rem;">Không tìm thấy cuộc hội thoại nào phù hợp</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(c => {
+        const isSelected = c.customerId === selectedCustomerId;
+        const timeStr = c.lastInteraction ? new Date(c.lastInteraction).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }) : '';
+        const stageNames = { 1: 'S1: Phân loại', 2: 'S2: Giải pháp', 3: 'S3: Xử lý từ chối', 4: 'S4: Chốt đơn' };
+        const isDropped = c.status === 'DROPPED' || c.status === 'CHOKED';
+        const isConverted = c.status === 'CONVERTED';
+
+        return `
+          <div class="conv-card ${isSelected ? 'active' : ''}" onclick="selectConversation('${c.customerId}')">
+            <div class="conv-card-header">
+              <span class="conv-card-name">
+                <i class="fa-regular fa-user" style="color: ${c.isIdentified ? 'var(--accent-emerald)' : 'var(--accent-blue)'};"></i>
+                ${escapeHtml(c.customerName || c.customerId || 'Khách Vô Danh')}
+              </span>
+              <span class="conv-card-time">${timeStr}</span>
+            </div>
+            <div class="conv-card-snippet">${escapeHtml(c.lastUserMessage || c.lastAiReply || 'Chưa có tin nhắn...')}</div>
+            <div class="conv-card-badges">
+              <span class="${c.isIdentified ? 'badge-identified' : 'badge-unidentified'}">
+                ${c.isIdentified ? '<i class="fa-solid fa-check"></i> Đã định danh' : '⚪ Chưa định danh'}
+              </span>
+              <span class="badge-stage">${stageNames[c.maxStage] || 'Stage ' + (c.maxStage || 1)}</span>
+              <span class="badge-channel">${getChannelName(c.channel)}</span>
+              ${isDropped ? `<span class="badge-status-drop"><i class="fa-solid fa-triangle-exclamation"></i> ${escapeHtml((c.objections && c.objections[0]) || 'Rơi rụng')}</span>` : ''}
+              ${isConverted ? `<span class="badge-status-ok"><i class="fa-solid fa-check"></i> Đã chốt</span>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // INSPECT CONVERSATION
+    async function selectConversation(customerId) {
+      selectedCustomerId = customerId;
+      renderConversationList();
+
+      const actions = document.getElementById('inspector-actions');
+      actions.style.display = 'flex';
+
+      try {
+        const res = await fetch('/api/traffic/conversation/' + customerId);
+        if (!res.ok) throw new Error('Failed to load conversation details');
+        const data = await res.json();
+        renderConversationDetail(data.detail || data);
+      } catch (err) {
+        console.error('Error loading conversation:', err);
+        showToast('Không thể tải chi tiết hội thoại: ' + err.message, 'error');
+      }
+    }
+
+    function renderConversationDetail(data) {
+      const conv = data.analysis || {};
+      const profile = data.profile || {};
+      const contact = data.contact || {};
+      const messages = data.messages || [];
+
+      // Update customer header
+      const identityLabel = data.isIdentified ? '🟢 ĐÃ ĐỊNH DANH' : '⚪ CHƯA ĐỊNH DANH (ẨN DANH)';
+      document.getElementById('inspector-name').innerHTML = `
+        ${escapeHtml(data.customerName || data.customerId || 'Khách hàng')}
+        <span class="${data.isIdentified ? 'badge-identified' : 'badge-unidentified'}" style="font-size: 0.68rem; margin-left: 6px;">
+          ${identityLabel}
+        </span>
+      `;
+      document.getElementById('inspector-avatar').innerText = (data.customerName || 'KH').substring(0, 2).toUpperCase();
+      document.getElementById('inspector-sub').innerText = 'ID: ' + data.customerId + ' | Kênh: ' + getChannelName(data.channel) + ' | Giai đoạn: Stage ' + (conv.maxStage || 1) + ' | Trạng thái: ' + (conv.status || 'IN_PROGRESS') + ' | ' + messages.length + ' tin nhắn';
+
+      // Update CRM Attributes Panel
+      const panel = document.getElementById('crm-profile-panel');
+      panel.style.display = 'grid';
+
+      document.getElementById('crm-job').innerText = profile.job || profile.personalInfo?.job || 'Chưa xác định';
+      document.getElementById('crm-context').innerText = profile.context || profile.personalInfo?.family_or_context || 'Chưa có thông tin bối cảnh';
+
+      const contactStr = [profile.phone || contact.phone, profile.email || contact.email].filter(Boolean).join(' • ') || 'Chưa có SĐT/Email';
+      document.getElementById('crm-contact').innerText = contactStr;
+
+      const sentiment = profile.sentimentTrend || profile.sentiment_trend || 'NEUTRAL';
+      const sentimentColors = {
+        'POSITIVE': 'background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border-color: rgba(16, 185, 129, 0.4);',
+        'NEUTRAL': 'background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); border-color: rgba(56, 189, 248, 0.4);',
+        'SKEPTICAL': 'background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); border-color: rgba(245, 158, 11, 0.4);',
+        'NEGATIVE': 'background: rgba(244, 63, 94, 0.15); color: var(--accent-rose); border-color: rgba(244, 63, 94, 0.4);'
+      };
+      document.getElementById('crm-sentiment').innerHTML = `
+        <span class="status-badge" style="${sentimentColors[sentiment] || sentimentColors['NEUTRAL']}">${sentiment}</span>
+      `;
+
+      document.getElementById('crm-preference').innerText = profile.preference || profile.lifestyleTraits?.preference || 'Chưa phát hiện băn khoăn đặc thù';
+      document.getElementById('crm-notes').innerText = profile.strategicNotes || profile.strategic_notes || 'Chưa có ghi chú chiến lược.';
+
+      // Render Messages Timeline
+      const timeline = document.getElementById('chat-timeline-container');
+      if (messages.length === 0) {
+        timeline.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 40px;">Chưa có dữ liệu tin nhắn chi tiết cho khách hàng này.</div>';
+        return;
+      }
+
+      let html = '';
+
+      messages.forEach(msg => {
+        const timeStr = msg.created_at ? new Date(msg.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '';
+
+        if (msg.user_message) {
+          html += `
+            <div class="chat-bubble-wrap customer">
+              <div class="chat-bubble-meta">
+                <span>👤 ${escapeHtml(data.customerName || 'Khách hàng')}</span>
+                <span>•</span>
+                <span>${timeStr}</span>
+              </div>
+              <div class="chat-bubble">
+                ${formatMessageHtml(msg.user_message)}
+              </div>
+            </div>
+          `;
+        }
+
+        if (msg.ai_reply) {
+          html += `
+            <div class="chat-bubble-wrap bot">
+              <div class="chat-bubble-meta">
+                <span>🤖 AI Advisor (DAG-3)</span>
+                <span>•</span>
+                <span>${timeStr}</span>
+              </div>
+              <div class="chat-bubble">
+                ${formatMessageHtml(msg.ai_reply)}
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      // If dropped, show drop alert banner at the bottom
+      if (conv.status === 'DROPPED' || conv.status === 'CHOKED') {
+        const objectionsText = (conv.objectionsDetected && conv.objectionsDetected.length > 0) 
+          ? conv.objectionsDetected.join(', ')
+          : 'Khách ngưng phản hồi hoặc từ chối tại Stage ' + conv.maxStage;
+
+        html += `
+          <div class="drop-alert-banner">
+            <div class="drop-alert-left">
+              <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.2rem;"></i>
+              <div>
+                <strong>Điểm rơi rụng được phát hiện:</strong> ${escapeHtml(objectionsText)}
+                <div style="font-size: 0.72rem; opacity: 0.85;">Hãy nạp SOP xử lý từ chối để hệ thống tự động tháo gỡ điểm nghẽn này trong các cuộc trò chuyện tương lai!</div>
+              </div>
+            </div>
+            <button class="btn-pill" style="background: rgba(244, 63, 94, 0.25); color: #fff; border-color: rgba(244, 63, 94, 0.6);" onclick="openInjectModalForCurrent()">
+              <i class="fa-solid fa-bolt"></i> Nạp SOP Ngay
+            </button>
+          </div>
+        `;
+      }
+
+      timeline.innerHTML = html;
+      timeline.scrollTop = timeline.scrollHeight;
+    }
+
+    // FILTERS & TAB HANDLERS
+    function setTimeRange(range, btn) {
+      document.querySelectorAll('.filter-group .btn-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter.timeRange = range;
+
+      const customInputs = document.getElementById('custom-date-inputs');
+      if (range === 'custom') {
+        customInputs.style.display = 'inline-flex';
+      } else {
+        customInputs.style.display = 'none';
+        currentFilter.startDate = null;
+        currentFilter.endDate = null;
+        loadAllData();
+      }
+    }
+
+    function applyCustomDate() {
+      const s = document.getElementById('start-date').value;
+      const e = document.getElementById('end-date').value;
+      if (!s || !e) {
+        showToast('Vui lòng chọn đầy đủ ngày bắt đầu và kết thúc', 'warning');
+        return;
+      }
+      currentFilter.startDate = s;
+      currentFilter.endDate = e;
+      loadAllData();
+    }
+
+    function applyFilters() {
+      currentFilter.channel = document.getElementById('channel-filter').value;
+      currentFilter.identity = document.getElementById('identity-filter').value;
+      loadAllData();
+    }
+
+    function setConvTab(tab, btn) {
+      document.querySelectorAll('.conv-filter-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter.tab = tab;
+      renderConversationList();
+    }
+
+    function filterConvList() {
+      currentFilter.search = document.getElementById('conv-search').value;
+      renderConversationList();
+    }
+
+    // SOP HOT-RELOAD MODAL
+    function openInjectModalForCurrent() {
+      const current = cachedConversations.find(c => c.customerId === selectedCustomerId);
+      if (current && current.objections && current.objections.length > 0) {
+        document.getElementById('sop-context').value = 'Khách hàng băn khoăn / rơi rụng về: ' + current.objections.join(', ');
+        document.getElementById('sop-keywords').value = current.objections.join(', ').toLowerCase();
+      }
+      document.getElementById('sop-inject-modal').classList.add('active');
+    }
+
+    function closeInjectModal() {
+      document.getElementById('sop-inject-modal').classList.remove('active');
+    }
+
+    async function submitInjectSop() {
+      const keywords = document.getElementById('sop-keywords').value.trim();
+      const context = document.getElementById('sop-context').value.trim();
+      const script = document.getElementById('sop-script').value.trim();
+      const target = document.getElementById('sop-target').value;
+      const notes = document.getElementById('sop-notes').value.trim();
+
+      if (!keywords || !script) {
+        showToast('Vui lòng nhập Từ khóa kích hoạt và Kịch bản hướng dẫn', 'warning');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/traffic/inject-sop', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            triggerKeywords: keywords,
+            objectionContext: context,
+            guidanceScript: script,
+            targetSopOrDag: target,
+            notes: notes
+          })
+        });
+
+        if (!res.ok) throw new Error('Không thể nạp SOP');
+        const data = await res.json();
+        showToast('🚀 Đã nạp thành công SOP vào DAG-3 (Hot-Reload)!', 'success');
+        closeInjectModal();
+        fetchStats();
+      } catch (err) {
+        showToast('Lỗi nạp SOP: ' + err.message, 'error');
+      }
+    }
+
+    // HIGH-TICKET R&D MODAL
+    function openRdModal() {
+      document.getElementById('rd-engine-modal').classList.add('active');
+      updateRdPreviewStats();
+    }
+
+    function closeRdModal() {
+      document.getElementById('rd-engine-modal').classList.remove('active');
+    }
+
+    function updateRdPreviewStats() {
+      const timeRange = document.getElementById('rd-time-range').value;
+      const droppedCount = document.getElementById('stat-dropped-chats').innerText || 0;
+      const totalCount = document.getElementById('stat-total-chats').innerText || 0;
+      document.getElementById('rd-stats-preview').innerText = droppedCount + ' khách rơi rụng / ' + totalCount + ' tương tác';
+    }
+
+    async function triggerRdAnalysis() {
+      const btn = document.getElementById('btn-run-rd');
+      const timeRange = document.getElementById('rd-time-range').value;
+      const customGoals = document.getElementById('rd-custom-goals').value;
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tổng hợp dữ liệu & phân tích qua Gemini Web...';
+
+      try {
+        const res = await fetch('/api/traffic/rd-analysis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            timeRange: timeRange,
+            focusGoal: customGoals
+          })
+        });
+
+        if (!res.ok) throw new Error('Yêu cầu phân tích R&D thất bại');
+        const data = await res.json();
+
+        document.getElementById('rd-result-section').style.display = 'flex';
+        document.getElementById('rd-result-time').innerText = new Date().toLocaleTimeString('vi-VN');
+        document.getElementById('rd-result-text').innerText = data.report || data.analysisReport || 'Đã gửi toàn bộ hồ sơ rơi rụng sang Gemini Web. Vui lòng kiểm tra tab Gemini để nhận kết quả chi tiết.';
+        showToast('✅ Đã hoàn thành báo cáo R&D High-Ticket!', 'success');
+      } catch (err) {
+        showToast('Lỗi phân tích R&D: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-brain"></i> Bắt Đầu Tổng Hợp & Phân Tích R&D';
+      }
+    }
+
+    // UTILITIES
+    function getChannelName(ch) {
+      const map = {
+        'zalo': 'Zalo OA',
+        'facebook': 'FB Cá nhân',
+        'telegram': 'Telegram',
+        'web': 'Website',
+        'fb_fanpage': 'Fanpage'
+      };
+      return map[ch] || ch || 'Đa kênh';
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function formatMessageHtml(rawText) {
+      if (!rawText) return '';
+      let text = String(rawText);
+
+      // 1. Tách thẻ DAG SOP Stage tag nếu có ở đầu chuỗi (ví dụ: [dag_sop_03_chatbot_qualifying:stage_3])
+      let dagTagHtml = '';
+      const dagMatch = text.match(/^\[([a-zA-Z0-9_-]+:[a-zA-Z0-9_-]+)\]\s*/);
+      if (dagMatch) {
+        dagTagHtml = `<div class="chat-dag-tag"><i class="fa-solid fa-code-branch"></i> ${escapeHtml(dagMatch[1])}</div>\n`;
+        text = text.substring(dagMatch[0].length);
+      }
+
+      // 2. Escape an toàn ký tự HTML
+      let escaped = escapeHtml(text);
+
+      // 3. Format Tiêu đề ### hoặc ## thành Section Header trực quan
+      escaped = escaped.replace(/(?:^|\n)#{1,4}\s*(.+?)(?=\n|$)/g, '\n<div class="chat-section-header"><i class="fa-solid fa-bookmark" style="font-size:0.75rem; color:var(--accent-blue);"></i> $1</div>');
+
+      // 4. Format đường phân cách ---
+      escaped = escaped.replace(/(?:^|\n)\s*---+\s*(?=\n|$)/g, '<hr class="chat-divider-line">');
+
+      // 5. Format chữ đậm **text**
+      escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+      // 6. Format dấu gạch đầu dòng Markdown (* , - , •) thành icon bullet 🔹
+      escaped = escaped.replace(/(?:^|\n)\s*[\*\-•]\s+(.+?)(?=\n|$)/g, '\n<span style="color: #38bdf8;">🔹</span> $1');
+
+      return dagTagHtml + escaped;
+    }
+
+    function showToast(msg, type = 'info') {
+      const box = document.getElementById('toast-box');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      const icon = type === 'success' ? 'fa-check' : (type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-info');
+      const color = type === 'success' ? 'var(--accent-emerald)' : (type === 'error' ? 'var(--accent-rose)' : 'var(--accent-blue)');
+      toast.innerHTML = `<i class="fa-solid ${icon}" style="color: ${color};"></i> <span>${msg}</span>`;
+      box.appendChild(toast);
+      setTimeout(() => {
+        toast.remove();
+      }, 4000);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+{
+  "id": "dag_sop_08_fund_allocation",
+  "name": "SOP-08: Quy trình Thu - Chi Phân bổ Quỹ Nội bộ (20% - 30% - 10% - 40%)",
+  "description": "Trích lập tự động 4 Quỹ doanh thu hàng tháng và kiểm tra 24h không khiếu nại trước khi chi trả Mentor & Affiliate",
+  "nodes": [
+    {
+      "id": "node_0_check_weekly_poll",
+      "command": "evaluate_condition",
+      "input": {
+        "expression": "'{{variables.reward_type}}' == 'WEEKLY_COMMUNITY_POLL'"
+      },
+      "branches": {
+        "true": "node_weekly_payout",
+        "false": "node_0b_check_renew"
+      }
+    },
+    {
+      "id": "node_weekly_payout",
+      "command": "finance_disburse_reward_20percent",
+      "input": {
+        "winner_ids": ["{{variables.member_id}}"],
+        "reward_fund_amount": 1000000,
+        "group_name": "{{variables.group_name}}",
+        "week": "{{variables.week}}"
+      },
+      "next": "END"
+    },
+    {
+      "id": "node_0b_check_renew",
+      "command": "evaluate_condition",
+      "input": {
+        "expression": "'{{variables.type}}' == 'RENEW'"
+      },
+      "branches": {
+        "true": "node_renew_payout",
+        "false": "node_1_record_monthly_revenue"
+      }
+    },
+    {
+      "id": "node_renew_payout",
+      "command": "finance_process_renewal_50_10_40",
+      "input": {
+        "member_id": "{{member_id}}",
+        "amount": "{{variables.amount}}",
+        "renewed_weeks_remaining": "{{variables.renewed_weeks_remaining}}"
+      },
+      "next": "END"
+    },
+    {
+      "id": "node_1_record_monthly_revenue",
+      "command": "finance_record_revenue",
+      "input": {
+        "month": "{{month}}"
+      },
+      "next": "node_2_allocate_funds"
+    },
+    {
+      "id": "node_2_allocate_funds",
+      "command": "finance_allocate_funds_20_30_10_40",
+      "input": {
+        "total_revenue": "{{nodes.node_1_record_monthly_revenue.output.total_revenue}}"
+      },
+      "next": "node_3_check_mentor_24h"
+    },
+    {
+      "id": "node_3_check_mentor_24h",
+      "command": "mentor_hold_24h_check",
+      "input": {
+        "session_id": "{{session_id}}"
+      },
+      "next": "node_4_evaluate_mentor_dispute"
+    },
+    {
+      "id": "node_4_evaluate_mentor_dispute",
+      "command": "evaluate_condition",
+      "input": {
+        "expression": "{{nodes.node_3_check_mentor_24h.output.is_disputed}} == false"
+      },
+      "branches": {
+        "true": "node_5_standard_payout",
+        "false": "node_6_payout_with_mentor_freeze"
+      }
+    },
+    {
+      "id": "node_5_standard_payout",
+      "command": "finance_payout_affiliate_mentor_bqt",
+      "input": {
+        "payout_matrix": {
+          "mentor_fund_30": "{{nodes.node_2_allocate_funds.output.mentor_fund_30}}",
+          "affiliate_fund_10": "{{nodes.node_2_allocate_funds.output.affiliate_fund_10}}",
+          "bqt_fund_40": "{{nodes.node_2_allocate_funds.output.bqt_fund_40}}"
+        }
+      },
+      "next": "END"
+    },
+    {
+      "id": "node_6_payout_with_mentor_freeze",
+      "command": "finance_payout_affiliate_mentor_bqt",
+      "input": {
+        "payout_matrix": {
+          "mentor_fund_30": 0,
+          "affiliate_fund_10": "{{nodes.node_2_allocate_funds.output.affiliate_fund_10}}",
+          "bqt_fund_40": "{{nodes.node_2_allocate_funds.output.bqt_fund_40}}"
+        },
+        "freeze_reason": "Mentor session {{session_id}} is disputed in DAG-11. 30% Mentor Fund is frozen pending arbitration."
+      }
+    }
+  ]
+}

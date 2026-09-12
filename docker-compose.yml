@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  opc-client-dashboard:
+    build:
+      context: ./web-browser-automation
+      dockerfile: Dockerfile
+    container_name: opc-client-dashboard
+    hostname: opc-client-dashboard
+    ports:
+      - "${DASHBOARD_PORT:-3001}:3001"
+      - "${NOVNC_PORT:-6080}:6080"
+      - "${WEB_STUDIO_PORT:-5173}:5173"
+    environment:
+      - PORT=3001
+      - MASTER_CORE_URL=${MASTER_CORE_URL:-http://100.102.213.106:3000}
+      - OPC_LICENSE_KEY=${OPC_LICENSE_KEY:-OPC-COMMUNITY-FREE-2026}
+      - CUSTOMER_NAME=${CUSTOMER_NAME:-OPC Community Member}
+      - OPC_VAULT_FILE=/app/data/opc_vault.json
+      - OPC_DATA_DIR=/app/data
+      - DISPLAY=:99
+    volumes:
+      - /etc/machine-id:/etc/machine-id:ro
+      - ./data:/app/data
+      - ./data/dags:/app/web-browser-automation/data/dags
+    restart: unless-stopped
+
+  opc-client-agent:
+    build:
+      context: ./os-controller-agent
+      dockerfile: Dockerfile
+    container_name: opc-client-agent
+    hostname: opc-client-agent
+    ports:
+      - "${AGENT_PORT:-3002}:3002"
+    environment:
+      - PORT=3002
+      - MASTER_CORE_URL=${MASTER_CORE_URL:-http://100.102.213.106:3000}
+      - TENANT_TOKEN=${TENANT_TOKEN:-TOKEN_COMMUNITY_CLIENT}
+      - OPC_DATA_DIR=/app/data
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
+  opc-client-master-bot:
+    build:
+      context: ./opc-master-telegram-bot
+      dockerfile: Dockerfile
+    container_name: opc-client-master-bot
+    hostname: opc-client-master-bot
+    ports:
+      - "${BOT_PORT:-3003}:3003"
+    environment:
+      - PORT=3003
+      - PERSONA_BRAIN_URL=http://opc-client-dashboard:3001
+      - OS_CONTROLLER_URL=http://opc-client-agent:3002
+      - OPC_DATA_DIR=/app/data
+      - OPC_VAULT_FILE=/app/data/opc_vault.json
+    volumes:
+      - /etc/machine-id:/etc/machine-id:ro
+      - ./data:/app/data
+    restart: unless-stopped

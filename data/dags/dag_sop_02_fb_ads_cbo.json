@@ -1,0 +1,59 @@
+{
+  "id": "dag_sop_02_fb_ads_cbo",
+  "name": "SOP-02: Quy trình Chạy Quảng cáo Facebook Ads Tối ưu Chi phí CBO",
+  "description": "Thử nghiệm A/B adsets, tự động tắt adset khi giá lead vượt định mức và tăng 20% ngân sách/ngày cho nhóm hiệu quả cao",
+  "status": "ACTIVE",
+  "trigger": {
+    "type": "CRON",
+    "expression": "0 0 * * *"
+  },
+  "createdAt": "2026-08-02T21:30:00.000Z",
+  "nodes": [
+    {
+      "id": "node_1_get_report",
+      "command": "fb_get_campaign_report",
+      "input": {
+        "date_range": "last_3_days",
+        "campaign_id": "act_new_campaign_test"
+      }
+    },
+    {
+      "id": "node_2_check_cpa",
+      "command": "evaluate_condition",
+      "input": {
+        "expression": "{{nodes.node_1_get_report.output.cpa}} <= 135000"
+      },
+      "branches": {
+        "true": "node_3_scale_budget",
+        "false": "node_4_turn_off_adset"
+      }
+    },
+    {
+      "id": "node_3_scale_budget",
+      "command": "fb_scale_budget_percent",
+      "input": {
+        "campaign_id": "{{nodes.node_1_get_report.output.campaign_id}}",
+        "percent_increase": 25
+      },
+      "next": "node_5_upsert_lead_crm"
+    },
+    {
+      "id": "node_4_turn_off_adset",
+      "command": "fb_toggle_campaign",
+      "input": {
+        "campaign_id": "act_new_campaign_test",
+        "status": "PAUSED"
+      }
+    },
+    {
+      "id": "node_5_upsert_lead_crm",
+      "command": "crm_upsert_lead",
+      "input": {
+        "customer_phone": "0988776655",
+        "name": "Nguyễn Văn A",
+        "source": "FB_Ads_CBO"
+      }
+    }
+  ],
+  "updatedAt": "2026-08-20T06:50:32.900Z"
+}

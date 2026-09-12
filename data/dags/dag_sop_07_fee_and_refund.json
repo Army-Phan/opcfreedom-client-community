@@ -1,0 +1,53 @@
+{
+  "id": "dag_sop_07_fee_and_refund",
+  "name": "SOP-07: Quy trình Thu - Chi Phí Thành viên & Refund 30 Ngày",
+  "description": "Quản lý đóng phí Đợt 1 (6.5M), tạm giữ Quỹ 30 ngày và hoàn 100% khi được Admin duyệt nếu có yêu cầu hợp lệ",
+  "status": "ACTIVE",
+  "trigger": {
+    "type": "AUTO"
+  },
+  "nodes": [
+    {
+      "id": "node_1_record_fee",
+      "command": "finance_record_fee",
+      "input": {
+        "member_id": "{{member_id}}",
+        "amount": "{{amount}}",
+        "fee_type": "{{fee_type}}"
+      }
+    },
+    {
+      "id": "node_2_track_30days",
+      "command": "cron_track_30days",
+      "input": {
+        "receipt_id": "{{nodes.node_1_record_fee.output.receipt_id}}"
+      }
+    },
+    {
+      "id": "node_3_evaluate_refund_window",
+      "command": "evaluate_condition",
+      "input": {
+        "expression": "{{nodes.node_2_track_30days.output.days_elapsed}} <= 30"
+      },
+      "branches": {
+        "true": "node_4_allow_refund_option",
+        "false": "node_5_transfer_to_main_fund"
+      }
+    },
+    {
+      "id": "node_4_allow_refund_option",
+      "command": "finance_process_refund",
+      "input": {
+        "receipt_id": "{{nodes.node_1_record_fee.output.receipt_id}}",
+        "reason": "{{refund_reason}}"
+      }
+    },
+    {
+      "id": "node_5_transfer_to_main_fund",
+      "command": "finance_transfer_to_main_fund",
+      "input": {
+        "receipt_id": "{{nodes.node_1_record_fee.output.receipt_id}}"
+      }
+    }
+  ]
+}

@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OPC Autonomous Node - Chợ DAG & Quản Lý Biến Thể Quy Trình</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --panel-bg: rgba(17, 24, 39, 0.85);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --primary: #3b82f6;
+      --primary-glow: rgba(59, 130, 246, 0.4);
+      --accent: #8b5cf6;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.12) 0%, transparent 40%);
+    }
+
+    .nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      text-decoration: none;
+    }
+    .nav-brand i { color: var(--primary); font-size: 1.4rem; }
+    .badge-node {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .nav-link:hover, .nav-link.active { color: #fff; }
+    .nav-link.active { color: var(--primary); }
+
+    .container {
+      max-width: 1440px;
+      margin: 1.5rem auto;
+      padding: 0 1.5rem;
+      width: 95%;
+      flex: 1;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+    .metric-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    .metric-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+    .metric-info h3 { font-size: 1.5rem; font-weight: 700; }
+    .metric-info p { font-size: 0.82rem; color: var(--text-muted); }
+
+    .main-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 1.75rem 2rem;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+      backdrop-filter: blur(12px);
+      margin-bottom: 2rem;
+    }
+
+    .tab-nav {
+      display: flex;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .tab-btn.active {
+      color: #fff;
+      background: var(--primary);
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .search-input {
+      flex: 1;
+      min-width: 260px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 10px 16px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .filter-select {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0.65rem 1.25rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      box-shadow: 0 4px 15px var(--primary-glow);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px var(--primary-glow);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #e2e8f0;
+      border: 1px solid var(--border-color);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.16);
+      color: #fff;
+    }
+    .btn-success {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+    .btn-success:hover {
+      background: rgba(16, 185, 129, 0.35);
+    }
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.35);
+    }
+    .btn-action {
+      padding: 0.42rem 0.8rem !important;
+      font-size: 0.78rem !important;
+      border-radius: 8px !important;
+      gap: 5px !important;
+      white-space: nowrap !important;
+    }
+
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 1.5rem;
+    }
+    .catalog-card {
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.25s ease;
+    }
+    .catalog-card:hover {
+      border-color: rgba(59, 130, 246, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+    }
+    .catalog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+    .catalog-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.35rem;
+      line-height: 1.35;
+    }
+    .catalog-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+    .signature-badge {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #38bdf8;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      word-break: break-all;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .var-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 1.25rem;
+    }
+    .var-tag {
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      color: #c4b5fd;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 12px;
+    }
+    .custom-table {
+      width: 100%;
+      min-width: 980px;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    .custom-table th {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .custom-table td {
+      padding: 14px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.88rem;
+      vertical-align: middle;
+    }
+    .custom-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+    .badge-core { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.35); }
+    .badge-custom { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.35); }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .modal-content {
+      background: #111827;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 780px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+    }
+    .modal-header {
+      padding: 1.25rem 1.75rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-body {
+      padding: 1.75rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .modal-footer {
+      padding: 1.25rem 1.75rem;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      color: #e2e8f0;
+    }
+    .form-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    pre {
+      background: #030712;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      overflow-x: auto;
+      max-height: 300px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      background: #1e293b;
+      color: #fff;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      border: 1px solid var(--border-color);
+      display: none;
+      z-index: 2000;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    /* AI CONSULTANT STYLES */
+    .consultant-layout {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+    @media (max-width: 1024px) {
+      .consultant-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    .consultant-chat-card {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      height: 620px;
+    }
+    .chat-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 16px 16px 0 0;
+    }
+    .chat-history {
+      flex: 1;
+      padding: 1.25rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .chat-msg {
+      display: flex;
+      gap: 10px;
+      max-width: 88%;
+    }
+    .chat-msg.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+    .chat-msg.ai {
+      align-self: flex-start;
+    }
+    .msg-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .msg-avatar.ai { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #fff; }
+    .msg-avatar.user { background: rgba(255, 255, 255, 0.15); color: #fff; }
+    .msg-bubble {
+      padding: 0.85rem 1.15rem;
+      border-radius: 14px;
+      font-size: 0.88rem;
+      line-height: 1.55;
+    }
+    .chat-msg.ai .msg-bubble {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-color);
+      color: #f1f5f9;
+      border-top-left-radius: 2px;
+    }
+    .chat-msg.user .msg-bubble {
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: #fff;
+      border-top-right-radius: 2px;
+    }
+    .chat-input-area {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 0 0 16px 16px;
+    }
+    .chip-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .chip-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .chip-btn:hover {
+      color: #fff;
+      background: rgba(59, 130, 246, 0.2);
+      border-color: rgba(59, 130, 246, 0.4);
+    }
+    .prescription-card {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    }
+    .prescription-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav-bar">
+    <a href="/index.html" class="nav-brand">
+      <i class="fa-solid fa-cube"></i>
+      <span>OPC Autonomous Node</span>
+      <span class="badge-node">MARKETPLACE & INSTANCES</span>
+    </a>
+    <div class="nav-links">
+      <a href="/index.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+      <a href="/brain.html" class="nav-link"><i class="fa-solid fa-brain"></i> Persona Brain</a>
+      <a href="/setup.html" class="nav-link"><i class="fa-solid fa-sliders"></i> Cài Đặt (Setup)</a>
+      <a href="/marketplace.html" class="nav-link active"><i class="fa-solid fa-store"></i> Chợ DAG & Biến Thể</a>
+      <a href="http://100.102.213.106:6080/vnc.html" target="_blank" class="nav-link" style="color: #34d399;"><i class="fa-solid fa-desktop"></i> Màn Hình VNC</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    
+    <!-- METRICS -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;"><i class="fa-solid fa-diagram-project"></i></div>
+        <div class="metric-info">
+          <h3 id="statTotalDags">0</h3>
+          <p>Tổng Quy Trình Cục Bộ</p>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(168, 85, 247, 0.15); color: #c084fc;"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+        <div class="metric-info">
+          <h3 id="statCustomInstances">0</h3>
+          <p>Biến Thể Đã May Đo</p>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(16, 185, 129, 0.15); color: #34d399;"><i class="fa-solid fa-store"></i></div>
+        <div class="metric-info">
+          <h3 id="statMarketplaceCatalog">0</h3>
+          <p>Mẫu Template Trên Chợ</p>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;"><i class="fa-solid fa-shield-heart"></i></div>
+        <div class="metric-info">
+          <h3 id="statCoreStatus">ONLINE</h3>
+          <p>Kết Nối Core HQ (Port 3000)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN DASHBOARD CARD -->
+    <div class="main-card">
+      <div class="tab-nav">
+        <button class="tab-btn active" id="tabBtnInstances" onclick="switchTab('instances')">
+          <i class="fa-solid fa-folder-tree"></i> Biến Thể Đang Vận Hành Cục Bộ (<span id="tabCountInstances">0</span>)
+        </button>
+        <button class="tab-btn" id="tabBtnCatalog" onclick="switchTab('catalog')">
+          <i class="fa-solid fa-cart-shopping"></i> Khám Phá Chợ DAG & SOP Chung (<span id="tabCountCatalog">0</span>)
+        </button>
+        <button class="tab-btn" id="tabBtnConsultant" onclick="switchTab('consultant')">
+          <i class="fa-solid fa-robot"></i> 🤖 AI Consultant (Kê Đơn DAG)
+        </button>
+      </div>
+
+      <!-- TAB 1: MY LOCAL DAG INSTANCES -->
+      <div id="viewInstances">
+        <div class="filter-bar">
+          <input type="text" id="instanceSearch" class="search-input" placeholder="Tìm kiếm quy trình cục bộ theo ID, Tên, Biến số..." oninput="filterInstances()">
+          <select id="instanceTypeFilter" class="filter-select" onchange="filterInstances()">
+            <option value="ALL">Tất Cả Loại Quy Trình</option>
+            <option value="CUSTOM">Chỉ Biến Thể Tùy Biến (Custom)</option>
+            <option value="CORE">Chỉ Quy Trình Cốt Lõi (Core)</option>
+          </select>
+          <button class="btn btn-primary" onclick="loadAllData()"><i class="fa-solid fa-rotate"></i> Làm Mới</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Mã Quy Trình (ID)</th>
+                <th>Tên Quy Trình & Mô Tả</th>
+                <th>Phân Loại</th>
+                <th>Biến Số Cấu Hình (Applied Variables)</th>
+                <th>Cập Nhật Lần Cuối</th>
+                <th style="text-align: right;">Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody id="instancesTableBody">
+              <tr>
+                <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">Đang tải danh sách quy trình cục bộ...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 2: PUBLIC MARKETPLACE CATALOG -->
+      <div id="viewCatalog" style="display: none;">
+        <div class="filter-bar">
+          <input type="text" id="catalogSearch" class="search-input" placeholder="Tìm kiếm mẫu quy trình theo ngành nghề, từ khóa..." oninput="filterCatalog()">
+          <select id="catalogCategoryFilter" class="filter-select" onchange="filterCatalog()">
+            <option value="ALL">Tất Cả Ngành Nghề</option>
+            <option value="Bất Động Sản">Bất Động Sản</option>
+            <option value="Marketing & Content">Marketing & Content</option>
+            <option value="Bán Hàng & Chốt Sale">Bán Hàng & Chốt Sale</option>
+            <option value="General Automation">Tự Động Hóa Chung</option>
+          </select>
+          <button class="btn btn-primary" onclick="loadAllData()"><i class="fa-solid fa-rotate"></i> Làm Mới</button>
+        </div>
+
+        <div class="catalog-grid" id="catalogGrid">
+          <!-- Catalog cards rendered here -->
+        </div>
+      </div>
+
+      <!-- TAB 3: AI CONSULTANT (DAG PRESCRIPTION & CHAT SUBMISSION) -->
+      <div id="viewConsultant" style="display: none;">
+        <div class="chip-group">
+          <span style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; margin-right: 6px;"><i class="fa-solid fa-bolt"></i> Chọn Nhanh Ngành:</span>
+          <button class="chip-btn" onclick="quickSelectIndustry('Bất Động Sản')">🏢 Bất Động Sản</button>
+          <button class="chip-btn" onclick="quickSelectIndustry('Spa & Thẩm Mỹ Viện')">💆 Spa & Thẩm Mỹ Viện</button>
+          <button class="chip-btn" onclick="quickSelectIndustry('Bán Lẻ & Thương Mại Điện Tử')">🛍️ Bán Lẻ & E-Commerce</button>
+          <button class="chip-btn" onclick="quickSelectIndustry('Agency Marketing & Thiết Kế')">🎨 Agency & IT</button>
+          <button class="chip-btn" onclick="quickSelectIndustry('Đào Tạo & Khóa Học')">🎓 Đào Tạo & Coach</button>
+          <button class="chip-btn" onclick="quickSelectIndustry('Nhà Hàng & F&B')">🍜 Nhà Hàng & F&B</button>
+        </div>
+
+        <div class="consultant-layout">
+          <!-- Cột Trái: Live Chat -->
+          <div class="consultant-chat-card">
+            <div class="chat-header">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="msg-avatar ai"><i class="fa-solid fa-user-tie"></i></div>
+                <div>
+                  <h4 style="font-size: 0.95rem; color: #fff;">AI Consultant 24/7 (Client 0 Dogfooding)</h4>
+                  <p style="font-size: 0.75rem; color: #34d399;"><i class="fa-solid fa-circle" style="font-size: 0.5rem;"></i> Trực Tuyến & Sẵn Sàng Kê Đơn</p>
+                </div>
+              </div>
+              <div>
+                <label for="dagFileInput" class="btn btn-secondary btn-action" style="cursor: pointer;" title="Nộp file .json DAG">
+                  <i class="fa-solid fa-paperclip"></i> Nộp File DAG
+                </label>
+                <input type="file" id="dagFileInput" accept=".json" style="display: none;" onchange="handleDagFileUpload(event)">
+              </div>
+            </div>
+
+            <div class="chat-history" id="consultantChatHistory">
+              <div class="chat-msg ai">
+                <div class="msg-avatar ai"><i class="fa-solid fa-user-tie"></i></div>
+                <div class="msg-bubble">
+                  Xin chào Anh/Chị! Em là <strong>AI Consultant</strong> của OPC Freedom. Em có thể giúp Anh/Chị:
+                  <ul style="margin: 8px 0 8px 18px; font-size: 0.84rem;">
+                    <li>🎯 <strong>Phân tích mô hình kinh doanh</strong> & "Kê đơn" bộ combo DAG phù hợp nhất.</li>
+                    <li>⚡ <strong>Cài đặt 1-Click</strong> toàn bộ quy trình may đo vào máy trạm của bạn.</li>
+                    <li>📤 <strong>Tiếp nhận & Chạy AI Pre-audit</strong> khi bạn nộp file JSON quy trình sáng tạo.</li>
+                  </ul>
+                  Hãy chọn ngành nghề ở trên hoặc nhắn tin mô tả mong muốn của bạn nhé!
+                </div>
+              </div>
+            </div>
+
+            <div class="chat-input-area">
+              <input type="text" id="consultantInput" class="form-control" placeholder="Nhập câu hỏi hoặc ngành nghề (VD: Tôi kinh doanh Spa, cần những DAG nào?)..." onkeydown="if(event.key==='Enter') sendConsultantMessage()">
+              <button class="btn btn-primary" onclick="sendConsultantMessage()" id="btnSendConsultant">
+                <i class="fa-solid fa-paper-plane"></i> Gửi
+              </button>
+            </div>
+          </div>
+
+          <!-- Cột Phải: Prescription Summary Panel -->
+          <div class="prescription-card" id="prescriptionCard">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+              <div>
+                <span class="badge badge-custom" style="margin-bottom: 6px; display: inline-block;">ĐƠN KÊ QUY TRÌNH (DAG PRESCRIPTION)</span>
+                <h3 id="rxIndustryName" style="font-size: 1.15rem; color: #fff;">Chưa Có Đơn Kê Hiện Tại</h3>
+              </div>
+              <span id="rxComboCount" class="badge badge-core" style="font-size: 0.85rem;">0 DAGs</span>
+            </div>
+
+            <p id="rxSolutionSummary" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.25rem;">
+              Hãy nhắn tin hoặc chọn ngành nghề bên cạnh để AI phân tích và lập đơn kê combo quy trình phù hợp cho doanh nghiệp bạn.
+            </p>
+
+            <div id="rxDagsList" style="margin-bottom: 1.25rem; max-height: 260px; overflow-y: auto;">
+              <!-- Recommended DAG items injected here -->
+            </div>
+
+            <div id="rxActionArea" style="display: none; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+              <button class="btn btn-success" style="width: 100%; padding: 0.85rem; font-size: 0.95rem;" onclick="installPrescriptionCombo()">
+                <i class="fa-solid fa-bolt"></i> ⚡ Cài Đặt Toàn Bộ Combo Vào Máy Cục Bộ
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- VARIABLE CONFIGURATION WIZARD MODAL -->
+  <div class="modal-overlay" id="configWizardModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h3 id="wizardTitle" style="font-size: 1.15rem; color: #fff;">Cấu Hình & Khởi Tạo Biến Thể DAG</h3>
+          <p id="wizardSubtitle" style="font-size: 0.8rem; color: var(--text-muted);"></p>
+        </div>
+        <button onclick="closeModal('configWizardModal')" style="background: transparent; border: none; color: #fff; font-size: 1.25rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="wizardTemplateId">
+        
+        <div class="form-group">
+          <label for="wizardInstanceName">Tên Biến Thể Cục Bộ (Tùy Chỉnh Cho Doanh Nghiệp Bạn)</label>
+          <input type="text" id="wizardInstanceName" class="form-control" placeholder="VD: Chiến Dịch BĐS Vinhomes Quận 9">
+        </div>
+
+        <div class="form-group">
+          <label for="wizardInstanceId">Mã Định Danh Biến Thể (Instance ID)</label>
+          <input type="text" id="wizardInstanceId" class="form-control" style="font-family: 'JetBrains Mono', monospace;" placeholder="VD: dag_instance_re_vinhomes_01">
+        </div>
+
+        <div style="margin: 1.5rem 0 1rem 0; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+          <h4 style="font-size: 0.95rem; color: #38bdf8; margin-bottom: 0.75rem;"><i class="fa-solid fa-sliders"></i> Điền Các Biến Số Bắt Buộc (Template Variables)</h4>
+          <div id="wizardDynamicFields">
+            <!-- Dynamic variable input fields injected here -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('configWizardModal')">Hủy</button>
+        <button class="btn btn-primary" onclick="submitInstallInstance()"><i class="fa-solid fa-rocket"></i> Lưu & Kích Hoạt Biến Thể</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECONFIGURE MODAL -->
+  <div class="modal-overlay" id="reconfigureModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h3 id="reconfigTitle" style="font-size: 1.15rem; color: #fff;">Chỉnh Sửa Biến Số Cục Bộ</h3>
+          <p id="reconfigSubtitle" style="font-size: 0.8rem; color: var(--text-muted);"></p>
+        </div>
+        <button onclick="closeModal('reconfigureModal')" style="background: transparent; border: none; color: #fff; font-size: 1.25rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="reconfigInstanceId">
+        
+        <div class="form-group">
+          <label for="reconfigInstanceName">Tên Biến Thể</label>
+          <input type="text" id="reconfigInstanceName" class="form-control">
+        </div>
+
+        <div id="reconfigDynamicFields">
+          <!-- Dynamic fields for reconfiguration injected here -->
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('reconfigureModal')">Hủy</button>
+        <button class="btn btn-primary" onclick="submitReconfigureInstance()"><i class="fa-solid fa-floppy-disk"></i> Lưu Cập Nhật</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBMIT TO CLIENT 0 MODAL -->
+  <div class="modal-overlay" id="submitModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size: 1.15rem; color: #fff;"><i class="fa-solid fa-share-nodes"></i> Đóng Góp Quy Trình Lên Chợ Chung</h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">Gửi hồ sơ lên Client 0 để AI Pre-audit và chuyển tiếp lên Core HQ Sandbox kiểm định an ninh</p>
+        </div>
+        <button onclick="closeModal('submitModal')" style="background: transparent; border: none; color: #fff; font-size: 1.25rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="submitDagId">
+
+        <div class="form-group">
+          <label>Quy trình sẽ nộp</label>
+          <input type="text" id="submitDagName" class="form-control" readonly style="background: rgba(255,255,255,0.05); color: #38bdf8;">
+        </div>
+
+        <div class="form-group">
+          <label for="submitCategory">Chuyên Mục / Ngành Nghề</label>
+          <select id="submitCategory" class="form-control">
+            <option value="Bất Động Sản">Bất Động Sản</option>
+            <option value="Marketing & Content">Marketing & Content</option>
+            <option value="Bán Hàng & Chốt Sale">Bán Hàng & Chốt Sale</option>
+            <option value="Spa / Làm Đẹp / Thẩm Mỹ">Spa / Làm Đẹp / Thẩm Mỹ</option>
+            <option value="E-commerce & Bán Lẻ">E-commerce & Bán Lẻ</option>
+            <option value="Tuyển Dụng & Nhân Sự">Tuyển Dụng & Nhân Sự</option>
+            <option value="General Automation">Tự Động Hóa Chung</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="submitDescription">Mô Tả Giá Trị Thực Chiến & Hướng Dẫn Vận Hành</label>
+          <textarea id="submitDescription" class="form-control" rows="4" placeholder="Mô tả cách quy trình này giúp doanh nghiệp tiết kiệm thời gian hoặc tăng doanh thu..."></textarea>
+        </div>
+
+        <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 12px; font-size: 0.82rem; color: #93c5fd;">
+          <i class="fa-solid fa-shield-halved"></i> <strong>Bảo vệ dữ liệu cá nhân:</strong> Hệ thống AI Pre-audit của Client 0 sẽ tự động bóc tách số điện thoại, token, mật khẩu của bạn thành các biến số mẫu trước khi ký số phát hành lên Chợ Chung.
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('submitModal')">Hủy</button>
+        <button class="btn btn-primary" onclick="confirmSubmitToCore()"><i class="fa-solid fa-paper-plane"></i> Gửi Đề Xuất Lên Client 0</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXECUTION RESULT MODAL -->
+  <div class="modal-overlay" id="execModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h3 id="execModalTitle" style="font-size: 1.15rem; color: #fff;">Kết Quả Chạy Thử Quy Trình</h3>
+          <p id="execModalSubtitle" style="font-size: 0.8rem; color: var(--text-muted);"></p>
+        </div>
+        <button onclick="closeModal('execModal')" style="background: transparent; border: none; color: #fff; font-size: 1.25rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div id="execStatusAlert" style="margin-bottom: 1rem; padding: 10px 14px; border-radius: 8px; font-size: 0.88rem; font-weight: 600;"></div>
+        <pre id="execOutputJson"></pre>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('execModal')">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    let globalInstances = [];
+    let globalCatalog = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadAllData();
+    });
+
+    async function loadAllData() {
+      try {
+        const [instRes, catRes] = await Promise.all([
+          fetch('/api/dag/instances').catch(() => null),
+          fetch('/api/marketplace/catalog').catch(() => null)
+        ]);
+
+        if (instRes && instRes.ok) {
+          const instData = await instRes.json();
+          globalInstances = (instData.baseDags || []).concat(instData.customInstances || []);
+          document.getElementById('statTotalDags').innerText = instData.total || globalInstances.length;
+          document.getElementById('statCustomInstances').innerText = instData.customCount || 0;
+          document.getElementById('tabCountInstances').innerText = globalInstances.length;
+          renderInstances(globalInstances);
+        }
+
+        if (catRes && catRes.ok) {
+          const catData = await catRes.json();
+          globalCatalog = catData.catalog || [];
+          document.getElementById('statMarketplaceCatalog').innerText = globalCatalog.length;
+          document.getElementById('tabCountCatalog').innerText = globalCatalog.length;
+          renderCatalog(globalCatalog);
+        }
+      } catch (e) {
+        showToast('Lỗi tải dữ liệu: ' + e.message, 'danger');
+      }
+    }
+
+    function switchTab(tabName) {
+      document.getElementById('tabBtnInstances').classList.toggle('active', tabName === 'instances');
+      document.getElementById('tabBtnCatalog').classList.toggle('active', tabName === 'catalog');
+      document.getElementById('tabBtnConsultant').classList.toggle('active', tabName === 'consultant');
+      document.getElementById('viewInstances').style.display = tabName === 'instances' ? 'block' : 'none';
+      document.getElementById('viewCatalog').style.display = tabName === 'catalog' ? 'block' : 'none';
+      document.getElementById('viewConsultant').style.display = tabName === 'consultant' ? 'block' : 'none';
+    }
+
+    let currentPrescription = null;
+
+    function quickSelectIndustry(indName) {
+      document.getElementById('consultantInput').value = `Tư vấn giúp tôi các quy trình tự động hóa cho ngành ${indName}`;
+      sendConsultantMessage();
+    }
+
+    async function sendConsultantMessage() {
+      const inputEl = document.getElementById('consultantInput');
+      const text = inputEl.value.trim();
+      if (!text) return;
+
+      appendChatMessage('user', text);
+      inputEl.value = '';
+      document.getElementById('btnSendConsultant').disabled = true;
+
+      try {
+        const res = await fetch('/api/marketplace/consultant/recommend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            business_type: text,
+            goals: text
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          appendChatMessage('ai', data.ai_advice || 'Dưới đây là đơn kê quy trình phù hợp:');
+          renderPrescription(data);
+        } else {
+          // Fallback chat endpoint
+          const chatRes = await fetch('/api/marketplace/consultant/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text })
+          });
+          const chatData = await chatRes.json();
+          appendChatMessage('ai', chatData.reply || chatData.ai_advice || 'Em đã tiếp nhận yêu cầu của Anh/Chị.');
+          if (chatData.prescription) {
+            renderPrescription(chatData.prescription);
+          }
+        }
+      } catch (err) {
+        appendChatMessage('ai', `⚠️ Lỗi kết nối AI Consultant: ${err.message}`);
+      } finally {
+        document.getElementById('btnSendConsultant').disabled = false;
+      }
+    }
+
+    function appendChatMessage(sender, text) {
+      const history = document.getElementById('consultantChatHistory');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `chat-msg ${sender}`;
+      
+      const avatarHtml = sender === 'ai' 
+        ? '<div class="msg-avatar ai"><i class="fa-solid fa-user-tie"></i></div>'
+        : '<div class="msg-avatar user"><i class="fa-solid fa-user"></i></div>';
+
+      const formattedText = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      msgDiv.innerHTML = `${avatarHtml}<div class="msg-bubble">${formattedText}</div>`;
+      
+      history.appendChild(msgDiv);
+      history.scrollTop = history.scrollHeight;
+    }
+
+    function renderPrescription(data) {
+      currentPrescription = data;
+      document.getElementById('rxIndustryName').innerText = data.industry?.name || 'Doanh Nghiệp Đa Ngành';
+      document.getElementById('rxComboCount').innerText = `${data.combo_count || (data.recommended_dags || []).length} DAGs`;
+      document.getElementById('rxSolutionSummary').innerText = data.solution_summary || 'Bộ quy trình tự động hóa toàn diện.';
+
+      const listEl = document.getElementById('rxDagsList');
+      listEl.innerHTML = (data.recommended_dags || []).map((d, i) => `
+        <div class="prescription-item">
+          <div>
+            <div style="font-weight: 600; color: #fff; font-size: 0.88rem; margin-bottom: 2px;">
+              ${i + 1}. ${d.name || d.id}
+            </div>
+            <div style="font-size: 0.76rem; color: var(--text-muted);">
+              ${d.description || ''}
+            </div>
+          </div>
+          <span class="badge badge-core" style="font-size: 0.72rem; white-space: nowrap;">${d.id}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('rxActionArea').style.display = 'block';
+    }
+
+    async function installPrescriptionCombo() {
+      if (!currentPrescription || !currentPrescription.recommended_dags) {
+        return showToast('Chưa có đơn kê DAG nào để cài đặt.', 'danger');
+      }
+
+      showToast('⚡ Đang tiến hành cài đặt hàng loạt combo DAGs vào máy...', 'success');
+
+      try {
+        const res = await fetch('/api/marketplace/consultant/install-combo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            combo_dags: currentPrescription.recommended_dags,
+            custom_prefix: `dag_combo_${(currentPrescription.industry?.key || 'custom')}`
+          })
+        });
+
+        const data = await res.json();
+        if (data.success || data.installed_count > 0) {
+          showToast(`🎉 Đã cài đặt thành công ${data.installed_count} quy trình vào máy cục bộ!`, 'success');
+          await loadAllData();
+          switchTab('instances');
+        } else {
+          showToast(`Lỗi cài đặt combo: ${data.error || 'Thất bại'}`, 'danger');
+        }
+      } catch (err) {
+        showToast('Lỗi: ' + err.message, 'danger');
+      }
+    }
+
+    async function handleDagFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      appendChatMessage('user', `📤 Nộp file DAG đề xuất: <strong>${file.name}</strong>`);
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const parsedJson = JSON.parse(e.target.result);
+          appendChatMessage('ai', '⏳ Đang khởi chạy quy trình SOP-19 tiếp nhận, bóc tách biến số và chạy kiểm duyệt Sandbox...');
+
+          const res = await fetch('/api/marketplace/consultant/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              dag_json: parsedJson,
+              note: `Đóng góp file ${file.name} qua Chat Portal`
+            })
+          });
+
+          const data = await res.json();
+          if (data.success) {
+            appendChatMessage('ai', `🎉 <strong>Tiếp nhận thành công!</strong><br>` +
+              `- Mã Ticket: <code>${data.candidate_id}</code><br>` +
+              `- AI Pre-audit: ${data.preaudit_passed ? '✅ ĐẠT CHUẨN' : '⚠️ CẦN SỬA'}<br>` +
+              `- Biến số bóc tách: ${data.variables_detected_count} biến số<br>` +
+              `- Sandbox: ${data.sandbox_passed ? '✅ AN TOÀN' : '❌ CẢNH BÁO'}<br>` +
+              `- Trạng thái: Hồ sơ đã được nộp lên Core HQ để Commander phê duyệt!`);
+          } else {
+            appendChatMessage('ai', `❌ Lỗi thẩm định: ${data.error || 'Từ chối'}`);
+          }
+        } catch (parseErr) {
+          appendChatMessage('ai', `❌ File không đúng định dạng JSON DAG hợp lệ: ${parseErr.message}`);
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function renderInstances(dags) {
+      const tbody = document.getElementById('instancesTableBody');
+      if (!dags || dags.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">Chưa có quy trình nào trong kho cục bộ.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = dags.map(d => {
+        const isCustom = !!d.is_local_instance;
+        const badge = isCustom 
+          ? '<span class="badge badge-custom"><i class="fa-solid fa-wand-magic-sparkles"></i> Biến Thể Tùy Biến</span>'
+          : '<span class="badge badge-core"><i class="fa-solid fa-shield"></i> Cốt Lõi Hệ Thống</span>';
+
+        const dateStr = d.updated_at || d.installed_at ? new Date(d.updated_at || d.installed_at).toLocaleString('vi-VN') : 'Mặc Định';
+        
+        let varsHtml = '<span style="color: var(--text-muted); font-size: 0.8rem;">(Mặc định)</span>';
+        if (d.applied_variables && Object.keys(d.applied_variables).length > 0) {
+          varsHtml = Object.entries(d.applied_variables).map(([k, v]) => `
+            <div style="font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; margin-bottom: 2px;">
+              <span style="color: #a78bfa;">${k}:</span> <span style="color: #38bdf8;">${v}</span>
+            </div>
+          `).join('');
+        }
+
+        return `
+          <tr>
+            <td style="white-space: nowrap;"><strong style="font-family: 'JetBrains Mono', monospace; color: #38bdf8;">${d.id}</strong></td>
+            <td style="min-width: 220px; max-width: 320px;">
+              <div style="font-weight: 600; color: #fff; line-height: 1.35; margin-bottom: 3px;">${d.name || d.id}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.35;">${d.description || ''}</div>
+            </td>
+            <td style="white-space: nowrap;">${badge}</td>
+            <td style="max-width: 260px; word-break: break-word;">${varsHtml}</td>
+            <td style="font-size: 0.8rem; color: var(--text-muted); white-space: nowrap;">${dateStr}</td>
+            <td style="text-align: right; white-space: nowrap;">
+              <div style="display: inline-flex; gap: 6px; align-items: center; justify-content: flex-end;">
+                <button class="btn btn-primary btn-action" onclick="executeDagLocal('${d.id}')" title="Chạy thử nghiệm ngay trên máy này">
+                  <i class="fa-solid fa-play"></i> Chạy Thử
+                </button>
+                <button class="btn btn-secondary btn-action" onclick="openReconfigureModal('${d.id}')" title="Cấu hình lại biến số">
+                  <i class="fa-solid fa-sliders"></i> Sửa Biến Số
+                </button>
+                <button class="btn btn-success btn-action" onclick="openSubmitModal('${d.id}')" title="Đóng góp lên Chợ Chung cho cộng đồng">
+                  <i class="fa-solid fa-share-nodes"></i> Nộp Lên Chợ
+                </button>
+                ${isCustom ? `
+                  <button class="btn btn-danger btn-action" onclick="deleteInstanceLocal('${d.id}')" title="Xóa biến thể này" style="padding: 0.42rem 0.6rem !important;">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderCatalog(catalog) {
+      const grid = document.getElementById('catalogGrid');
+      if (!catalog || catalog.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">Chợ chưa có mẫu quy trình nào. Vui lòng kiểm tra lại kết nối Core HQ.</div>';
+        return;
+      }
+
+      grid.innerHTML = catalog.map(item => {
+        const varTags = (item.required_variables || []).map(v => `<span class="var-tag">{{${v.name || v}}}</span>`).join('');
+        const author = item.author || 'OPC Core HQ';
+        const signature = item.signature || 'Chưa Ký Số';
+
+        return `
+          <div class="catalog-card">
+            <div>
+              <div class="catalog-header">
+                <span class="badge" style="background: rgba(139, 92, 246, 0.15); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.3);">${item.category || 'General'}</span>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">v${item.version || '1.0.0'}</span>
+              </div>
+              <h3 class="catalog-title">${item.name}</h3>
+              <p class="catalog-desc">${item.description || ''}</p>
+              
+              <div class="signature-badge" title="${signature}">
+                <i class="fa-solid fa-certificate"></i>
+                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${signature}</span>
+              </div>
+
+              <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.5rem;">Biến số cần điền:</div>
+              <div class="var-tags">
+                ${varTags || '<span style="font-size: 0.75rem; color: var(--text-muted);">(Không yêu cầu)</span>'}
+              </div>
+            </div>
+
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.75rem; color: var(--text-muted);"><i class="fa-solid fa-user-check"></i> ${author}</span>
+              <button class="btn btn-primary btn-action" onclick="openInstallWizard('${item.id}')" style="padding: 0.55rem 1rem !important; font-size: 0.85rem !important;">
+                <i class="fa-solid fa-download"></i> Cài Đặt Biến Thể
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterInstances() {
+      const q = document.getElementById('instanceSearch').value.toLowerCase().trim();
+      const type = document.getElementById('instanceTypeFilter').value;
+
+      const filtered = globalInstances.filter(d => {
+        const matchesQuery = (d.id || '').toLowerCase().includes(q) || (d.name || '').toLowerCase().includes(q) || (d.description || '').toLowerCase().includes(q);
+        let matchesType = true;
+        if (type === 'CUSTOM') matchesType = !!d.is_local_instance;
+        if (type === 'CORE') matchesType = !d.is_local_instance;
+        return matchesQuery && matchesType;
+      });
+
+      renderInstances(filtered);
+    }
+
+    function filterCatalog() {
+      const q = document.getElementById('catalogSearch').value.toLowerCase().trim();
+      const cat = document.getElementById('catalogCategoryFilter').value;
+
+      const filtered = globalCatalog.filter(item => {
+        const matchesQuery = (item.name || '').toLowerCase().includes(q) || (item.description || '').toLowerCase().includes(q);
+        const matchesCat = cat === 'ALL' || item.category === cat;
+        return matchesQuery && matchesCat;
+      });
+
+      renderCatalog(filtered);
+    }
+
+    // --- WIZARD INSTALL ---
+    function openInstallWizard(templateId) {
+      const template = globalCatalog.find(c => c.id === templateId);
+      if (!template) return;
+
+      document.getElementById('wizardTemplateId').value = template.id;
+      document.getElementById('wizardTitle').innerText = `Cài Đặt: ${template.name}`;
+      document.getElementById('wizardSubtitle').innerText = `Tác giả: ${template.author || 'Core HQ'} • v${template.version || '1.0.0'}`;
+      
+      const randSuffix = Math.random().toString(36).substring(2, 6);
+      document.getElementById('wizardInstanceId').value = `dag_instance_${template.id.replace('dag_sop_', '')}_${randSuffix}`;
+      document.getElementById('wizardInstanceName').value = `${template.name} (Tùy biến)`;
+
+      const fieldsContainer = document.getElementById('wizardDynamicFields');
+      const reqVars = template.required_variables || [];
+
+      if (reqVars.length === 0) {
+        fieldsContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">Quy trình này không yêu cầu biến số tùy chỉnh.</p>';
+      } else {
+        fieldsContainer.innerHTML = reqVars.map(v => {
+          const varName = v.name || v;
+          const label = v.label || varName;
+          const desc = v.description || '';
+          const defaultVal = v.default || '';
+
+          return `
+            <div class="form-group">
+              <label for="var_${varName}">${label} <span style="color: #a78bfa; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;">{{${varName}}}</span></label>
+              ${desc ? `<div class="form-desc">${desc}</div>` : ''}
+              <input type="text" id="var_${varName}" class="form-control wizard-var-input" data-var="${varName}" value="${defaultVal}" placeholder="Nhập giá trị...">
+            </div>
+          `;
+        }).join('');
+      }
+
+      openModal('configWizardModal');
+    }
+
+    async function submitInstallInstance() {
+      const templateId = document.getElementById('wizardTemplateId').value;
+      const instanceId = document.getElementById('wizardInstanceId').value.trim();
+      const instanceName = document.getElementById('wizardInstanceName').value.trim();
+
+      const variables = {};
+      const inputs = document.querySelectorAll('.wizard-var-input');
+      inputs.forEach(inp => {
+        const k = inp.getAttribute('data-var');
+        variables[k] = inp.value.trim();
+      });
+
+      try {
+        const res = await fetch('/api/marketplace/install-dag', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            template_id: templateId,
+            variables,
+            meta: {
+              instance_id: instanceId,
+              instance_name: instanceName
+            }
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          closeModal('configWizardModal');
+          showToast(`🎉 Đã khởi tạo thành công biến thể "${instanceName}"!`, 'success');
+          await loadAllData();
+          switchTab('instances');
+        } else {
+          showToast(`Lỗi: ${data.error}`, 'danger');
+        }
+      } catch (e) {
+        showToast(`Lỗi: ${e.message}`, 'danger');
+      }
+    }
+
+    // --- RECONFIGURE MODAL ---
+    function openReconfigureModal(dagId) {
+      const dag = globalInstances.find(d => d.id === dagId);
+      if (!dag) return;
+
+      document.getElementById('reconfigInstanceId').value = dag.id;
+      document.getElementById('reconfigTitle').innerText = `Chỉnh Sửa: ${dag.name || dag.id}`;
+      document.getElementById('reconfigSubtitle').innerText = `Mã ID: ${dag.id}`;
+      document.getElementById('reconfigInstanceName').value = dag.name || '';
+
+      const fieldsContainer = document.getElementById('reconfigDynamicFields');
+      const applied = dag.applied_variables || {};
+      const rawTemplate = dag.raw_template || {};
+      const reqVars = rawTemplate.required_variables || [];
+
+      if (Object.keys(applied).length === 0 && reqVars.length === 0) {
+        fieldsContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem; padding: 1rem 0;">Quy trình này không có biến số tùy biến.</p>';
+      } else {
+        const keys = new Set([...Object.keys(applied), ...reqVars.map(v => v.name || v)]);
+        fieldsContainer.innerHTML = Array.from(keys).map(k => {
+          const currentVal = applied[k] || '';
+          return `
+            <div class="form-group">
+              <label for="reconfig_var_${k}">${k}</label>
+              <input type="text" id="reconfig_var_${k}" class="form-control reconfig-var-input" data-var="${k}" value="${currentVal}">
+            </div>
+          `;
+        }).join('');
+      }
+
+      openModal('reconfigureModal');
+    }
+
+    async function submitReconfigureInstance() {
+      const instanceId = document.getElementById('reconfigInstanceId').value;
+      const instanceName = document.getElementById('reconfigInstanceName').value.trim();
+
+      const variables = {};
+      const inputs = document.querySelectorAll('.reconfig-var-input');
+      inputs.forEach(inp => {
+        const k = inp.getAttribute('data-var');
+        variables[k] = inp.value.trim();
+      });
+
+      try {
+        const res = await fetch('/api/dag/instances/reconfigure', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            instance_id: instanceId,
+            variables,
+            meta: { instance_name: instanceName }
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          closeModal('reconfigureModal');
+          showToast(`✅ Đã cập nhật biến số cho "${instanceName}" thành công!`, 'success');
+          loadAllData();
+        } else {
+          showToast(`Lỗi: ${data.error}`, 'danger');
+        }
+      } catch (e) {
+        showToast(`Lỗi: ${e.message}`, 'danger');
+      }
+    }
+
+    // --- SUBMIT TO CORE ---
+    function openSubmitModal(dagId) {
+      const dag = globalInstances.find(d => d.id === dagId);
+      if (!dag) return;
+
+      document.getElementById('submitDagId').value = dag.id;
+      document.getElementById('submitDagName').value = `${dag.name || dag.id} (${dag.id})`;
+      document.getElementById('submitDescription').value = dag.description || '';
+      openModal('submitModal');
+    }
+
+    async function confirmSubmitToCore() {
+      const dagId = document.getElementById('submitDagId').value;
+      const category = document.getElementById('submitCategory').value;
+      const desc = document.getElementById('submitDescription').value.trim();
+
+      try {
+        const res = await fetch('/api/marketplace/submit-to-client0', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            dag_id: dagId,
+            niche_category: category,
+            description: desc
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          closeModal('submitModal');
+          showToast(`🚀 Đã nộp đề xuất lên Client 0 thành công! (Ticket: ${data.candidate?.candidate_id || 'OK'})`, 'success');
+        } else {
+          showToast(`Lỗi nộp hồ sơ: ${data.error}`, 'danger');
+        }
+      } catch (e) {
+        showToast(`Lỗi: ${e.message}`, 'danger');
+      }
+    }
+
+    // --- DELETE INSTANCE ---
+    async function deleteInstanceLocal(dagId) {
+      if (!confirm(`Bạn có chắc chắn muốn xóa biến thể "${dagId}" khỏi máy cục bộ?`)) return;
+
+      try {
+        const res = await fetch(`/api/dag/instances/${encodeURIComponent(dagId)}`, {
+          method: 'DELETE'
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('🗑️ Đã xóa biến thể thành công.', 'success');
+          loadAllData();
+        } else {
+          showToast(`Lỗi: ${data.error}`, 'danger');
+        }
+      } catch (e) {
+        showToast(`Lỗi: ${e.message}`, 'danger');
+      }
+    }
+
+    // --- EXECUTE LOCAL DAG ---
+    async function executeDagLocal(dagId) {
+      showToast(`⚡ Đang khởi động quy trình "${dagId}" trên DAGEngine...`, 'success');
+      try {
+        const res = await fetch('/api/dag/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: dagId })
+        });
+
+        const data = await res.json();
+        document.getElementById('execModalTitle').innerText = `Thực Thi: ${dagId}`;
+        document.getElementById('execModalSubtitle').innerText = `Execution ID: ${data.data?.execution_id || 'N/A'}`;
+
+        const alertBox = document.getElementById('execStatusAlert');
+        if (data.success && data.data?.status === 'COMPLETED') {
+          alertBox.style.background = 'rgba(16, 185, 129, 0.2)';
+          alertBox.style.color = '#34d399';
+          alertBox.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+          alertBox.innerHTML = '<i class="fa-solid fa-circle-check"></i> Quy trình đã thực thi HOÀN TẤT thành công 100%!';
+        } else if (data.data?.status === 'PAUSED') {
+          alertBox.style.background = 'rgba(245, 158, 11, 0.2)';
+          alertBox.style.color = '#fbbf24';
+          alertBox.style.border = '1px solid rgba(245, 158, 11, 0.4)';
+          alertBox.innerHTML = '<i class="fa-solid fa-circle-pause"></i> Quy trình tạm dừng chờ phản hồi từ người dùng (Interactive State).';
+        } else {
+          alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+          alertBox.style.color = '#f87171';
+          alertBox.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+          alertBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Lỗi thực thi: ${data.error || 'Thất bại'}`;
+        }
+
+        document.getElementById('execOutputJson').textContent = JSON.stringify(data.data || data, null, 2);
+        openModal('execModal');
+      } catch (e) {
+        showToast(`Lỗi chạy quy trình: ${e.message}`, 'danger');
+      }
+    }
+
+    // --- MODAL & TOAST HELPERS ---
+    function openModal(id) {
+      document.getElementById(id).style.display = 'flex';
+    }
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('toast');
+      t.innerText = msg;
+      t.style.display = 'block';
+      if (type === 'danger') {
+        t.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+        t.style.color = '#f87171';
+      } else {
+        t.style.borderColor = 'rgba(16, 185, 129, 0.5)';
+        t.style.color = '#34d399';
+      }
+      setTimeout(() => { t.style.display = 'none'; }, 4000);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "id": "dag_sop_realestate_autopilot",
+  "name": "SOP: Quy trình Chăm Sóc & Chốt Khách Hàng Bất Động Sản",
+  "description": "Tự động lấy thông tin từ Fanpage act_re_invest_01 và gửi tin nhắn Zalo tới số 0988776655",
+  "nodes": [
+    {
+      "id": "node_1_ingest_lead",
+      "command": "cme_generate_content",
+      "input": {
+        "topic": "Dự Án Chung Cư Vinhomes Grand Park",
+        "target_audience": "Nhà đầu tư bất động sản",
+        "fanpage_id": "act_client_real_estate_hanoi",
+        "contact_phone": "0912345678"
+      },
+      "next": "node_2_send_message"
+    },
+    {
+      "id": "node_2_send_message",
+      "command": "chat_send_message",
+      "input": {
+        "channel": "zalo_web",
+        "recipient_id": "0912345678",
+        "text": "Xin chào anh/chị quan tâm tới dự án Vinhomes Grand Park!"
+      },
+      "next": "END"
+    }
+  ],
+  "installed_at": "2026-09-08T18:55:29.345Z",
+  "is_local_instance": true
+}

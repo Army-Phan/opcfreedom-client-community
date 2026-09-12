@@ -1,0 +1,66 @@
+{
+  "id": "dag_sop_06_trumvps_provision",
+  "name": "SOP-06: Quy trình Kích hoạt & Quản lý Máy chủ TrumVPS / Ubuntu AI",
+  "description": "Tự động khởi tạo VPS Docker AI trên TrumVPS, bàn giao credential cho 2 nhân sự và giám sát tải trọng CPU/RAM",
+  "nodes": [
+    {
+      "id": "node_1_verify_legal",
+      "command": "member_verify_legal",
+      "input": {
+        "member_id": "{{member_id}}"
+      }
+    },
+    {
+      "id": "node_2_provision_vps",
+      "command": "vps_provision_instance",
+      "input": {
+        "member_id": "{{member_id}}",
+        "os_type": "{{variables.os_type}}",
+        "specs": "{{variables.specs}}"
+      }
+    },
+    {
+      "id": "node_3_send_credentials",
+      "command": "chat_send_message",
+      "input": {
+        "channel": "email_and_private_msg",
+        "recipient_id": "{{member_id}}",
+        "text": "Thông tin đăng nhập VPS TrumVPS: IP {{nodes.node_2_provision_vps.output.ip_address}}, User: {{nodes.node_2_provision_vps.output.username}}, Mật khẩu: {{nodes.node_2_provision_vps.output.password}}"
+      }
+    },
+    {
+      "id": "node_4_monitor_health",
+      "command": "vps_monitor_health",
+      "input": {
+        "ip_address": "{{nodes.node_2_provision_vps.output.ip_address}}"
+      }
+    },
+    {
+      "id": "node_5_check_overload",
+      "command": "evaluate_condition",
+      "input": {
+        "expression": "{{nodes.node_4_monitor_health.output.cpu_usage}} <= 90"
+      },
+      "branches": {
+        "true": "node_6_log_healthy",
+        "false": "node_7_alert_upgrade"
+      }
+    },
+    {
+      "id": "node_6_log_healthy",
+      "command": "evaluate_condition",
+      "input": {
+        "expression": "1 == 1"
+      }
+    },
+    {
+      "id": "node_7_alert_upgrade",
+      "command": "chat_send_message",
+      "input": {
+        "channel": "telegram",
+        "recipient_id": "{{member_id}}",
+        "text": "⚠️ Cảnh báo: Tải trọng CPU/RAM trên VPS của Anh đã vượt quá 90%. Vui lòng xem xét nâng cấp gói!"
+      }
+    }
+  ]
+}

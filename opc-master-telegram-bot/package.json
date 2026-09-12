@@ -1,0 +1,25 @@
+{
+  "name": "opc-master-telegram-bot",
+  "version": "1.0.0",
+  "description": "Trợ lý Tổng chỉ huy Telegram cho hệ sinh thái OPC Autonomous OS",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "opc",
+    "telegram",
+    "bot",
+    "ai",
+    "master-bot"
+  ],
+  "author": "Antigravity AI Engineering Team",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
+    "node-telegram-bot-api": "^0.66.0"
+  }
+}

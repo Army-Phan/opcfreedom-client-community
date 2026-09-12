@@ -1,0 +1,21 @@
+{
+  "name": "opcfreedom-client-community",
+  "version": "4.2.0",
+  "description": "Official OPC Freedom Community Client Node - Hệ điều hành tự động hóa doanh nghiệp mini",
+  "main": "web-browser-automation/server.js",
+  "scripts": {
+    "start": "docker compose up -d",
+    "stop": "docker compose down",
+    "logs": "docker compose logs -f"
+  },
+  "keywords": [
+    "opc-freedom",
+    "automation",
+    "browser-automation",
+    "dag-engine",
+    "ai-agent",
+    "community-node"
+  ],
+  "author": "OPC Freedom HQ",
+  "license": "MIT"
+}
