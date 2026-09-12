@@ -13,8 +13,11 @@ Phiên bản này được thiết kế để **tặng cộng đồng** trải n
    - Tự động duy trì 11 Tabs mạng xã hội (Facebook, TikTok, YouTube, Threads, X, Instagram, Zalo, Telegram...).
 2. **📊 Client Web Dashboard (Port 3001):**
    - Quản lý kênh bán hàng, chiến dịch nội dung (CME), sản phẩm và CRM khách hàng cục bộ.
-3. **⚡ Local DAG Engine (Động cơ Thực thi Quy trình Tự động):**
-   - Bộ 20 DAG templates chuẩn hóa giúp tự động hóa từ A-Z (chăm sóc khách hàng, phân phối nội dung, nuôi kênh).
+3. **⚡ Local DAG Engine (Bộ DAG Cốt Lõi Cho Mọi Doanh Nghiệp):**
+   - **DAG 01:** Tự động sáng tạo và đăng bài đa kênh (Facebook, TikTok, YouTube, Threads, Zalo...).
+   - **DAG 02:** Quản lý và tối ưu chiến dịch quảng cáo (Facebook Ads CBO).
+   - **DAG 03:** Chatbot tiếp đón, tư vấn và sàng lọc khách hàng tiềm năng tự động.
+   - **DAG Mẫu:** Mẫu tự động hóa quy trình chuyên ngành (Real Estate Autopilot).
 4. **🤖 Master Telegram Bot Riêng (Port 3003):**
    - Cho phép bạn chỉ huy và nhận báo cáo từ máy trạm trực tiếp qua Telegram cá nhân.
 5. **🎨 Local Web Studio & Cloudflare Deployer (Port 5173):**
@@ -27,8 +30,8 @@ Phiên bản này được thiết kế để **tặng cộng đồng** trải n
 | Hạng Mục | 🎁 Thành Viên Cộng Đồng (Free Community) | 👑 Thành Viên Trả Phí (Paid Membership / VIP) |
 |---|---|---|
 | **Mã Nguồn Cài Đặt** | Bản phát hành này (Độc lập 100%) | Bản phát hành này + Key VIP kích hoạt |
-| **Số Lượng DAGs** | Bộ 20 Template DAGs cơ bản | Full DAGs nâng cao + Độc quyền từ Core |
-| **Mở Rộng Tính Năng** | • Tự code thêm DAGs<br>• Hoặc thuê **Dịch vụ DAG 17 (Custom R&D)** | Được đội ngũ Core HQ / Client 0 hỗ trợ nạp sẵn và nâng cấp |
+| **Bộ DAGs Sẵn Có** | Bộ DAGs cốt lõi doanh nghiệp (DAG 1, 2, 3) | Full bộ DAGs nâng cao + Độc quyền từ Core |
+| **Mở Rộng Tính Năng** | • Tự code thêm DAGs<br>• Hoặc chat với **MTB Client 0** để dùng **Dịch vụ DAG 17 (Custom R&D)** | Được đội ngũ Core HQ / Client 0 hỗ trợ nạp sẵn và nâng cấp liên tục |
 | **Hỗ Trợ Kỹ Thuật** | Hỗ trợ qua Group Cộng đồng | Hỗ trợ 1-1 chuyên sâu từ Mentor |
 
 ---
