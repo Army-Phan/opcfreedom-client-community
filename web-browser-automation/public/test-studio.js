@@ -56,14 +56,11 @@ async function loadProfiles() {
         <div class="roles-tag-container">${rolesHtml}</div>
 
         <div class="profile-actions">
-          <button class="btn-launch" onclick="launchProfile('${p.id}', '${p.defaultUrls[0].url}')">
-            🚀 Mở ${p.defaultUrls[0].name} Trên VNC
-          </button>
-          ${p.defaultUrls[1] ? `
-            <button class="btn-secondary" onclick="launchProfile('${p.id}', '${p.defaultUrls[1].url}')">
-              🌐 Mở ${p.defaultUrls[1].name}
+          ${p.defaultUrls.map((u, i) => `
+            <button class="${i === 0 ? 'btn-launch' : 'btn-secondary'}" onclick="launchProfile('${p.id}', '${u.url}')">
+              ${i === 0 ? '🚀' : '🌐'} Mở ${u.name}
             </button>
-          ` : ''}
+          `).join('')}
           ${p.isRunning ? `
             <button class="btn-secondary" style="color: #f87171;" onclick="closeProfile('${p.id}')">
               🛑 Đóng Trình Duyệt Này

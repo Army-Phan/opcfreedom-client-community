@@ -78,8 +78,10 @@ async function launchChromeContext(isHeadless) {
     args: [
       '--disable-blink-features=AutomationControlled',
       '--no-sandbox',
+      '--test-type',
       '--disable-infobars',
-      '--window-size=1280,720'
+      '--start-maximized',
+      '--window-size=1600,873'
     ]
   };
 

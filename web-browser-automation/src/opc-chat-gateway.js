@@ -173,7 +173,7 @@ class OpcChatGateway {
         let url = '';
         if (ch === 'zalo') url = 'https://chat.zalo.me/';
         else if (ch === 'facebook') url = 'https://www.facebook.com/messages/';
-        else if (ch === 'telegram') url = 'https://web.telegram.org/';
+        else if (ch === 'telegram') url = 'https://web.telegram.org/a/';
         else if (ch.startsWith('gemini_')) url = 'https://gemini.google.com/app';
 
         if (url) {
@@ -197,22 +197,6 @@ class OpcChatGateway {
             await page.exposeFunction('onNewCustomerMessage', async (payload) => {
               return await this.processCustomerMessage(payload);
             });
-
-            // Tiêm script lắng nghe DOM ngầm
-            let scriptPath = '';
-            if (ch === 'zalo') scriptPath = path.resolve('src/inject/zalo-listener.js');
-            else if (ch === 'facebook') scriptPath = path.resolve('src/inject/fb-listener.js');
-            else if (ch === 'telegram') scriptPath = path.resolve('src/inject/tele-listener.js');
-            
-            if (scriptPath && fs.existsSync(scriptPath)) {
-              const listenerScript = fs.readFileSync(scriptPath, 'utf8');
-              await page.addInitScript(listenerScript);
-              console.log(`[ChatGateway Browser Hook] Đã tiêm bộ lắng nghe chuyên dụng cho kênh ${ch}`);
-            } else {
-              await page.addInitScript(() => {
-                console.log('[ChatGateway Browser Hook] Đã tiêm bộ lắng nghe tin nhắn mặc định.');
-              });
-            }
           }
 
           // Đi đến URL không block nếu chưa có mạng (Có cơ chế chống checkpoint cho Facebook)
@@ -245,9 +229,38 @@ class OpcChatGateway {
                 page.goto('https://www.facebook.com/messages/', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
               });
           } else {
-            page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(e => {
+            page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(e => {
               console.warn(`[ChatGateway] Cảnh báo khi tải trang ${ch}: ${e.message}`);
             });
+          }
+
+          // Tiêm script lắng nghe DOM AN TOÀN sau khi trang đã tải (tránh làm sập Webpack/React)
+          if (!ch.startsWith('gemini_')) {
+            let scriptPath = '';
+            if (ch === 'zalo') scriptPath = path.resolve('src/inject/zalo-listener.js');
+            else if (ch === 'facebook') scriptPath = path.resolve('src/inject/fb-listener.js');
+            else if (ch === 'telegram') scriptPath = path.resolve('src/inject/tele-listener.js');
+
+            if (scriptPath && fs.existsSync(scriptPath)) {
+              const listenerScript = fs.readFileSync(scriptPath, 'utf8');
+              const injectSafely = async () => {
+                try {
+                  await page.waitForTimeout(2500);
+                  await page.evaluate(listenerScript);
+                  console.log(`[ChatGateway Hook] 🛡️ Đã tiêm bộ lắng nghe an toàn cho kênh ${ch}`);
+                } catch (err) {
+                  // Bỏ qua lỗi nếu page đang chuyển hướng
+                }
+              };
+
+              // Tiêm lần đầu
+              injectSafely();
+
+              // Tự động tiêm lại khi người dùng reload / F5 trang
+              page.on('load', () => {
+                setTimeout(injectSafely, 2500);
+              });
+            }
           }
 
           // Giãn cách nạp tab 3000ms (3s) lần lượt để trình duyệt tải ổn định và chống Google Bot reCAPTCHA
@@ -398,6 +411,18 @@ class OpcChatGateway {
       return { success: false, error: 'Empty message text.' };
     }
 
+    // === CHỐNG GỬI TRÙNG LẶP & ĐỒNG THỜI (DEDUPLICATION GUARD) ===
+    this.processedSignatures = this.processedSignatures || new Set();
+    if (this.processedSignatures.has(msgSignature)) {
+      console.log(`[ChatGateway] 🛡️ Tin nhắn trùng lặp đang/đã được xử lý (${msgSignature.slice(0, 50)}...). Bỏ qua.`);
+      return { success: false, error: 'Duplicate message ignored.' };
+    }
+    this.processedSignatures.add(msgSignature);
+    if (this.processedSignatures.size > 200) {
+      const first = this.processedSignatures.values().next().value;
+      this.processedSignatures.delete(first);
+    }
+
     console.log(`\n[ChatGateway] 📩 Nhận tin nhắn mới từ [${channel.toUpperCase()}] (${customerName || customerId}):\n"${messageText}"`);
 
     // === BỘ QUẢN LÝ PHIÊN HỘI THOẠI (SESSION LOCK) ===
@@ -438,150 +463,159 @@ class OpcChatGateway {
     this.stats.messagesProcessed++;
     this.stats.lastActivity = new Date().toISOString();
 
-    let aiReply = '';
-    let isBlockedByFirewall = false;
-    let autoTyped = false;
+    // TUẦN TỰ HÓA HÀNG ĐỢI XỬ LÝ (QUEUE SERIALIZATION) ĐỂ KHÔNG BAO GIỜ BỊ GỬI DOUBLE TRÊN CÙNG KÊNH
+    const queueKey = channel;
+    this.channelQueues[queueKey] = (this.channelQueues[queueKey] || Promise.resolve()).then(async () => {
+      let aiReply = '';
+      let isBlockedByFirewall = false;
+      let autoTyped = false;
 
-    try {
-      // ⚠️ ĐỊNH TUYẾN CHUẨN: Luôn gọi vào Client Brain nội bộ (Port 3001) để xử lý logic DAG & SOP của Client
-      const res = await fetch(`${CLIENT_BRAIN_URL}/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: messageText,
-          channel,
-          customerId,
-          customerName,
-          isCustomerChannel: true,
-          activeBrainId: 'brain_customer_support',
-          msgSignature
-        })
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        aiReply = data.reply || data.responseText || '';
-        isBlockedByFirewall = !!data.firewallProtected;
-      } else {
-        aiReply = 'Dạ em chào anh/chị, bên em đang bận một chút. Em sẽ phản hồi anh/chị sớm nhất ạ!';
-      }
-    } catch (err) {
-      console.error(`[ChatGateway] Lỗi gọi Client Brain (${CLIENT_BRAIN_URL}): ${err.message}`);
-      aiReply = 'Dạ em chào anh/chị, hệ thống đang bận. Em xin phép hỗ trợ anh/chị sau ít phút ạ!';
-    }
-
-    // Tiền xử lý & làm đẹp nội dung cho từng kênh giao tiếp (Zalo, FB, Tele, Web)
-    if (aiReply) {
-      aiReply = formatMessageForChannel(aiReply, channel);
-    }
-
-    if (aiReply && channel === 'fb_fanpage') {
       try {
-        console.log(`[ChatGateway] 🚀 Gửi câu trả lời AI tới Facebook Fanpage Messenger (${customerId}): "${aiReply.replace(/\n/g, ' ').slice(0, 60)}..."`);
-        const sendRes = await this.sendFacebookPageMessage(customerId, aiReply);
-        autoTyped = sendRes.success;
-      } catch (err) {
-        console.error(`[ChatGateway] Lỗi gửi tin nhắn Fanpage: ${err.message}`);
-      }
-    } else if (aiReply && this.pages[channel] && !this.pages[channel].isClosed()) {
-      try {
-        console.log(`[ChatGateway] 🤖 Tự động gõ câu trả lời vào [${channel.toUpperCase()}]: "${aiReply.replace(/\n/g, ' ').slice(0, 60)}..."`);
-        const page = this.pages[channel];
+        // ⚠️ ĐỊNH TUYẾN CHUẨN: Luôn gọi vào Client Brain nội bộ (Port 3001) để xử lý logic DAG & SOP của Client
+        const res = await fetch(`${CLIENT_BRAIN_URL}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: messageText,
+            channel,
+            customerId,
+            customerName,
+            isCustomerChannel: true,
+            activeBrainId: 'brain_customer_support',
+            msgSignature
+          })
+        });
 
-        if (channel === 'facebook') {
-          // Xử lý riêng cho Facebook: click trước để Lexical nhận diện selection
-          await page.evaluate(async ({ reply, customerId }) => {
-            window.lastAiReplies = window.lastAiReplies || [];
-            window.lastAiReplies.push(reply.trim().substring(0, 50));
-            if (window.lastAiReplies.length > 50) window.lastAiReplies.shift();
-
-            // AI tương tác -> gia hạn thời gian active session
-            window.activeSessionLastTime = Date.now();
-            window.activeCustomerId = customerId;
-          }, { reply: aiReply, customerId }).catch(() => {});
-
-          const textbox = page.locator('div[role="main"] div[role="textbox"][contenteditable="true"]').first();
-          await textbox.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-          await textbox.click().catch(() => {});
-          await page.waitForTimeout(150);
-
-          await page.evaluate(() => {
-            document.execCommand('selectAll', false, null);
-            document.execCommand('delete', false, null);
-          }).catch(() => {});
-
-          await page.waitForTimeout(100);
-          await page.keyboard.insertText(aiReply);
+        if (res.ok) {
+          const data = await res.json();
+          aiReply = data.reply || data.responseText || '';
+          isBlockedByFirewall = !!data.firewallProtected;
         } else {
-          // BẢO TOÀN NGUYÊN BẢN CỦA ZALO VÀ TELEGRAM (Không thay đổi bất cứ dòng code nào của logic cũ, chỉ đôn đốc session)
-          await page.evaluate(async ({ reply, channel, customerId }) => {
-            window.lastAiReplies = window.lastAiReplies || [];
-            window.lastAiReplies.push(reply.trim().substring(0, 50));
-            if (window.lastAiReplies.length > 50) window.lastAiReplies.shift();
+          aiReply = 'Dạ em chào anh/chị, bên em đang bận một chút. Em sẽ phản hồi anh/chị sớm nhất ạ!';
+        }
+      } catch (err) {
+        console.error(`[ChatGateway] Lỗi gọi Client Brain (${CLIENT_BRAIN_URL}): ${err.message}`);
+        aiReply = 'Dạ em chào anh/chị, hệ thống đang bận. Em xin phép hỗ trợ anh/chị sau ít phút ạ!';
+      }
 
-            // AI tương tác -> gia hạn thời gian active session
-            window.activeSessionLastTime = Date.now();
-            window.activeCustomerId = customerId;
+      // Tiền xử lý & làm đẹp nội dung cho từng kênh giao tiếp (Zalo, FB, Tele, Web)
+      if (aiReply) {
+        aiReply = formatMessageForChannel(aiReply, channel);
+      }
 
-            let activeInput = document.querySelector('#richInput, .input-message-input, div[aria-placeholder*="tin nhắn"], div[aria-label*="Message"], div[role="textbox"][contenteditable="true"]');
-            if (!activeInput) {
-              activeInput = document.activeElement && document.activeElement.tagName !== 'BODY' ? document.activeElement : document.querySelector('[contenteditable="true"], textarea');
-            }
-            if (activeInput) {
-              activeInput.focus();
+      if (aiReply && channel === 'fb_fanpage') {
+        try {
+          console.log(`[ChatGateway] 🚀 Gửi câu trả lời AI tới Facebook Fanpage Messenger (${customerId}): "${aiReply.replace(/\n/g, ' ').slice(0, 60)}..."`);
+          const sendRes = await this.sendFacebookPageMessage(customerId, aiReply);
+          autoTyped = sendRes.success;
+        } catch (err) {
+          console.error(`[ChatGateway] Lỗi gửi tin nhắn Fanpage: ${err.message}`);
+        }
+      } else if (aiReply && this.pages[channel] && !this.pages[channel].isClosed()) {
+        try {
+          console.log(`[ChatGateway] 🤖 Tự động gõ câu trả lời vào [${channel.toUpperCase()}]: "${aiReply.replace(/\n/g, ' ').slice(0, 60)}..."`);
+          const page = this.pages[channel];
+
+          if (channel === 'facebook') {
+            // Xử lý riêng cho Facebook: click trước để Lexical nhận diện selection
+            await page.evaluate(async ({ reply, customerId }) => {
+              window.lastAiReplies = window.lastAiReplies || [];
+              window.lastAiReplies.push(reply.trim().substring(0, 50));
+              if (window.lastAiReplies.length > 50) window.lastAiReplies.shift();
+
+              // AI tương tác -> gia hạn thời gian active session
+              window.activeSessionLastTime = Date.now();
+              window.activeCustomerId = customerId;
+            }, { reply: aiReply, customerId }).catch(() => {});
+
+            const textbox = page.locator('div[role="main"] div[role="textbox"][contenteditable="true"]').first();
+            await textbox.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+            await textbox.click().catch(() => {});
+            await page.waitForTimeout(150);
+
+            await page.evaluate(() => {
               document.execCommand('selectAll', false, null);
               document.execCommand('delete', false, null);
-              
-              if (channel === 'zalo' || channel === 'facebook') {
-                const dataTransfer = new DataTransfer();
-                dataTransfer.setData('text/plain', reply);
-                
-                const htmlReply = reply.replace(/\n/g, '<br>');
-                dataTransfer.setData('text/html', htmlReply);
-                
-                const pasteEvent = new ClipboardEvent('paste', {
-                  clipboardData: dataTransfer,
-                  bubbles: true,
-                  cancelable: true,
-                });
-                activeInput.dispatchEvent(pasteEvent);
-                activeInput.dispatchEvent(new Event('input', { bubbles: true }));
-              } else {
-                document.execCommand('insertText', false, reply);
+            }).catch(() => {});
+
+            await page.waitForTimeout(100);
+            await page.keyboard.insertText(aiReply);
+          } else {
+            // BẢO TOÀN NGUYÊN BẢN CỦA ZALO VÀ TELEGRAM (Không thay đổi bất cứ dòng code nào của logic cũ, chỉ đôn đốc session)
+            await page.evaluate(async ({ reply, channel, customerId }) => {
+              window.lastAiReplies = window.lastAiReplies || [];
+              window.lastAiReplies.push(reply.trim().substring(0, 50));
+              if (window.lastAiReplies.length > 50) window.lastAiReplies.shift();
+
+              // AI tương tác -> gia hạn thời gian active session
+              window.activeSessionLastTime = Date.now();
+              window.activeCustomerId = customerId;
+
+              let activeInput = document.querySelector('#richInput, .input-message-input, div[aria-placeholder*="tin nhắn"], div[aria-label*="Message"], div[role="textbox"][contenteditable="true"]');
+              if (!activeInput) {
+                activeInput = document.activeElement && document.activeElement.tagName !== 'BODY' ? document.activeElement : document.querySelector('[contenteditable="true"], textarea');
               }
-            }
-          }, { reply: aiReply, channel, customerId }).catch(() => {});
-        }
-        
-        await page.waitForTimeout(200);
-        await page.keyboard.press('Enter');
+              if (activeInput) {
+                activeInput.focus();
+                document.execCommand('selectAll', false, null);
+                document.execCommand('delete', false, null);
+                
+                if (channel === 'zalo' || channel === 'facebook') {
+                  const dataTransfer = new DataTransfer();
+                  dataTransfer.setData('text/plain', reply);
+                  
+                  const htmlReply = reply.replace(/\n/g, '<br>');
+                  dataTransfer.setData('text/html', htmlReply);
+                  
+                  const pasteEvent = new ClipboardEvent('paste', {
+                    clipboardData: dataTransfer,
+                    bubbles: true,
+                    cancelable: true,
+                  });
+                  activeInput.dispatchEvent(pasteEvent);
+                  activeInput.dispatchEvent(new Event('input', { bubbles: true }));
+                } else {
+                  document.execCommand('insertText', false, reply);
+                }
+              }
+            }, { reply: aiReply, channel, customerId }).catch(() => {});
+          }
+          
+          await page.waitForTimeout(200);
+          await page.keyboard.press('Enter');
 
-        // Gia hạn phiên hoạt động trên Node.js
-        if (this.activeSessions[channel]) {
-          this.activeSessions[channel].lastActiveTime = Date.now();
-        }
+          // Gia hạn phiên hoạt động trên Node.js
+          if (this.activeSessions[channel]) {
+            this.activeSessions[channel].lastActiveTime = Date.now();
+          }
 
-        autoTyped = true;
-      } catch (err) {
-        console.warn(`[ChatGateway] Không thể gõ tự động vào ô chat ${channel}: ${err.message}`);
+          autoTyped = true;
+        } catch (err) {
+          console.warn(`[ChatGateway] Không thể gõ tự động vào ô chat ${channel}: ${err.message}`);
+        }
       }
-    }
 
-    const logEntry = {
-      timestamp: new Date().toISOString(),
-      channel,
-      customerId,
-      customerName,
-      incomingMessage: messageText,
-      aiReply,
-      firewallProtected: isBlockedByFirewall,
-      autoTyped
-    };
+      const logEntry = {
+        timestamp: new Date().toISOString(),
+        channel,
+        customerId,
+        customerName,
+        incomingMessage: messageText,
+        aiReply,
+        firewallProtected: isBlockedByFirewall,
+        autoTyped
+      };
 
-    this.stats.simulationLogs.unshift(logEntry);
-    if (this.stats.simulationLogs.length > 20) this.stats.simulationLogs.pop();
+      this.stats.simulationLogs.unshift(logEntry);
+      if (this.stats.simulationLogs.length > 20) this.stats.simulationLogs.pop();
 
-    return logEntry;
+      return logEntry;
+    }).catch(err => {
+      console.error(`[ChatGateway Queue] Lỗi xử lý tin nhắn ${channel}:`, err.message);
+      return { success: false, error: err.message };
+    });
+
+    return await this.channelQueues[queueKey];
   }
 
   /**
@@ -1021,16 +1055,16 @@ class OpcChatGateway {
     const lowerPrompt = (promptText || '').toLowerCase();
     let fallbackText = '';
     if (lowerPrompt.includes('nộp cọc') || lowerPrompt.includes('chọn gói membership') || lowerPrompt.includes('cài đặt trọn gói a-z')) {
-      fallbackText = `[dag_sop_03_chatbot_qualifying:stage_4] Dạ tuyệt vời quá anh/chị! Em đã ghi nhận anh/chị chọn gói MEMBERSHIP triển khai trọn gói A-Z cùng bảo trợ pháp lý và tối ưu vận hành.
+      fallbackText = `[dag_sop_03_chatbot_qualifying:stage_4] Dạ tuyệt vời quá anh/chị! Em đã ghi nhận yêu cầu của anh/chị.
 
-Để kích hoạt hệ thống ngay hôm nay, anh/chị vui lòng hoàn tất khoản phí Đợt 1 là 6.500.000 VNĐ qua thông tin thanh toán:
-🏦 Ngân hàng: Techcombank
-💳 Số tài khoản: 1903 5848 8190 25
-👤 Chủ tài khoản: NGUYEN THI PHUONG THAO
-💵 Số tiền: 6.500.000 VNĐ
+Để kích hoạt hệ thống ngay hôm nay, anh/chị vui lòng hoàn tất khoản thanh toán qua thông tin:
+🏦 Ngân hàng: [Tên Ngân Hàng]
+💳 Số tài khoản: [Số Tài Khoản]
+👤 Chủ tài khoản: [Tên Chủ Tài Khoản]
+💵 Số tiền: [Số Tiền]
 📝 Nội dung chuyển khoản: [Số điện thoại của anh/chị]
 
-Sau khi nhận được chuyển khoản, Đội ngũ Kỹ sư của OPC Freedom sẽ liên hệ trực tiếp trong vòng 30 phút để bàn giao chìa khóa trao tay và thiết lập hệ thống cho anh/chị nhé ạ!`;
+Sau khi nhận được chuyển khoản, Đội ngũ Kỹ thuật sẽ liên hệ trực tiếp trong vòng 30 phút để bàn giao và thiết lập hệ thống cho anh/chị nhé ạ!`;
     } else if (lowerPrompt.includes('dân it') || lowerPrompt.includes('tự code') || lowerPrompt.includes('tự dựng server') || lowerPrompt.includes('cho anh xin link bản free') || lowerPrompt.includes('xin bản free')) {
       fallbackText = `[dag_sop_03_chatbot_qualifying:stage_3] Dạ hoàn toàn nhất trí anh nhé! Em rất tôn trọng và hoan nghênh tinh thần của anh.
 

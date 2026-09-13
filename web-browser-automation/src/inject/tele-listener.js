@@ -1,5 +1,7 @@
 // Telegram Web DOM Listener
 (() => {
+  if (window.__tele_listener_injected) return;
+  window.__tele_listener_injected = true;
   console.log('[Tele Listener] Đã khởi chạy');
   const processedMessages = new Set();
   const pendingMessages = [];
@@ -121,7 +123,7 @@
                 if (window.onNewCustomerMessage) window.onNewCustomerMessage(payload);
               }
               pendingMessages.length = 0;
-            }, 1500);
+            }, 2500); // 2.5s gom trọn vẹn chùm tin nhắn liên tiếp
           }
         });
       });

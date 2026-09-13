@@ -13,15 +13,15 @@ const CHANNELS_MAP = {
   // Nhóm Chat & AI (4 kênh)
   zalo: 'https://chat.zalo.me/',
   facebook: 'https://www.facebook.com/',
-  telegram: 'https://web.telegram.org/',
+  telegram: 'https://web.telegram.org/a/',
   gemini: 'https://gemini.google.com/app',
   // Nhóm Phân Phối Bài Đăng SOP-01 (7 kênh)
   linkedin: 'https://www.linkedin.com/',
   instagram: 'https://www.instagram.com/',
   threads: 'https://www.threads.net/',
-  tiktok: 'https://www.tiktok.com/',
+  tiktok: 'https://www.tiktok.com/login',
   youtube: 'https://studio.youtube.com/',
-  x: 'https://x.com/',
+  x: 'https://x.com/i/flow/login',
   website: 'http://100.102.213.106:3000/'
 };
 
@@ -149,9 +149,11 @@ async function run() {
     args: [
       '--disable-blink-features=AutomationControlled',
       '--no-sandbox',
+      '--test-type',
       '--disable-infobars',
-      '--window-position=100,100',
-      '--window-size=1366,768'
+      '--start-maximized',
+      '--window-position=0,0',
+      '--window-size=1600,873'
     ]
   };
 
@@ -169,10 +171,7 @@ async function run() {
     throw launchErr;
   }
 
-  await context.addInitScript(() => {
-    Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-  });
-
+  // --disable-blink-features=AutomationControlled đã loại bỏ cờ automation ở cấp Blink engine.
   for (let i = 0; i < targetUrls.length; i++) {
     const page = (i === 0 && context.pages().length > 0) ? context.pages()[0] : await context.newPage();
     console.log(`   [Tab ${i + 1}/${targetUrls.length}] Đang nạp: ${targetUrls[i]}`);
@@ -189,6 +188,8 @@ async function run() {
   });
 }
 
-run().catch(err => {
-  console.error("❌ Lỗi khi khởi chạy trình duyệt:", err.message);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  run().catch(err => {
+    console.error("❌ Lỗi khi khởi chạy trình duyệt:", err.message);
+  });
+}

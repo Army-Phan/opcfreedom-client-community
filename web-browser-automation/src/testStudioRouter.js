@@ -32,8 +32,8 @@ const DEFINED_PROFILES = [
     telegram_id: 'tg_admin_01',
     description: 'Chủ hệ thống điều phối, duyệt xuất bản Chợ chung, quản lý quỹ, trọng tài và quảng cáo.',
     defaultUrls: [
-      { name: 'Telegram Web', url: 'https://web.telegram.org/k/' },
-      { name: 'Facebook Ads', url: 'https://adsmanager.facebook.com/' }
+      { name: 'Telegram Web', url: 'https://web.telegram.org/a/' },
+      { name: 'Gemini AI', url: 'https://gemini.google.com/' }
     ]
   },
   {
@@ -45,8 +45,10 @@ const DEFINED_PROFILES = [
     telegram_id: 'tg_member_a_02',
     description: 'Hội viên thực chiến: nộp vấn đề họp tuần /nopvande, nộp SOP /sop add, gửi hiến kế /gopy, nộp hồ sơ tín dụng.',
     defaultUrls: [
-      { name: 'Telegram Web', url: 'https://web.telegram.org/k/' },
-      { name: 'Zalo Web', url: 'https://chat.zalo.me/' }
+      { name: 'Telegram Web', url: 'https://web.telegram.org/a/' },
+      { name: 'Zalo Web', url: 'https://chat.zalo.me/' },
+      { name: 'Facebook', url: 'https://www.facebook.com/' },
+      { name: 'GitHub', url: 'https://github.com/' }
     ]
   },
   {
@@ -58,7 +60,7 @@ const DEFINED_PROFILES = [
     telegram_id: 'tg_partner_dev_03',
     description: 'Lập trình viên đấu thầu IT may đo, Mentor nghiệm thu lộ trình, Hội viên chấm điểm chéo 3x3 /danhgia.',
     defaultUrls: [
-      { name: 'Telegram Web', url: 'https://web.telegram.org/k/' },
+      { name: 'Telegram Web', url: 'https://web.telegram.org/a/' },
       { name: 'GitHub', url: 'https://github.com/' }
     ]
   },
@@ -71,7 +73,7 @@ const DEFINED_PROFILES = [
     telegram_id: 'tg_bank_partner_04',
     description: 'Đại diện Tín dụng Vietcombank / MBBank nhận Data Folder giải ngân vốn và nộp thầu Deal.',
     defaultUrls: [
-      { name: 'Telegram Web', url: 'https://web.telegram.org/k/' }
+      { name: 'Telegram Web', url: 'https://web.telegram.org/a/' }
     ]
   }
 ];
@@ -148,8 +150,11 @@ testStudioRouter.post('/profiles/launch', async (req, res) => {
       args: [
         '--no-sandbox',
         '--disable-blink-features=AutomationControlled',
+        '--test-type',
+        '--disable-infobars',
+        '--start-maximized',
         '--disable-dev-shm-usage',
-        '--window-size=1280,800'
+        '--window-size=1600,873'
       ],
       env: {
         ...process.env,

@@ -194,7 +194,7 @@ const server = http.createServer(async (req, res) => {
         `• *Số điện thoại (Đối chiếu):* *${phone || 'Chưa cung cấp'}*\n` +
         `• *Email:* ${email || 'Chưa cung cấp'}\n` +
         `• *Nội dung:* Đóng phí thành viên Đợt 1 (6.500.000 VNĐ)\n\n` +
-        `👉 *Vui lòng kiểm tra tài khoản Techcombank (NGUYEN THI PHUONG THAO) xem đã nhận được tiền với nội dung là SĐT trên chưa. Bấm nút bên dưới để duyệt.*`;
+        `👉 *Vui lòng kiểm tra tài khoản ngân hàng của bạn xem đã nhận được tiền với nội dung là SĐT trên chưa. Bấm nút bên dưới để duyệt.*`;
 
       await botInstance.sendMessage(adminId, text, {
         parse_mode: 'Markdown',

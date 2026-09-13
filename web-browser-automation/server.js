@@ -676,14 +676,14 @@ app.post('/api/chat-gateway/stop', async (req, res) => {
 const LOGIN_CHANNELS_MAP = {
   zalo: 'https://chat.zalo.me/',
   facebook: 'https://www.facebook.com/',
-  telegram: 'https://web.telegram.org/',
+  telegram: 'https://web.telegram.org/a/',
   gemini: 'https://gemini.google.com/app',
   linkedin: 'https://www.linkedin.com/',
   instagram: 'https://www.instagram.com/',
   threads: 'https://www.threads.net/',
-  tiktok: 'https://www.tiktok.com/',
+  tiktok: 'https://www.tiktok.com/login',
   youtube: 'https://studio.youtube.com/',
-  x: 'https://x.com/',
+  x: 'https://x.com/i/flow/login',
   website: 'http://100.102.213.106:3000/'
 };
 
@@ -1688,7 +1688,7 @@ Bạn đang quản lý các luồng quy trình (DAG) sau đây của hệ thốn
            4) Triệt tiêu rủi ro: Cam kết hoàn tiền 100% trong 30 ngày (Điều 3) nếu không hiệu quả. Đợt 1 chỉ đóng 6.5M; đợt 2 đóng vào tháng thứ 6 khi hệ sinh thái đã mang lại tiền.
            5) Hỏi khách: Anh/chị muốn nhận link GitHub để tự lập trình (Bản Free) hay chọn bản Membership để Kỹ sư cài đặt trọn gói A-Z?
          + TUYỆT ĐỐI KHÔNG bắn số tài khoản hoặc đòi nộp tiền trước khi khách hàng xác nhận chọn gói Membership.
-     * [dag_sop_03_chatbot_qualifying:stage_4] : Chỉ khi khách hàng đã hiểu rõ và xác nhận chọn gói MEMBERSHIP (hoặc muốn kỹ sư cài đặt trọn gói, muốn đóng cọc 6.5M): Gửi thông tin thanh toán Đợt 1 (6.500.000 VNĐ) vào STK Techcombank: 1903 5848 8190 25 - NGUYEN THI PHUONG THAO. Nội dung chuyển khoản BẮT BUỘC ghi Số điện thoại của khách hàng để kích hoạt ngay.
+     * [dag_sop_03_chatbot_qualifying:stage_4] : Chỉ khi khách hàng đã hiểu rõ và xác nhận: Gửi thông tin thanh toán tài khoản ngân hàng của doanh nghiệp bạn. Nội dung chuyển khoản BẮT BUỘC ghi Số điện thoại của khách hàng để kích hoạt ngay.
 
 [MA TRẬN DẤU HIỆU HÀNH VI ĐỂ KÍCH HOẠT QUY TRÌNH]
 | Tên Quy trình (ID) | Hành vi/Ý định kích hoạt thực sự (Trigger) | Chỉ hỏi khái niệm chung (Tư vấn tự do - BỎ QUA) |

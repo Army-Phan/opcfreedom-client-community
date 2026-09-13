@@ -1,5 +1,7 @@
 // Zalo DOM Listener
 (() => {
+  if (window.__zalo_listener_injected) return;
+  window.__zalo_listener_injected = true;
   console.log('[Zalo Listener] Đã khởi chạy');
   const scriptStartTime = Date.now();
   const processedMessages = new Set();
@@ -137,7 +139,7 @@
                   }
                   // Dọn dẹp hàng đợi
                   pendingMessages.length = 0;
-                }, 1500); // Tăng thời gian gom tin lên 1.5 giây để nhận chùm tin tốt hơn
+                }, 2500); // 2.5s gom trọn vẹn chùm tin nhắn liên tiếp
               }
             });
       });

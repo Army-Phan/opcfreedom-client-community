@@ -1,5 +1,7 @@
 // Facebook Messenger DOM Listener
 (() => {
+  if (window.__fb_listener_injected) return;
+  window.__fb_listener_injected = true;
   console.log('[FB Listener] Đã khởi chạy');
   const scriptStartTime = Date.now();
   const processedMessages = new Set();
@@ -168,8 +170,9 @@
                 console.log('[FB Listener] 🚀 Gửi chùm tin nhắn mới nhất cho AI:', payload);
                 if (window.onNewCustomerMessage) window.onNewCustomerMessage(payload);
               }
+              // Dọn dẹp hàng đợi
               pendingMessages.length = 0;
-            }, 1500);
+            }, 2500); // 2.5s gom trọn vẹn chùm tin nhắn liên tiếp
           }
         });
       });

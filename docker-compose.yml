@@ -19,6 +19,7 @@ services:
       - OPC_VAULT_FILE=/app/data/opc_vault.json
       - OPC_DATA_DIR=/app/data
       - DISPLAY=:99
+      - VNC_RESOLUTION=1600x900
     volumes:
       - /etc/machine-id:/etc/machine-id:ro
       - ./data:/app/data
