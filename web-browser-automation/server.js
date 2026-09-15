@@ -65,6 +65,82 @@ app.get('/api/status', (req, res) => {
   res.json({ success: true, service: 'web-browser-automation', status: 'ONLINE', port: 3001 });
 });
 
+app.get('/api/diagnostics/latest', (req, res) => {
+  try {
+    const diagDir = path.join(__dirname, 'data', 'diagnostics');
+    if (!fs.existsSync(diagDir)) {
+      return res.json({ success: true, count: 0, bundles: [] });
+    }
+    const folders = fs.readdirSync(diagDir)
+      .filter(f => {
+        try { return fs.statSync(path.join(diagDir, f)).isDirectory(); } catch (e) { return false; }
+      })
+      .sort((a, b) => {
+        const timeA = parseInt(a.split('_').pop()) || 0;
+        const timeB = parseInt(b.split('_').pop()) || 0;
+        return timeB - timeA;
+      });
+    const latest = folders.slice(0, 10).map(f => {
+      const cPath = path.join(diagDir, f, 'context.json');
+      const ctx = fs.existsSync(cPath) ? JSON.parse(fs.readFileSync(cPath, 'utf8')) : null;
+      return { folder: f, context: ctx };
+    });
+    res.json({ success: true, count: folders.length, latest });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/diagnostics/:bundle_id/snapshot', (req, res) => {
+  try {
+    const snapPath = path.join(__dirname, 'data', 'diagnostics', req.params.bundle_id, 'dom_snapshot.html');
+    if (!fs.existsSync(snapPath)) {
+      return res.status(404).send('Snapshot not found');
+    }
+    res.setHeader('Content-Type', 'text/html');
+    res.sendFile(snapPath);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+app.get('/api/debug/inspect-linkedin-dom', async (req, res) => {
+  try {
+    if (!chatGateway || !chatGateway.context) {
+      return res.status(400).json({ error: 'Chat Gateway context is not active.' });
+    }
+    const page = await chatGateway.context.newPage();
+    await page.goto('https://www.linkedin.com/feed/', { waitUntil: 'networkidle', timeout: 30000 }).catch(() => {});
+    await page.waitForTimeout(3000);
+
+    const feedElements = await page.evaluate(() => {
+      const els = Array.from(document.querySelectorAll('button, div[role="button"], a, input, [contenteditable]'));
+      return els.map(el => ({
+        tag: el.tagName,
+        text: (el.innerText || el.textContent || '').trim().replace(/\s+/g, ' ').substring(0, 100),
+        ariaLabel: el.getAttribute('aria-label'),
+        placeholder: el.getAttribute('placeholder'),
+        role: el.getAttribute('role'),
+        id: el.id,
+        className: el.className
+      })).filter(el => {
+        const t = (el.text || '').toLowerCase();
+        const a = (el.ariaLabel || '').toLowerCase();
+        const p = (el.placeholder || '').toLowerCase();
+        return t.includes('post') || t.includes('start') || t.includes('share') || t.includes('media') ||
+               a.includes('post') || a.includes('start') || a.includes('share') || a.includes('media') ||
+               p.includes('post') || p.includes('start') || p.includes('share') || p.includes('media') ||
+               el.role === 'textbox' || el.tag === 'INPUT';
+      });
+    });
+
+    await page.close();
+    res.json({ success: true, feedElements });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 app.get('/api/debug/telegram-dom', async (req, res) => {
   try {
     const page = chatGateway.pages['telegram'];
@@ -677,7 +753,7 @@ const LOGIN_CHANNELS_MAP = {
   zalo: 'https://chat.zalo.me/',
   facebook: 'https://www.facebook.com/',
   telegram: 'https://web.telegram.org/a/',
-  gemini: 'https://gemini.google.com/app',
+  gemini: 'https://gemini.google.com/app?authuser=f2farena@gmail.com',
   linkedin: 'https://www.linkedin.com/',
   instagram: 'https://www.instagram.com/',
   threads: 'https://www.threads.net/',
@@ -1681,14 +1757,14 @@ Bạn đang quản lý các luồng quy trình (DAG) sau đây của hệ thốn
      * [dag_sop_03_chatbot_qualifying:stage_2] : Đang hỏi khảo sát dự án & nỗi đau vận hành (Xác định dự án của khách là Ý tưởng mới [IDEA] hay đã có doanh thu [REVENUE]; đào sâu khó khăn: trực chat/canh bill đêm kiệt sức, chi phí nhân sự cao, cần vốn 1.5 Tỷ, lo lắng thuế HKD).
      * [dag_sop_03_chatbot_qualifying:stage_3] : Đang tư vấn sâu giải pháp theo Kịch Bản 5 Hồi Storytelling (Deep Consulting).
        - NGUYÊN TẮC VÀNG TẠI STAGE 3:
-         + Khi khách hỏi: "Free khác gì Membership?", "Sao web nói mã nguồn mở miễn phí mà giờ lại thu tiền?", "Tại sao phải cọc 6.5M?", "13 triệu có đắt không?": BẮT BUỘC trả lời bằng tiền tố [dag_sop_03_chatbot_qualifying:stage_3] và giải thích cặn kẽ 5 hồi:
-           1) Thấu cảm kiệt sức: Doanh chủ cày 14-18h/ngày, sợ sót đơn, sợ nhân viên cẩu thả mất khách, rủi ro thuế cá nhân.
-           2) Minh bạch sự thật: Bản Free ($10k code mở GitHub) là MIỄN PHÍ 100% cho Dev tự dựng server, tự code, tự fix lỗi khi sập và tự chịu rủi ro. Bản Membership (12M-13M/năm, chia 2 đợt: đợt 1 cọc 6.5M) là "Chìa Khóa Trao Tay" cho Doanh chủ: Kỹ sư cài đặt trọn gói A-Z, bảo trì 24/7, Mắt Bão bảo trợ thuế HKD, hồ sơ mở tín dụng 1.5 Tỷ.
+         + Khi khách hỏi xin link bản Free, hỏi "Free khác gì Membership?", "Sao web nói mã nguồn mở miễn phí mà giờ lại thu tiền?", "Tại sao phải cọc 6.5M?", "13 triệu có đắt không?": BẮT BUỘC trả lời bằng tiền tố [dag_sop_03_chatbot_qualifying:stage_3] và giải thích cặn kẽ 5 hồi:
+           1) Trao giá trị & Minh bạch: Cung cấp ngay link GitHub Free Community chính thức: https://github.com/Army-Phan/opcfreedom-client-community . Khẳng định bản Free ($10k code mở GitHub) là MIỄN PHÍ 100% trọn đời cho Dev/IT tự dựng server, tự code, tự fix lỗi khi sập.
+           2) Nỗi đau & Bản Membership: Doanh chủ cày 14-18h/ngày, kiệt sức vì trực chat/canh bill đêm, sợ rủi ro thuế cá nhân. Bản Membership (12M-13M/năm, chia 2 đợt: đợt 1 cọc 6.5M) là "Chìa Khóa Trao Tay" cho Doanh chủ: Kỹ sư cài đặt trọn gói A-Z, bảo trì 24/7, Mắt Bão bảo trợ thuế HKD, hồ sơ mở tín dụng 1.5 Tỷ.
            3) Bài toán kinh tế: 13M/năm = 33.000 VNĐ/ngày (bằng 1 bát phở sáng / ly cà phê), tiết kiệm 600 - 900 triệu/năm tiền thuê 4-5 nhân sự.
            4) Triệt tiêu rủi ro: Cam kết hoàn tiền 100% trong 30 ngày (Điều 3) nếu không hiệu quả. Đợt 1 chỉ đóng 6.5M; đợt 2 đóng vào tháng thứ 6 khi hệ sinh thái đã mang lại tiền.
-           5) Hỏi khách: Anh/chị muốn nhận link GitHub để tự lập trình (Bản Free) hay chọn bản Membership để Kỹ sư cài đặt trọn gói A-Z?
+           5) Hỏi khách: Anh/chị là Dân IT muốn tự dựng code từ link GitHub trên (Bản Free) hay là Doanh chủ muốn chọn bản Membership để Kỹ sư cài đặt trọn gói A-Z?
          + TUYỆT ĐỐI KHÔNG bắn số tài khoản hoặc đòi nộp tiền trước khi khách hàng xác nhận chọn gói Membership.
-     * [dag_sop_03_chatbot_qualifying:stage_4] : Chỉ khi khách hàng đã hiểu rõ và xác nhận: Gửi thông tin thanh toán tài khoản ngân hàng của doanh nghiệp bạn. Nội dung chuyển khoản BẮT BUỘC ghi Số điện thoại của khách hàng để kích hoạt ngay.
+     * [dag_sop_03_chatbot_qualifying:stage_4] : Chỉ khi khách hàng đã hiểu rõ và xác nhận chọn gói MEMBERSHIP (hoặc muốn kỹ sư cài đặt trọn gói, muốn đóng cọc 6.5M): Gửi thông tin thanh toán Đợt 1 (6.500.000 VNĐ) vào STK Techcombank: 1903 5848 8190 25 - NGUYEN THI PHUONG THAO. Nội dung chuyển khoản BẮT BUỘC ghi Số điện thoại của khách hàng để kích hoạt ngay.
 
 [MA TRẬN DẤU HIỆU HÀNH VI ĐỂ KÍCH HOẠT QUY TRÌNH]
 | Tên Quy trình (ID) | Hành vi/Ý định kích hoạt thực sự (Trigger) | Chỉ hỏi khái niệm chung (Tư vấn tự do - BỎ QUA) |
@@ -1831,9 +1907,28 @@ Hãy đưa ra câu trả lời tư vấn phù hợp nhất.`;
 });
 
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', async () => {
   console.log(`==================================================`);
   console.log(`🚀 AutoBrowse & AutoHeal System running at:`);
   console.log(`   http://localhost:${PORT}`);
   console.log(`==================================================`);
+
+  // Auto-Start on Boot: Tự động khởi chạy Omnichannel Chat Gateway trên shared_omnichannel_profile
+  const autoStart = process.env.AUTO_START_GATEWAY !== 'false';
+  if (autoStart) {
+    console.log('[Auto-Start] 🚀 Đang tự động khởi chạy Omnichannel Chat Gateway (shared_omnichannel_profile)...');
+    try {
+      const gwResult = await chatGateway.start({
+        headless: false,
+        channels: ['zalo', 'facebook', 'telegram', 'web', 'fb_fanpage']
+      });
+      if (gwResult.success) {
+        console.log('[Auto-Start] 🟢 Chat Gateway đã khởi động thành công và đang lắng nghe đa kênh 24/7 (13 tab sẵn sàng)!');
+      } else {
+        console.warn('[Auto-Start] ⚠️ Chat Gateway phản hồi:', gwResult.message || gwResult.error);
+      }
+    } catch (err) {
+      console.error('[Auto-Start] ❌ Lỗi khi tự khởi động Chat Gateway:', err.message);
+    }
+  }
 });

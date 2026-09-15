@@ -1,12 +1,46 @@
 import dotenv from 'dotenv';
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { callGeminiWithRetry } from './gemini-client.js';
 import { callGeminiWeb } from './gemini-web-client.js';
 import { getGlobalConfig } from './db.js';
 
 dotenv.config();
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const modelName = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
+
+export function persistHotPatch(toolNameOrId, stepId, correctedSelector) {
+  try {
+    if (!correctedSelector || typeof correctedSelector !== 'string') return;
+    const toolsDir = path.resolve(__dirname, '..', 'data', 'tools');
+    if (!fs.existsSync(toolsDir)) return;
+    const files = fs.readdirSync(toolsDir).filter(f => f.endsWith('.json') && !f.endsWith('.bak'));
+    for (const f of files) {
+      const toolFilePath = path.join(toolsDir, f);
+      try {
+        const toolContent = JSON.parse(fs.readFileSync(toolFilePath, 'utf8'));
+        if (toolContent.id === toolNameOrId || toolContent.name === toolNameOrId) {
+          const step = toolContent.steps ? toolContent.steps.find(s => s.id === stepId) : null;
+          if (step && step.selector) {
+            if (!step.selector.includes(correctedSelector)) {
+              fs.copyFileSync(toolFilePath, `${toolFilePath}.bak`);
+              step.selector = `${correctedSelector}, ${step.selector}`;
+              step.lastHealedAt = new Date().toISOString();
+              step.lastHealedSelector = correctedSelector;
+              fs.writeFileSync(toolFilePath, JSON.stringify(toolContent, null, 2), 'utf8');
+              console.log(`[Auto-Persist Hot-Patcher] ⚡ Đã ghi đè bản vá selector vĩnh viễn vào: ${toolFilePath} (kèm backup .bak)`);
+            }
+          }
+          break;
+        }
+      } catch (e) {}
+    }
+  } catch (err) {
+    console.warn(`[Auto-Persist Hot-Patcher] Lỗi ghi bản vá: ${err.message}`);
+  }
+}
 
 export async function healSelector(page, step, failedSelector, error, screenshotPath = null) {
   if (process.env.MOCK_HEALER === 'true') {
@@ -25,12 +59,27 @@ export async function healSelector(page, step, failedSelector, error, screenshot
       reason: 'Mocked for testing interactive inputs'
     };
   }
-  console.log(`[Healer] Extracting DOM context for failed selector: "${failedSelector}"...`);
+  console.log(`[Healer] Extracting DOM context for failed selector: "${failedSelector}" with Deep Shadow DOM Piercing...`);
   
   let elements = [];
   try {
     elements = await page.evaluate(() => {
-      const allEls = Array.from(document.querySelectorAll('a, button, input, textarea, select, [role="button"], [onclick], [contenteditable="true"], div, span'));
+      function queryAllDeep(root = document) {
+        let nodes = [];
+        try {
+          const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
+          while (walker.nextNode()) {
+            const el = walker.currentNode;
+            nodes.push(el);
+            if (el.shadowRoot) {
+              nodes = nodes.concat(queryAllDeep(el.shadowRoot));
+            }
+          }
+        } catch (e) {}
+        return nodes;
+      }
+
+      const allEls = queryAllDeep(document);
       
       return allEls.map(el => {
         const isClickable = el.tagName === 'A' || 
@@ -39,6 +88,8 @@ export async function healSelector(page, step, failedSelector, error, screenshot
                             el.tagName === 'TEXTAREA' || 
                             el.tagName === 'SELECT' || 
                             el.getAttribute('role') === 'button' ||
+                            el.getAttribute('role') === 'textbox' ||
+                            el.getAttribute('contenteditable') === 'true' ||
                             el.getAttribute('onclick') !== null ||
                             window.getComputedStyle(el).cursor === 'pointer';
         
@@ -61,9 +112,10 @@ export async function healSelector(page, step, failedSelector, error, screenshot
           tag: el.tagName.toLowerCase(),
           id: el.id ? `#${el.id}` : '',
           name: el.getAttribute('name') ? `name="${el.getAttribute('name')}"` : '',
-          classes: el.className ? `class="${Array.from(el.classList).join(' ')}"` : '',
+          classes: el.className && typeof el.className === 'string' ? `class="${Array.from(el.classList).join(' ')}"` : '',
           text: el.innerText ? el.innerText.trim().substring(0, 50) : '',
           placeholder: el.getAttribute('placeholder') || '',
+          ariaLabel: el.getAttribute('aria-label') || '',
           type: el.getAttribute('type') || '',
           role: el.getAttribute('role') || '',
           outerHTML: outer

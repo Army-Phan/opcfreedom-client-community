@@ -3,20 +3,113 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { saveRun, saveTool, updateToolStep } from './db.js';
-import { healSelector } from './healer.js';
+import { healSelector, persistHotPatch } from './healer.js';
+import { findChromiumExecutable } from './login-channels.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 const SCREENSHOTS_DIR = path.join(PUBLIC_DIR, 'screenshots');
 const STATES_DIR = path.join(__dirname, '..', 'data', 'states');
 const PROFILE_DIR = path.join(__dirname, '..', 'data', 'profiles', 'recorder_profile');
+const DIAGNOSTICS_DIR = path.join(__dirname, '..', 'data', 'diagnostics');
 
 fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
 fs.mkdirSync(STATES_DIR, { recursive: true });
 fs.mkdirSync(PROFILE_DIR, { recursive: true });
+fs.mkdirSync(DIAGNOSTICS_DIR, { recursive: true });
 
 // Store active run pause resolvers
 export const pauseResolvers = new Map();
+
+export function normalizeMediaPath(filePath) {
+  if (!filePath || typeof filePath !== 'string') return filePath;
+  const cleaned = filePath.trim();
+  if (process.platform === 'linux') {
+    // If it's a Windows-style path (e.g. D:\... or contains backslashes)
+    if (/^[a-zA-Z]:[\\\/]/.test(cleaned) || cleaned.includes('\\')) {
+      const fileName = path.basename(cleaned.replace(/\\/g, '/'));
+      const containerAsset = `/app/data/assets/${fileName}`;
+      if (fs.existsSync(containerAsset)) {
+        return containerAsset;
+      }
+      return containerAsset;
+    }
+  } else if (process.platform === 'win32') {
+    if (cleaned.startsWith('/app/data/assets/')) {
+      const fileName = path.basename(cleaned);
+      const winAssetPath = path.resolve(__dirname, '..', '..', 'tenant_data', 'client_0', 'data', 'assets', fileName);
+      if (fs.existsSync(winAssetPath)) {
+        return winAssetPath;
+      }
+      const localDataAsset = path.resolve(__dirname, '..', 'data', 'assets', fileName);
+      if (fs.existsSync(localDataAsset)) {
+        return localDataAsset;
+      }
+    }
+  }
+  return cleaned;
+}
+
+export async function exportDiagnosticBundle(page, tool, step, error, screenshotPath = null) {
+  try {
+    const timestamp = Date.now();
+    const toolId = tool ? (tool.id || tool.name || 'unknown') : 'unknown';
+    const bundleDir = path.join(DIAGNOSTICS_DIR, `${toolId}_${timestamp}`);
+    fs.mkdirSync(bundleDir, { recursive: true });
+
+    // 1. DOM Snapshot
+    if (page && !page.isClosed()) {
+      const html = await page.content().catch(() => '');
+      if (html) {
+        fs.writeFileSync(path.join(bundleDir, 'dom_snapshot.html'), html, 'utf8');
+      }
+
+      // 2. Screenshot
+      const shotDest = path.join(bundleDir, 'screenshot.png');
+      if (screenshotPath && fs.existsSync(screenshotPath)) {
+        fs.copyFileSync(screenshotPath, shotDest);
+      } else {
+        await page.screenshot({ path: shotDest, fullPage: true }).catch(() => {});
+      }
+
+      // 3. Interactive Elements Tree
+      const interactiveTree = await page.evaluate(() => {
+        const els = Array.from(document.querySelectorAll('button, a, input, textarea, select, [role="button"], [role="textbox"], [contenteditable="true"]'));
+        return els.map(el => ({
+          tag: el.tagName,
+          text: (el.innerText || el.textContent || '').trim().substring(0, 100),
+          ariaLabel: el.getAttribute('aria-label'),
+          role: el.getAttribute('role'),
+          id: el.id,
+          name: el.getAttribute('name'),
+          className: el.className,
+          disabled: el.hasAttribute('disabled') || el.getAttribute('aria-disabled') === 'true',
+          contenteditable: el.getAttribute('contenteditable')
+        }));
+      }).catch(() => []);
+      fs.writeFileSync(path.join(bundleDir, 'interactive_tree.json'), JSON.stringify(interactiveTree, null, 2), 'utf8');
+    }
+
+    // 4. Context metadata
+    const context = {
+      toolId,
+      stepId: step ? step.id : null,
+      stepType: step ? step.type : null,
+      stepDescription: step ? step.description : null,
+      targetSelector: step ? step.selector : null,
+      errorMessage: error ? error.message : null,
+      platform: process.platform,
+      timestamp,
+      url: page && !page.isClosed() ? page.url() : null
+    };
+    fs.writeFileSync(path.join(bundleDir, 'context.json'), JSON.stringify(context, null, 2), 'utf8');
+    console.log(`[Diagnostic Bundle] 📦 Đã xuất gói chẩn đoán sự cố tại: ${bundleDir}`);
+    return bundleDir;
+  } catch (diagErr) {
+    console.warn(`[Diagnostic Bundle] Failed to export bundle: ${diagErr.message}`);
+    return null;
+  }
+}
 
 export function clearToolState(toolId) {
   const statePath = path.join(STATES_DIR, `${toolId}_state.json`);
@@ -206,9 +299,8 @@ async function humanType(page, selector, text) {
   
   await page.waitForTimeout(Math.floor(Math.random() * 150) + 80);
   
-  // Thay vì dùng page.focus, ta mô phỏng click vật lý để đảm bảo Focus sâu (Lexical/React)
+  // Focus via physical click to trigger Lexical/React/Draft.js listeners
   try {
-    // Không dùng force: true để tránh lách qua Event Listener của Facebook
     await el.click({ timeout: 2000 });
   } catch (e) {
     const box = await el.boundingBox();
@@ -217,16 +309,41 @@ async function humanType(page, selector, text) {
     }
   }
   
-  // Tránh dùng page.fill() trên contenteditable vì sẽ làm hỏng React state.
-  // Dùng Ctrl+A -> Backspace để xóa nội dung cũ (nếu có)
-  await page.keyboard.down('Control');
-  await page.keyboard.press('a');
-  await page.keyboard.up('Control');
+  // Clear existing content
+  await page.keyboard.press('Control+A');
   await page.keyboard.press('Backspace');
-  
-  // Type with slight random delay between keys for human likeness
-  for (const char of text) {
-    await page.keyboard.type(char, { delay: Math.floor(Math.random() * 80) + 40 });
+  await page.waitForTimeout(100);
+
+  const isEditable = await el.evaluate(e => {
+    return e.getAttribute('contenteditable') === 'true' || e.isContentEditable || e.classList.contains('ql-editor') || e.classList.contains('editor-content');
+  }).catch(() => false);
+
+  if (isEditable) {
+    // Smart Rich-Text Input: insert text directly via evaluate execCommand to trigger React state instantly
+    let inserted = false;
+    try {
+      inserted = await page.evaluate((val) => {
+        return document.execCommand('insertText', false, val);
+      }, text);
+    } catch (e) {}
+
+    if (!inserted) {
+      await page.keyboard.insertText(text);
+    }
+
+    // Trigger input events to notify frontend frameworks
+    await el.evaluate((e) => {
+      e.dispatchEvent(new Event('beforeinput', { bubbles: true }));
+      e.dispatchEvent(new Event('input', { bubbles: true }));
+      e.dispatchEvent(new Event('change', { bubbles: true }));
+    }).catch(() => {});
+  } else {
+    // Standard input / textarea
+    try {
+      await el.fill(text);
+    } catch (fillErr) {
+      await page.keyboard.insertText(text);
+    }
   }
 }
 
@@ -490,13 +607,22 @@ export async function executeTool(tool, options = {}, onUpdate = () => {}) {
     } else if (usePersistentProfile) {
       addLog(`[Stealth Runner] Launching Persistent Context Chrome (headless: ${headless}, profile: ${profileName})...`);
       fs.mkdirSync(activeProfileDir, { recursive: true });
-      context = await chromium.launchPersistentContext(activeProfileDir, {
+      const launchOpts = {
         headless,
         slowMo,
-        channel: 'chrome',
-        viewport: { width: 1280, height: 720 },
+        viewport: { width: 1366, height: 768 },
+        deviceScaleFactor: 1,
+        locale: 'en-US,en;q=0.9',
+        timezoneId: 'Asia/Ho_Chi_Minh',
         args: stealthArgs
-      });
+      };
+      const execPath = findChromiumExecutable();
+      if (execPath) {
+        launchOpts.executablePath = execPath;
+      } else if (process.platform === 'win32') {
+        launchOpts.channel = 'chrome';
+      }
+      context = await chromium.launchPersistentContext(activeProfileDir, launchOpts);
       page = context.pages().length > 0 ? context.pages()[0] : await context.newPage();
       
       if (fs.existsSync(statePath)) {
@@ -512,11 +638,19 @@ export async function executeTool(tool, options = {}, onUpdate = () => {}) {
       }
     } else {
       addLog(`[Stealth Runner] Launching Playwright Chrome (headless: ${headless}, slowMo: ${slowMo}ms)...`);
+      const launchOpts = { headless, slowMo, args: stealthArgs };
+      const execPath = findChromiumExecutable();
+      if (execPath) {
+        launchOpts.executablePath = execPath;
+      } else if (process.platform === 'win32') {
+        launchOpts.channel = 'chrome';
+      }
       try {
-        browser = await chromium.launch({ headless, slowMo, channel: 'chrome', args: stealthArgs });
+        browser = await chromium.launch(launchOpts);
       } catch (launchErr) {
-        addLog(`Google Chrome channel not found (${launchErr.message}), falling back to bundled Chromium...`, 'warning');
-        browser = await chromium.launch({ headless, slowMo, args: stealthArgs });
+        addLog(`Specified browser channel not found (${launchErr.message}), falling back to bundled Chromium...`, 'warning');
+        delete launchOpts.channel;
+        browser = await chromium.launch(launchOpts);
       }
       
       const contextOptions = {
@@ -733,14 +867,16 @@ export async function executeTool(tool, options = {}, onUpdate = () => {}) {
                 break;
 
               case 'paste_media':
-                addLog(`[Paste Media] 🚀 Đang tải và dán file Media: "${resolvedValue}" vào selector "${currentSelector}"`);
-                await humanPasteMedia(page, currentSelector, resolvedValue);
+                const normalizedPastePath = normalizeMediaPath(resolvedValue);
+                addLog(`[Paste Media] 🚀 Đang tải và dán file Media: "${normalizedPastePath}" vào selector "${currentSelector}"`);
+                await humanPasteMedia(page, currentSelector, normalizedPastePath);
                 addLog(`[Paste Media] ✅ Đã dán thành công!`);
                 break;
 
               case 'upload_file':
               case 'set_file':
-                addLog(`[Upload File] 🚀 Chuẩn bị tải lên tệp Media: "${resolvedValue}" tại selector "${currentSelector || 'auto'}"`);
+                const normalizedUploadPath = normalizeMediaPath(resolvedValue);
+                addLog(`[Upload File] 🚀 Chuẩn bị tải lên tệp Media: "${normalizedUploadPath}" tại selector "${currentSelector || 'auto'}"`);
                 try {
                   let uploadSuccess = false;
 
@@ -750,7 +886,7 @@ export async function executeTool(tool, options = {}, onUpdate = () => {}) {
                     const isFileInput = elCount > 0 && await page.locator(currentSelector).first().evaluate(el => el.tagName.toLowerCase() === 'input' && el.type === 'file').catch(() => false);
                     
                     if (isFileInput) {
-                      await page.setInputFiles(currentSelector, resolvedValue);
+                      await page.setInputFiles(currentSelector, normalizedUploadPath);
                       addLog(`[Upload File - Tầng 1 Direct Input] ✅ Đã nạp tệp thành công qua Playwright setInputFiles vào "${currentSelector}"`);
                       uploadSuccess = true;
                     }
@@ -764,7 +900,7 @@ export async function executeTool(tool, options = {}, onUpdate = () => {}) {
                         page.waitForEvent('filechooser', { timeout: 5000 }),
                         humanClick(page, currentSelector)
                       ]);
-                      await fileChooser.setFiles(resolvedValue);
+                      await fileChooser.setFiles(normalizedUploadPath);
                       addLog(`[Upload File - Tầng 2 File Chooser] ✅ Đã đánh chặn & nạp tệp thành công cho phần tử UI "${currentSelector}"`);
                       uploadSuccess = true;
                     } catch (fcErr) {
@@ -777,7 +913,7 @@ export async function executeTool(tool, options = {}, onUpdate = () => {}) {
                     const globalFileInputs = await page.locator('input[type="file"]').count().catch(() => 0);
                     if (globalFileInputs > 0) {
                       addLog(`[Upload File - Tầng 3A Global Scan] Phát hiện ${globalFileInputs} thẻ input[type="file"] ngầm trên DOM. Đang nạp tệp...`);
-                      await page.setInputFiles('input[type="file"]', resolvedValue);
+                      await page.setInputFiles('input[type="file"]', normalizedUploadPath);
                       addLog(`[Upload File - Tầng 3A Global Scan] ✅ Đã nạp tệp thành công vào thẻ input ngầm.`);
                       uploadSuccess = true;
                     }
@@ -791,12 +927,12 @@ export async function executeTool(tool, options = {}, onUpdate = () => {}) {
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({
                         toolName: 'guiOps_handleNativeFileDialog',
-                        params: { filePath: resolvedValue, action: 'open' }
+                        params: { filePath: normalizedUploadPath, action: 'open' }
                       })
                     });
                     const jsonRes = await res.json();
                     if (jsonRes.status === 'success') {
-                      addLog(`[Upload File - Tầng 3B OS Bridge] ✅ OS Controller Agent đã xử lý thành công tệp: "${resolvedValue}"`);
+                      addLog(`[Upload File - Tầng 3B OS Bridge] ✅ OS Controller Agent đã xử lý thành công tệp: "${normalizedUploadPath}"`);
                       uploadSuccess = true;
                     } else {
                       throw new Error(`OS Controller Agent error: ${jsonRes.error || 'Unknown error'}`);
@@ -804,10 +940,10 @@ export async function executeTool(tool, options = {}, onUpdate = () => {}) {
                   }
 
                   if (!uploadSuccess) {
-                    throw new Error(`Không thể nạp tệp Media "${resolvedValue}" qua cả 3 tầng chiến lược.`);
+                    throw new Error(`Không thể nạp tệp Media "${normalizedUploadPath}" qua cả 3 tầng chiến lược.`);
                   }
                 } catch (upErr) {
-                  throw new Error(`Upload tệp Media "${resolvedValue}" thất bại: ${upErr.message}`);
+                  throw new Error(`Upload tệp Media "${normalizedUploadPath}" thất bại: ${upErr.message}`);
                 }
                 break;
 
@@ -1003,6 +1139,9 @@ export async function executeTool(tool, options = {}, onUpdate = () => {}) {
               }
               onUpdate(run);
 
+              // Tự động xuất Gói chẩn đoán sự cố (Diagnostic Bundle)
+              await exportDiagnosticBundle(page, tool, step, error, failShotPath);
+
               try {
                 const healingResult = await healSelector(page, step, step.selector, error, failShotPath);
                 const actionNeeded = healingResult.actionNeeded || 'heal';
@@ -1081,6 +1220,7 @@ export async function executeTool(tool, options = {}, onUpdate = () => {}) {
                     } else {
                       saveTool(tool.name, tool);
                     }
+                    persistHotPatch(tool.id || tool.name, step.id, healingResult.correctedSelector);
                     addLog(`[Healer] Đã vá và lưu selector: "${healingResult.correctedSelector}"`, 'warning');
                   }
 

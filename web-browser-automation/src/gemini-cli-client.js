@@ -121,9 +121,9 @@ function releaseSlot() {
 }
 
 /**
- * Gọi Antigravity Engine (Tier 1) qua Bridge
+ * Gọi Antigravity Engine (Tier 1) qua Bridge kèm hỗ trợ Cảm biến Thị giác Đa phương thức (Vision Sensor)
  */
-export async function callGeminiAgy({ promptText, conversationId = null, title = '' }) {
+export async function callGeminiAgy({ promptText, imagePath = null, media = null, caller = 'api_chat_gateway', conversationId = null, title = '' }) {
   const config = getGatewayConfig();
   if (!config.tier1Enabled) {
     throw new Error('Tier 1 Antigravity hiện đang bị tắt trong cấu hình.');
@@ -135,18 +135,44 @@ export async function callGeminiAgy({ promptText, conversationId = null, title =
   }
 
   const maxSlots = Math.max(1, Number(config.tier1Concurrency) || 2);
-  const timeoutMs = Math.max(5000, Number(config.tier1TimeoutMs) || 15000);
+  const timeoutMs = Math.max(5000, Number(config.tier1TimeoutMs) || 25000);
 
-  // 1. Chờ slot trong Worker Pool
+  // 1. Chuẩn bị thông tin tệp đa phương thức (nếu có)
+  let mediaPayload = media;
+  if (!mediaPayload && imagePath && fs.existsSync(imagePath)) {
+    const ext = path.extname(imagePath).toLowerCase();
+    const mimeMap = {
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.webp': 'image/webp',
+      '.gif': 'image/gif',
+      '.mp4': 'video/mp4',
+      '.mov': 'video/quicktime',
+      '.webm': 'video/webm'
+    };
+    const mimeType = mimeMap[ext] || 'image/jpeg';
+    const isVideo = mimeType.startsWith('video/');
+    mediaPayload = {
+      localPath: path.resolve(imagePath),
+      mimeType,
+      type: isVideo ? 'video' : 'image',
+      originalName: path.basename(imagePath)
+    };
+  }
+
+  // 2. Chờ slot trong Worker Pool
   await acquireSlot(maxSlots, timeoutMs);
 
   try {
-    // 2. Gửi request tới Bridge kèm AbortSignal timeout
+    // 3. Gửi request tới Bridge kèm AbortSignal timeout
     const payload = {
       prompt: promptText,
       model: config.tier1Model || 'pro',
       conversationId: conversationId || undefined,
-      title: title || undefined
+      title: title || undefined,
+      caller,
+      media: mediaPayload || undefined
     };
 
     const res = await fetch(`${bridgeUrl}/api/prompt`, {
@@ -168,10 +194,12 @@ export async function callGeminiAgy({ promptText, conversationId = null, title =
 
     return {
       text: data.text.trim(),
-      conversationId: data.conversationId
+      conversationId: data.conversationId,
+      visualAnalysis: data.visualAnalysis || null
     };
 
   } finally {
     releaseSlot();
   }
 }
+
