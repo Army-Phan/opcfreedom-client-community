@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Website Manager for Client Node
  * Điều khiển môi trường phát triển cục bộ (Vite Dev Server) và triển khai tự động lên Cloudflare Pages.
  */
@@ -49,7 +49,7 @@ export function getWebsiteStatus() {
   return {
     websiteDir: WEBSITE_DIR,
     isDevRunning: isRunning,
-    devUrl: 'http://100.102.213.106:5173',
+    devUrl: 'http://localhost:5173',
     liveUrl: 'https://opcfreedom.com',
     hasDist,
     lastBuildTime,
@@ -60,7 +60,7 @@ export function getWebsiteStatus() {
 export async function startDevServer() {
   if (isDevServerRunning()) {
     appendLog('ℹ️ Dev server đã đang chạy.');
-    return { success: true, message: 'Dev server đang chạy', devUrl: 'http://100.102.213.106:5173' };
+    return { success: true, message: 'Dev server đang chạy', devUrl: 'http://localhost:5173' };
   }
 
   appendLog('🚀 Đang khởi động Vite Dev Server trên cổng 5173...');
@@ -89,7 +89,7 @@ export async function startDevServer() {
 
     // Đợi 2 giây để port mở
     await new Promise(r => setTimeout(r, 2000));
-    return { success: true, message: 'Đã bật Dev Server', devUrl: 'http://100.102.213.106:5173' };
+    return { success: true, message: 'Đã bật Dev Server', devUrl: 'http://localhost:5173' };
   } catch (err) {
     appendLog(`❌ Lỗi khi khởi động Dev Server: ${err.message}`);
     return { success: false, error: err.message };

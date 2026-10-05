@@ -1,4 +1,4 @@
-import { chromium } from 'playwright';
+﻿import { chromium } from 'playwright';
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
@@ -22,7 +22,7 @@ const CHANNELS_MAP = {
   tiktok: 'https://www.tiktok.com/login',
   youtube: 'https://studio.youtube.com/',
   x: 'https://x.com/i/flow/login',
-  website: 'http://100.102.213.106:3000/'
+  website: 'http://localhost:3000/'
 };
 
 function resolveTargetUrls() {

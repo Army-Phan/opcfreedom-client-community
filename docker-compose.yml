@@ -13,7 +13,7 @@ services:
       - "${WEB_STUDIO_PORT:-5173}:5173"
     environment:
       - PORT=3001
-      - MASTER_CORE_URL=${MASTER_CORE_URL:-http://100.102.213.106:3000}
+      - MASTER_CORE_URL=${MASTER_CORE_URL:-http://localhost:3000}
       - OPC_LICENSE_KEY=${OPC_LICENSE_KEY:-OPC-COMMUNITY-FREE-2026}
       - CUSTOMER_NAME=${CUSTOMER_NAME:-OPC Community Member}
       - OPC_VAULT_FILE=/app/data/opc_vault.json
@@ -21,7 +21,6 @@ services:
       - DISPLAY=:99
       - VNC_RESOLUTION=1600x900
     volumes:
-      - /etc/machine-id:/etc/machine-id:ro
       - ./data:/app/data
       - ./data/dags:/app/web-browser-automation/data/dags
     restart: unless-stopped
@@ -36,7 +35,7 @@ services:
       - "${AGENT_PORT:-3002}:3002"
     environment:
       - PORT=3002
-      - MASTER_CORE_URL=${MASTER_CORE_URL:-http://100.102.213.106:3000}
+      - MASTER_CORE_URL=${MASTER_CORE_URL:-http://localhost:3000}
       - TENANT_TOKEN=${TENANT_TOKEN:-TOKEN_COMMUNITY_CLIENT}
       - OPC_DATA_DIR=/app/data
     volumes:
@@ -58,6 +57,5 @@ services:
       - OPC_DATA_DIR=/app/data
       - OPC_VAULT_FILE=/app/data/opc_vault.json
     volumes:
-      - /etc/machine-id:/etc/machine-id:ro
       - ./data:/app/data
     restart: unless-stopped

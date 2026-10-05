@@ -1059,16 +1059,16 @@ class OpcChatGateway {
     const lowerPrompt = (custMatch ? custMatch[1] : (promptText || '')).toLowerCase();
     let fallbackText = '';
     if (lowerPrompt.includes('nộp cọc') || lowerPrompt.includes('chọn gói membership') || lowerPrompt.includes('cài đặt trọn gói a-z') || lowerPrompt.includes('cài đặt trọn gói')) {
-      fallbackText = `[dag_sop_03_chatbot_qualifying:stage_4] Dạ tuyệt vời quá anh/chị! Em đã ghi nhận anh/chị chọn gói MEMBERSHIP triển khai trọn gói A-Z cùng bảo trợ pháp lý và tối ưu vận hành.
+      fallbackText = `[dag_sop_03_chatbot_qualifying:stage_4] Dạ tuyệt vời quá anh/chị! Em đã ghi nhận yêu cầu của anh/chị.
 
-Để kích hoạt hệ thống ngay hôm nay, anh/chị vui lòng hoàn tất khoản phí Đợt 1 là 6.500.000 VNĐ qua thông tin thanh toán:
-🏦 Ngân hàng: Techcombank
-💳 Số tài khoản: 1903 5848 8190 25
-👤 Chủ tài khoản: NGUYEN THI PHUONG THAO
-💵 Số tiền: 6.500.000 VNĐ
+Để kích hoạt hệ thống ngay hôm nay, anh/chị vui lòng hoàn tất khoản thanh toán qua thông tin:
+🏦 Ngân hàng: [Tên Ngân Hàng]
+💳 Số tài khoản: [Số Tài Khoản]
+👤 Chủ tài khoản: [Tên Chủ Tài Khoản]
+💵 Số tiền: [Số Tiền]
 📝 Nội dung chuyển khoản: [Số điện thoại của anh/chị]
 
-Sau khi nhận được chuyển khoản, Đội ngũ Kỹ sư của OPC Freedom sẽ liên hệ trực tiếp trong vòng 30 phút để bàn giao chìa khóa trao tay và thiết lập hệ thống cho anh/chị nhé ạ!`;
+Sau khi nhận được chuyển khoản, Đội ngũ Kỹ thuật sẽ liên hệ trực tiếp trong vòng 30 phút để bàn giao và thiết lập hệ thống cho anh/chị nhé ạ!`;
     } else if (lowerPrompt.includes('dân it') || lowerPrompt.includes('tự code') || lowerPrompt.includes('tự dựng server') || lowerPrompt.includes('cho anh xin link bản free') || lowerPrompt.includes('xin bản free') || lowerPrompt.includes('link github') || lowerPrompt.includes('kho mã nguồn')) {
       fallbackText = `[dag_sop_03_chatbot_qualifying:stage_3] Dạ hoàn toàn nhất trí anh/chị nhé! Em xin gửi tặng anh/chị link kho mã nguồn mở GitHub miễn phí 100% chính thức của dự án:
 👉 GitHub: https://github.com/Army-Phan/opcfreedom-client-community

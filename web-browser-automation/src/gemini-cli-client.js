@@ -1,4 +1,4 @@
-import fs from 'fs';
+﻿import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -48,7 +48,7 @@ export function saveGatewayConfig(newCfg = {}) {
 const CANDIDATE_BRIDGE_URLS = [
   process.env.ANTIGRAVITY_BRIDGE_URL,
   'http://172.19.0.1:45350',
-  'http://100.102.213.106:45350',
+  'http://localhost:45350',
   'http://127.0.0.1:45350',
   'http://localhost:45350'
 ].filter(Boolean);

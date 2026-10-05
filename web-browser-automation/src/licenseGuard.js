@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+﻿import crypto from 'crypto';
 import http from 'http';
 import https from 'https';
 import os from 'os';
@@ -117,7 +117,7 @@ export async function performClientHeartbeat() {
     const currentHwid = getMachineFingerprint();
     const licenseKey = config.OPC_LICENSE_KEY || 'OPC-COMMUNITY-FREE-2026';
 
-    const coreUrl = process.env.MASTER_CORE_URL || 'http://100.102.213.106:3000';
+    const coreUrl = process.env.MASTER_CORE_URL || 'http://localhost:3000';
     const targetEndpoint = `${coreUrl.replace(/\/+$/, '')}/api/license/heartbeat`;
 
     console.log(`[Heartbeat] 💓 Đang gửi nhịp tim về Core HQ: ${targetEndpoint} (HWID: ${currentHwid}, Host: ${os.hostname()})...`);

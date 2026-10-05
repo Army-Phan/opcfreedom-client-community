@@ -28,7 +28,6 @@ import {
 import { getLicensedDags, getDag, updateDag, installDagFromTemplate, instantiateDag, getDagInstances, reconfigureInstance, deleteDagInstance } from './src/clientDagRegistry.js';
 import { clientDagEngine } from './src/clientDagEngine.js';
 import * as websiteManager from './src/websiteManager.js';
-import { testStudioRouter } from './src/testStudioRouter.js';
 import { getAuditLogs, getAuditStats } from './src/geminiAuditLogger.js';
 import { getGatewayConfig, saveGatewayConfig } from './src/gemini-cli-client.js';
 import { getTopicsSummary, resetTopic } from './src/topicSessionManager.js';
@@ -59,7 +58,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 const DATA_DIR = process.env.OPC_DATA_DIR || path.resolve(__dirname, 'data');
 app.use('/website-preview', express.static(path.join(DATA_DIR, 'website/dist')));
 app.use(licenseMiddleware);
-app.use('/api/test-studio', testStudioRouter);
 
 app.get('/api/status', (req, res) => {
   res.json({ success: true, service: 'web-browser-automation', status: 'ONLINE', port: 3001 });
@@ -760,7 +758,7 @@ const LOGIN_CHANNELS_MAP = {
   tiktok: 'https://www.tiktok.com/login',
   youtube: 'https://studio.youtube.com/',
   x: 'https://x.com/i/flow/login',
-  website: 'http://100.102.213.106:3000/'
+  website: 'http://localhost:3000/'
 };
 
 app.post('/api/chat-gateway/login', async (req, res) => {
@@ -938,7 +936,7 @@ app.post('/api/chat-gateway/gemini-test', async (req, res) => {
     const responseText = await chatGateway.executeGeminiPrompt({
       promptText,
       channel: channel || 'web',
-      caller: caller || 'gemini-logs-test-studio',
+      caller: caller || 'gemini-logs',
       customerId,
       customerName,
       customTopicKey
@@ -1232,7 +1230,7 @@ app.post('/api/dag/execute', async (req, res) => {
 // Lấy Catalog Chợ từ Core HQ
 app.get('/api/marketplace/catalog', async (req, res) => {
   try {
-    const CORE_API_URL = process.env.MASTER_CORE_URL || process.env.CORE_API_URL || 'http://100.102.213.106:3000';
+    const CORE_API_URL = process.env.MASTER_CORE_URL || process.env.CORE_API_URL || 'http://localhost:3000';
     const response = await fetch(`${CORE_API_URL}/api/marketplace/catalog`).catch(() => null);
     if (response && response.ok) {
       const data = await response.json();
@@ -1253,7 +1251,7 @@ app.post('/api/marketplace/install-dag', async (req, res) => {
 
     // Nếu không truyền trực tiếp template_data thì fetch từ Core
     if (!targetTemplate && template_id) {
-      const CORE_API_URL = process.env.MASTER_CORE_URL || process.env.CORE_API_URL || 'http://100.102.213.106:3000';
+      const CORE_API_URL = process.env.MASTER_CORE_URL || process.env.CORE_API_URL || 'http://localhost:3000';
       const catRes = await fetch(`${CORE_API_URL}/api/marketplace/catalog`).catch(() => null);
       if (catRes && catRes.ok) {
         const catData = await catRes.json();
@@ -1288,7 +1286,7 @@ app.post('/api/marketplace/submit-to-client0', async (req, res) => {
     }
 
     const vault = await getVaultConfig();
-    const CORE_API_URL = process.env.MASTER_CORE_URL || process.env.CORE_API_URL || 'http://100.102.213.106:3000';
+    const CORE_API_URL = process.env.MASTER_CORE_URL || process.env.CORE_API_URL || 'http://localhost:3000';
 
     const payload = {
       candidate_id: `CAND_${localDag.id}_${Date.now()}`,
@@ -1324,7 +1322,7 @@ app.post('/api/marketplace/submit-to-client0', async (req, res) => {
 app.post('/api/marketplace/consultant/recommend', async (req, res) => {
   try {
     const { business_type, goals, current_pain_points, budget } = req.body || {};
-    const CORE_API_URL = process.env.MASTER_CORE_URL || process.env.CORE_API_URL || 'http://100.102.213.106:3000';
+    const CORE_API_URL = process.env.MASTER_CORE_URL || process.env.CORE_API_URL || 'http://localhost:3000';
 
     const resp = await fetch(`${CORE_API_URL}/api/consultant/recommend-dags`, {
       method: 'POST',
@@ -1347,7 +1345,7 @@ app.post('/api/marketplace/consultant/recommend', async (req, res) => {
 app.post('/api/marketplace/consultant/chat', async (req, res) => {
   try {
     const { message, userId, userName } = req.body || {};
-    const CORE_API_URL = process.env.MASTER_CORE_URL || process.env.CORE_API_URL || 'http://100.102.213.106:3000';
+    const CORE_API_URL = process.env.MASTER_CORE_URL || process.env.CORE_API_URL || 'http://localhost:3000';
 
     const resp = await fetch(`${CORE_API_URL}/api/consultant/chat`, {
       method: 'POST',
@@ -1370,7 +1368,7 @@ app.post('/api/marketplace/consultant/chat', async (req, res) => {
 app.post('/api/marketplace/consultant/submit', async (req, res) => {
   try {
     const { member_id, author_name, dag_json, note, niche_category } = req.body || {};
-    const CORE_API_URL = process.env.MASTER_CORE_URL || process.env.CORE_API_URL || 'http://100.102.213.106:3000';
+    const CORE_API_URL = process.env.MASTER_CORE_URL || process.env.CORE_API_URL || 'http://localhost:3000';
 
     const resp = await fetch(`${CORE_API_URL}/api/consultant/submit-chat-dag`, {
       method: 'POST',
@@ -1764,7 +1762,7 @@ Bạn đang quản lý các luồng quy trình (DAG) sau đây của hệ thốn
            4) Triệt tiêu rủi ro: Cam kết hoàn tiền 100% trong 30 ngày (Điều 3) nếu không hiệu quả. Đợt 1 chỉ đóng 6.5M; đợt 2 đóng vào tháng thứ 6 khi hệ sinh thái đã mang lại tiền.
            5) Hỏi khách: Anh/chị là Dân IT muốn tự dựng code từ link GitHub trên (Bản Free) hay là Doanh chủ muốn chọn bản Membership để Kỹ sư cài đặt trọn gói A-Z?
          + TUYỆT ĐỐI KHÔNG bắn số tài khoản hoặc đòi nộp tiền trước khi khách hàng xác nhận chọn gói Membership.
-     * [dag_sop_03_chatbot_qualifying:stage_4] : Chỉ khi khách hàng đã hiểu rõ và xác nhận chọn gói MEMBERSHIP (hoặc muốn kỹ sư cài đặt trọn gói, muốn đóng cọc 6.5M): Gửi thông tin thanh toán Đợt 1 (6.500.000 VNĐ) vào STK Techcombank: 1903 5848 8190 25 - NGUYEN THI PHUONG THAO. Nội dung chuyển khoản BẮT BUỘC ghi Số điện thoại của khách hàng để kích hoạt ngay.
+     * [dag_sop_03_chatbot_qualifying:stage_4] : Chỉ khi khách hàng đã hiểu rõ và xác nhận: Gửi thông tin thanh toán tài khoản ngân hàng của doanh nghiệp bạn. Nội dung chuyển khoản BẮT BUỘC ghi Số điện thoại của khách hàng để kích hoạt ngay.
 
 [MA TRẬN DẤU HIỆU HÀNH VI ĐỂ KÍCH HOẠT QUY TRÌNH]
 | Tên Quy trình (ID) | Hành vi/Ý định kích hoạt thực sự (Trigger) | Chỉ hỏi khái niệm chung (Tư vấn tự do - BỎ QUA) |

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
@@ -299,7 +299,7 @@
       <a href="/" class="nav-btn"><i class="fa-solid fa-gauge-high"></i> Dashboard Automation</a>
       <a href="/brain.html" class="nav-btn" style="color:#c084fc; border-color:rgba(168,85,247,0.4);"><i class="fa-solid fa-brain"></i> Brain SOP Client</a>
       <a href="/setup.html" class="nav-btn"><i class="fa-solid fa-gear"></i> Setup Wizard</a>
-      <a href="http://100.102.213.106:6080/vnc.html" target="_blank" class="nav-btn"><i class="fa-solid fa-desktop"></i> noVNC (6080)</a>
+      <a href="http://localhost:6080/vnc.html" target="_blank" class="nav-btn"><i class="fa-solid fa-desktop"></i> noVNC (6080)</a>
     </div>
   </header>
 
@@ -329,7 +329,7 @@
       </div>
       <div class="card-body">
         Máy chủ phát triển Vite chạy trên máy trạm Client Node. Hỗ trợ cập nhật giao diện thời gian thực (HMR).
-        <div style="margin-top: 6px; font-weight: 600; color: #f8fafc;">http://100.102.213.106:5173</div>
+        <div style="margin-top: 6px; font-weight: 600; color: #f8fafc;">http://localhost:5173</div>
       </div>
       <div class="card-footer">
         <button id="btnToggleDev" class="btn btn-green" onclick="toggleDevServer()"><i class="fa-solid fa-play"></i> Bật Dev Server</button>
@@ -451,7 +451,7 @@
     }
 
     function openDevTab() {
-      window.open('http://100.102.213.106:5173', '_blank');
+      window.open('http://localhost:5173', '_blank');
     }
 
     function switchPreview(mode) {
@@ -473,7 +473,7 @@
         iframe.src = '/website-preview/';
       } else {
         tabDev.className = 'preview-tab active';
-        iframe.src = 'http://100.102.213.106:5173';
+        iframe.src = 'http://localhost:5173';
       }
     }
 

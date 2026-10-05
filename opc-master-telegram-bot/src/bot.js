@@ -1,4 +1,4 @@
-import TelegramBot from 'node-telegram-bot-api';
+﻿import TelegramBot from 'node-telegram-bot-api';
 import axios from 'axios';
 import dotenv from 'dotenv';
 
@@ -316,7 +316,7 @@ export function initBot() {
           `💡 *Giải pháp cốt lõi:* ${data.solution_summary}\n\n` +
           `📦 *Bộ Combo ${data.combo_count} Quy Trình Đề Xuất:*\n${dagsListText}\n` +
           `🤖 *Lời khuyên từ AI Consultant:*\n${data.ai_advice}\n\n` +
-          `👉 *Kích hoạt ngay:* Mở [Chợ DAG & Biến Thể Portal](http://100.102.213.106:3001/marketplace.html) để cài đặt 1-click vào máy của Anh!`;
+          `👉 *Kích hoạt ngay:* Mở [Chợ DAG & Biến Thể Portal](http://localhost:3001/marketplace.html) để cài đặt 1-click vào máy của Anh!`;
 
         bot.sendMessage(chatId, replyText, { parse_mode: 'Markdown' });
       } catch (err) {
