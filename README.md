@@ -1,4 +1,4 @@
-﻿# 🚀 OPC Freedom Community Client (Phiên Bản Miễn Phí Tặng Cộng Đồng)
+# 🚀 OPC Freedom Community Client (Phiên Bản Miễn Phí Tặng Cộng Đồng)
 
 **Hệ Điều Hành Tự Động Hóa Vận Hành & Tiếp Thị Đa Kênh 1-Click Dành Cho Mọi Doanh Nghiệp**
 
@@ -11,6 +11,7 @@
 1. **🖥️ Màn Hình Máy Tính Ảo (Cloud Desktop 1600x900 HD+ - Cổng 6080):**
    - Tích hợp sẵn giao diện máy tính Linux ảo hóa chạy trực tiếp trên trình duyệt web với độ phân giải **1600x900 HD+** sắc nét, tự động co giãn màn hình (Auto Scaling).
    - Tự động duy trì và điều khiển đồng thời **11 Kênh Mạng Xã Hội** (Facebook, TikTok, YouTube, Threads, X, Instagram, Zalo, Telegram...).
+   - Hỗ trợ thiết lập **Mật khẩu bảo vệ (VNC Password Guard)** chống truy cập trái phép.
 2. **📊 Bảng Điều Khiển Quản Trị Trung Tâm (Web Dashboard - Cổng 3001):**
    - Quản lý kênh tiếp thị, chiến dịch nội dung tự động, danh mục sản phẩm và hồ sơ chăm sóc khách hàng (CRM).
 3. **⚡ Bộ Kịch Bản Tự Động Hóa Cốt Lõi (Pre-built Automation Workflows):**
@@ -18,11 +19,13 @@
    - **Kịch bản 2 - Tối Ưu Chiến Dịch Quảng Cáo (DAG 02 - Facebook Ads CBO):** Tự động theo dõi ngân sách, tối ưu chi phí và điều chỉnh chiến dịch quảng cáo.
    - **Kịch bản 3 - Chatbot Tư Vấn & Sàng Lọc Khách Hàng (DAG 03):** Tự động chào đón, giải đáp thắc mắc, tư vấn sản phẩm và thu thập thông tin khách hàng 24/7 với cơ chế chống nghẽn và khử trùng tin nhắn.
    - **Kịch bản Mẫu - Bất Động Sản AutoPilot:** Quy trình mẫu giúp doanh nghiệp dễ dàng tùy biến cho ngành nghề riêng.
-4. **🍪 Bộ Công Cụ Nạp Cookie 1-Click (Bypass Quét Mã QR):**
+4. **🧠 Bộ Phân Loại Ý Định Thông Minh (Universal Intent Classifier - UICC v1.0):**
+   - Tự động đo lường độ tin cậy (Confidence Score), phân biệt chính xác giữa câu hỏi thăm thông thường và yêu cầu tư vấn chuyên sâu.
+5. **🍪 Bộ Công Cụ Nạp Cookie 1-Click (Bypass Quét Mã QR):**
    - Hỗ trợ nạp trực tiếp file JSON Cookie (`src/import-cookies.js`) vào profile trình duyệt, tự động đăng nhập nhanh chóng mà không cần thao tác thủ công.
-5. **🤖 Trợ Lý Telegram Điều Khiển Từ Xa (Cổng 3003):**
+6. **🤖 Trợ Lý Telegram Điều Khiển Từ Xa (Cổng 3003):**
    - Nhận báo cáo hoạt động và ra lệnh điều khiển hệ thống trực tiếp từ điện thoại thông qua ứng dụng Telegram cá nhân.
-6. **🎨 Trình Thiết Kế Website Bán Hàng 1-Click (Web Studio - Cổng 5173):**
+7. **🎨 Trình Thiết Kế Website Bán Hàng 1-Click (Web Studio - Cổng 5173):**
    - Tự động tạo và xuất bản Landing Page / Website bán hàng chuyên nghiệp chỉ trong vài phút.
 
 ---
@@ -51,7 +54,7 @@ sudo ufw enable
 git clone https://github.com/Army-Phan/opcfreedom-client-community.git
 cd opcfreedom-client-community
 
-# Bước 2: Tạo file cấu hình từ mẫu
+# Bước 2: Tạo file cấu hình từ mẫu (Tùy chỉnh VNC_PASSWORD nếu muốn)
 cp .env.example .env
 
 # Bước 3: Khởi chạy toàn bộ hệ thống bằng Docker Compose
@@ -86,11 +89,16 @@ Sau khi khởi chạy xong, bạn mở trình duyệt và truy cập các cổng
 
 ---
 
-## 🆕 Nhật Ký Bản Cập Nhật (Release Highlights - v4.2.1)
+## 🆕 Nhật Ký Bản Cập Nhật (Release Highlights - v4.3.0)
 
+- 🛡️ **5-Shield Docker Hardening:**
+  - Cấp phát bộ nhớ đệm `shm_size: '2gb'` và chế độ `ipc: host` ngăn ngừa triệt để lỗi sập Chromium/DevTools khi tự động hóa các Single Page Apps (SPA) nặng (Facebook, Zalo, TikTok).
+  - Tự động dọn dẹp các tệp khóa treo `SingletonLock` và tiến trình cũ khi container khởi động lại.
+  - Tích hợp lớp bảo mật mật khẩu `VNC_PASSWORD` cho màn hình máy tính ảo noVNC.
+- 🧠 **Universal Intent & Confidence Classifier (UICC v1.0 Standalone):**
+  - Tự động phân loại ý định người dùng và chấm điểm độ tự tin (Confidence Score) cho hệ thống Chat Gateway.
 - 🖥️ **Hiển Thị Chuẩn 1600x900 HD+:** Tối ưu hóa độ phân giải noVNC, tự động co giãn (Scale) vừa vặn khung hình và bổ sung cờ bàn phím ảo `-xkb`.
 - ⚡ **Khử Trùng Lặp & Hàng Đợi Đa Kênh:** Chat Gateway trang bị cơ chế tuần tự hóa hàng đợi tin nhắn (Queue Serialization) và bộ lọc trùng lặp (Deduplication Guard) chống spam tin nhắn.
-- 🛡️ **Chống Đơ / Freeze Ứng Dụng SPA:** Nâng cấp phương thức tiêm lắng nghe DOM an toàn sau khi trang tải xong, tương thích hoàn hảo với Zalo Web, Telegram Web A, TikTok.
 - 🍪 **Công Cụ Nạp Cookie Tiện Lợi:** Thêm script `src/import-cookies.js` nạp file JSON cookie tự động.
 - 🔒 **Độc Lập & Bảo Mật 100% (Standalone):** Loại bỏ toàn bộ phụ thuộc máy chủ trung ương, đảm bảo quyền riêng tư tuyệt đối cho người tự host.
 
@@ -98,16 +106,15 @@ Sau khi khởi chạy xong, bạn mở trình duyệt và truy cập các cổng
 
 ## 🚀 Dịch Vụ Lập Trình & May Đo Kịch Bản Theo Yêu Cầu
 
-Nếu doanh nghiệp của bạn có quy trình vận hành đặc thù (như: cào dữ liệu thị trường tự động, tích hợp phần mềm kế toán/ERP nội bộ, bot chốt đơn tự động chuyên ngành):
+Nếu doanh nghiệp của bạn có nhu cầu:
+- May đo kịch bản tự động hóa riêng biệt cho ngành hàng đặc thù.
+- Nâng cấp lên gói vận hành tự động **VIP Autonomous Node** (DA & TA giám sát 24/7).
+- Hỗ trợ triển khai hệ thống quy mô lớn trên cụm máy chủ VPS phân tán.
 
-👉 Bạn có thể liên hệ với **Đội ngũ Kỹ sư OPC Freedom** để được tư vấn và may đo giải pháp:
-1. Đội ngũ kỹ sư sẽ phân tích nhu cầu và lên giải pháp tối ưu cho doanh nghiệp của bạn.
-2. Lập trình, kiểm thử an toàn và bàn giao tích hợp trực tiếp vào hệ thống của bạn.
+👉 **Liên hệ Đội ngũ Kỹ thuật & Hỗ trợ Doanh nghiệp:**
+- 🌐 Website: [https://opcfreedom.com](https://opcfreedom.com)
+- 💬 Hỗ trợ Cộng đồng: Tham gia kênh hỗ trợ chính thức trên Telegram / Zalo.
+- 📧 Email: `contact@opcfreedom.com`
 
 ---
-
-## 📜 Giấy Phép & Bản Quyền (MIT License)
-
-Mã nguồn **OPC Freedom Community Client** được phát hành công khai và miễn phí theo **[Giấy phép MIT (MIT License)](LICENSE)**.
-
-* **Quyền hạn của bạn:** Bạn được toàn quyền sử dụng miễn phí, sao chép, chỉnh sửa, tích hợp vào các dự án cá nhân hoặc thương mại.
+*Phát triển bởi đội ngũ OPC Freedom với sứ mệnh phổ cập tự động hóa cho mọi doanh nghiệp Việt.*

@@ -7,10 +7,15 @@ services:
       dockerfile: Dockerfile
     container_name: opc-client-dashboard
     hostname: opc-client-dashboard
+    shm_size: '2gb'
+    ipc: host
     ports:
       - "${DASHBOARD_PORT:-3001}:3001"
       - "${NOVNC_PORT:-6080}:6080"
       - "${WEB_STUDIO_PORT:-5173}:5173"
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     environment:
       - PORT=3001
       - MASTER_CORE_URL=${MASTER_CORE_URL:-http://localhost:3000}
@@ -19,10 +24,15 @@ services:
       - OPC_VAULT_FILE=/app/data/opc_vault.json
       - OPC_DATA_DIR=/app/data
       - DISPLAY=:99
-      - VNC_RESOLUTION=1600x900
+      - VNC_RESOLUTION=${VNC_RESOLUTION:-1600x900}
+      - VNC_PASSWORD=${VNC_PASSWORD:-}
+      - LIBGL_ALWAYS_SOFTWARE=1
+      - NO_AT_BRIDGE=1
     volumes:
       - ./data:/app/data
       - ./data/dags:/app/web-browser-automation/data/dags
+      - ./data/browser_profiles:/app/data/browser_profiles
+      - ./data/gemini_profiles:/root/.gemini
     restart: unless-stopped
 
   opc-client-agent:
@@ -33,6 +43,9 @@ services:
     hostname: opc-client-agent
     ports:
       - "${AGENT_PORT:-3002}:3002"
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     environment:
       - PORT=3002
       - MASTER_CORE_URL=${MASTER_CORE_URL:-http://localhost:3000}
@@ -50,6 +63,9 @@ services:
     hostname: opc-client-master-bot
     ports:
       - "${BOT_PORT:-3003}:3003"
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     environment:
       - PORT=3003
       - PERSONA_BRAIN_URL=http://opc-client-dashboard:3001
